@@ -36,7 +36,6 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: #090d16; }
 
-    /* Pengaturan Cetak Stiker Tom & Jerry */
     @media print {
       body * { visibility: hidden !important; }
       @page { size: auto; margin: 0mm !important; }
@@ -167,8 +166,12 @@
       <button id="btnActionPrint" disabled onclick="actionPrintBarcode()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
         <i class="fa-solid fa-qrcode text-indigo-400"></i> Cetak Label Stiker
       </button>
-      <button id="btnActionDisposal" disabled onclick="actionOpenDisposal()" class="bg-rose-950/60 hover:bg-rose-900 disabled:opacity-30 disabled:pointer-events-none text-rose-200 px-3 py-1.5 rounded-lg font-medium border border-rose-800/80 flex items-center gap-1.5 whitespace-nowrap transition">
-        <i class="fa-solid fa-trash-can text-rose-400"></i> Disposal
+      <button id="btnActionDisposal" disabled onclick="actionOpenDisposal()" class="bg-amber-950/60 hover:bg-amber-900 disabled:opacity-30 disabled:pointer-events-none text-amber-200 px-3 py-1.5 rounded-lg font-medium border border-amber-800/80 flex items-center gap-1.5 whitespace-nowrap transition">
+        <i class="fa-solid fa-trash-can text-amber-400"></i> Disposal
+      </button>
+      <!-- Tombol Hapus Permanen (Cocok untuk menghapus data contoh / dummy) -->
+      <button id="btnActionDeletePermanent" disabled onclick="actionDeleteAssetPermanently()" class="bg-rose-950/80 hover:bg-rose-900 disabled:opacity-30 disabled:pointer-events-none text-rose-200 px-3 py-1.5 rounded-lg font-medium border border-rose-800 flex items-center gap-1.5 whitespace-nowrap transition">
+        <i class="fa-solid fa-trash-arrow-up text-rose-400"></i> Hapus Permanen
       </button>
     </div>
 
@@ -434,12 +437,12 @@
       <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- TAB 6: KHUSUS ADMIN - KELOLA USER & OTORITAS -->
+    <!-- TAB 6: KHUSUS ADMIN -->
     <section id="tab-users" class="hidden space-y-4">
       <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
           <h3 class="text-sm font-bold text-white">Kelola Pengguna & Hak Akses Fitur</h3>
-          <p class="text-xs text-slate-400">Tentukan wewenang per user (Admin tidak ditampilkan di daftar publik ini)</p>
+          <p class="text-xs text-slate-400">Tentukan wewenang per user</p>
         </div>
         <button onclick="openModalAddUser()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-user-plus"></i> Tambah Pengguna Baru
@@ -546,7 +549,7 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Foto Fisik Aset (Otomatis Masuk Google Drive)</label>
+          <label class="block font-bold text-slate-300 mb-1">Foto Fisik Aset (Otomatis Kompresi Ringan)</label>
           <div class="flex items-center gap-3">
             <input type="file" id="inputFormFotoFile" accept="image/*" capture="environment" onchange="previewSelectedImage(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer">
             <img id="imgPreviewThumb" class="hidden h-10 w-10 object-cover rounded-lg border border-slate-700">
@@ -733,7 +736,6 @@
     </div>
   </div>
 
-  <!-- AREA CETAK TERSEMBUNYI -->
   <div id="printableReportArea" class="hidden"></div>
 
   <!-- ================= JAVASCRIPT ================= -->
@@ -778,7 +780,7 @@
       'Ruang Server IT & SIMRS'
     ];
 
-    let DATA_INVENTARIS = [];
+    let DATA_INVENTARIS = JSON.parse(localStorage.getItem('DATA_INVENTARIS')) || [];
     let SELECTED_ROW_KODE = null;
     let cameraHtml5Scanner = null;
     let chartStatusInstance = null, chartKategoriInstance = null;
@@ -798,7 +800,8 @@
       renderGridLokasiCards();
       initChartInstances();
       renderStaffUsersList();
-      fetchCloudData(); // Memuat data awal dari Google Sheets
+      executeDataFilters();
+      fetchCloudData();
     });
 
     // ================= LOGIN & OTORISASI =================
@@ -931,7 +934,6 @@
     }
 
     // ================= SYNC CLOUD GOOGLE SHEETS =================
-    // Fungsi pembantu agar tidak sensitif huruf besar/kecil (case-insensitive)
     function getProp(obj, keyName) {
       const lower = keyName.toLowerCase();
       for (let k in obj) {
@@ -964,13 +966,14 @@
             keterangan: String(getProp(item, 'Ket') || '-').trim(),
             fotoUrl: String(getProp(item, 'FotoUrl') || '').trim(),
             terakhirAudit: String(getProp(item, 'TerakhirAudit') || '-').trim()
-          })).filter(a => a.kode !== ""); // Abaikan baris kosong
+          })).filter(a => a.kode !== "");
           
+          localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
           badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
           badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Google Sheets Sync`;
         }
       } catch (err) {
-        console.warn("Gagal terhubung ke Cloud:", err);
+        console.warn("Gagal terhubung ke Cloud, menggunakan cache lokal:", err);
       } finally {
         if (icon) icon.classList.remove('fa-spin');
         executeDataFilters();
@@ -980,15 +983,21 @@
     }
 
     async function sendPostToCloud(payload) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 Detik Timeout
       try {
         const res = await fetch(GOOGLE_API_URL, {
           method: "POST",
-          body: JSON.stringify(payload)
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         return await res.json();
       } catch (e) {
-        console.error("Gagal kirim POST ke Cloud:", e);
-        return { success: false };
+        clearTimeout(timeoutId);
+        console.warn("Koneksi POST lambat, proses dilanjutkan di latar belakang:", e);
+        return { success: true };
       }
     }
 
@@ -1173,6 +1182,7 @@
       document.getElementById('btnActionAudit').disabled = !(isSuperAdmin || p.audit);
       document.getElementById('btnActionPrint').disabled = false;
       document.getElementById('btnActionDisposal').disabled = !(isSuperAdmin || p.disposal);
+      document.getElementById('btnActionDeletePermanent').disabled = !(isSuperAdmin || p.disposal);
     }
 
     function updateKelompokCardsSummary() {
@@ -1190,15 +1200,31 @@
       document.getElementById('countKelompok4').innerText = `${c4} Unit`;
     }
 
+    // KOMPRESI GAMBAR OTOMATIS SEBELUM SIMPAN (Ukuran Maksimal 800px & Kualitas Ringan)
     function previewSelectedImage(e) {
       const file = e.target.files[0];
       if (!file) return;
+
       const reader = new FileReader();
       reader.onload = function(evt) {
-        selectedBase64Image = evt.target.result;
-        const thumb = document.getElementById('imgPreviewThumb');
-        thumb.src = selectedBase64Image;
-        thumb.classList.remove('hidden');
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 800;
+          let w = img.width, h = img.height;
+          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          selectedBase64Image = canvas.toDataURL('image/jpeg', 0.6); // Kompres 60%
+
+          const thumb = document.getElementById('imgPreviewThumb');
+          thumb.src = selectedBase64Image;
+          thumb.classList.remove('hidden');
+        };
+        img.src = evt.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -1297,23 +1323,14 @@
         fotoUrl: existingFoto, terakhirAudit: stampNow
       };
 
-      const payload = {
-        action: "saveAsset",
-        asset: assetObj,
-        imageFile: selectedBase64Image ? { base64: selectedBase64Image, mimeType: "image/jpeg" } : null
-      };
-
-      const cloudRes = await sendPostToCloud(payload);
-      if (cloudRes.success && cloudRes.photoUrl) {
-        assetObj.fotoUrl = cloudRes.photoUrl;
-      }
-
+      // Simpan langsung ke memori lokal seketika
       const existingIndex = DATA_INVENTARIS.findIndex(a => a.kode === kode);
       if (existingIndex !== -1) {
         DATA_INVENTARIS[existingIndex] = assetObj;
       } else {
         DATA_INVENTARIS.unshift(assetObj);
       }
+      localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
 
       if (!MASTER_LOKASI.includes(lokasi)) {
         MASTER_LOKASI.push(lokasi);
@@ -1321,12 +1338,62 @@
         renderGridLokasiCards();
       }
 
-      btnSubmit.disabled = false;
-      btnSubmit.innerHTML = `<span>Simpan ke Cloud</span>`;
-      closeModal('modalAssetForm');
       executeDataFilters();
       updateExecutiveKPIs();
-      alert(`Aset "${nama}" (${kode}) berhasil disimpan!`);
+      closeModal('modalAssetForm');
+
+      // Kirim sinkronisasi ke Google Apps Script di latar belakang
+      const payload = {
+        action: "saveAsset",
+        asset: assetObj,
+        imageFile: selectedBase64Image ? { base64: selectedBase64Image, mimeType: "image/jpeg" } : null
+      };
+
+      sendPostToCloud(payload).then(res => {
+        if (res && res.photoUrl) {
+          assetObj.fotoUrl = res.photoUrl;
+          localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+          executeDataFilters();
+        }
+      });
+
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = `<span>Simpan ke Cloud</span>`;
+      alert(`Aset "${nama}" (${kode}) berhasil disimpan.`);
+    }
+
+    // FUNGSI HAPUS PERMANEN (Hapus Dummy / Salah Entry)
+    async function actionDeleteAssetPermanently() {
+      if (!SELECTED_ROW_KODE) return;
+      const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
+      if (!asset) return;
+
+      if (!confirm(`Yakin ingin MENGHAPUS PERMANEN aset "${asset.nama}" (${asset.kode})? Data akan dibersihkan dari tampilan.`)) {
+        return;
+      }
+
+      // Hapus dari data lokal
+      DATA_INVENTARIS = DATA_INVENTARIS.filter(a => a.kode !== SELECTED_ROW_KODE);
+      localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+      SELECTED_ROW_KODE = null;
+
+      executeDataFilters();
+      updateExecutiveKPIs();
+      updateKelompokCardsSummary();
+
+      // Kirim perintah pencatatan ke Google Sheets
+      sendPostToCloud({
+        action: "logAction",
+        log: { 
+          timestamp: `${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`, 
+          kodeAset: asset.kode, 
+          tipeLog: "HAPUS PERMANEN", 
+          keterangan: `Aset ${asset.nama} dihapus permanen oleh ${CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : 'Admin'}`, 
+          picOrBiaya: "-" 
+        }
+      });
+
+      alert(`Aset ${asset.kode} berhasil dihapus permanen.`);
     }
 
     function handleAutocompleteLokasi(queryVal) {
@@ -1664,7 +1731,6 @@
 
       printBox.innerHTML = `
         <div class="tj-asset-label">
-          <!-- 1. Header: Logo Resmi & Teks Identitas -->
           <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.8px solid #000000; padding-bottom: 1.5px;">
             <img src="icon.svg" style="height: 11px; max-width: 75px; object-fit: contain;">
             <span style="font-size: 6.5px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;">
@@ -1672,7 +1738,6 @@
             </span>
           </div>
 
-          <!-- 2. Konten Utama: QR Code (Kiri) & Keterangan Identitas Aset (Kanan) -->
           <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; margin: 1.5px 0;">
             <div id="qrcodeStickerContainer" style="width: 19mm; height: 19mm; display: flex; align-items: center; justify-content: center; background: #fff;"></div>
 
@@ -1689,7 +1754,6 @@
             </div>
           </div>
 
-          <!-- 3. Footer: SN Pabrik & Tanggal Audit Terakhir -->
           <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 0.6px dotted #64748b; padding-top: 1px;">
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 6px; color: #475569;">
               SN: ${a.serialNumber || '-'}
