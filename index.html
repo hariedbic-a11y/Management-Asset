@@ -108,7 +108,7 @@
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
     <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- LOGO RESMI GABUNGAN PHS & RS GPI -->
+      <!-- LOGO GABUNGAN PHS & RS GPI -->
       <div class="flex items-center gap-3">
         <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
           <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
@@ -161,7 +161,7 @@
       <button id="btnActionMutasi" disabled onclick="actionOpenMutasi()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
         <i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Mutasi Ruangan
       </button>
-      <button id="btnActionAudit" disabled onclick="actionVerifyAuditToday()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button id="btnActionAudit" disabled onclick="actionVerifyAuditToday()" title="Verifikasi Stock Opname Fisik Hari Ini" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
         <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Verifikasi Opname
       </button>
       <button id="btnActionPrint" disabled onclick="actionPrintBarcode()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
@@ -437,7 +437,7 @@
       <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- TAB 6: KHUSUS ADMIN - KELOLA USER -->
+    <!-- TAB 6: KHUSUS ADMIN -->
     <section id="tab-users" class="hidden space-y-4">
       <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
@@ -563,8 +563,20 @@
             <input type="text" id="inputFormSerial" placeholder="Contoh: SN-8829102-MND" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
           </div>
           <div>
-            <label class="block font-bold text-slate-300 mb-1">Tanggal Perolehan *</label>
+            <label class="block font-bold text-slate-300 mb-1">Tanggal Perolehan (Tgl Beli) *</label>
             <input type="date" id="inputFormTglBeli" required class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3" id="boxFormAuditContainer">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Tanggal Verifikasi Opname / Audit Terakhir</label>
+            <input type="date" id="inputFormAuditDate" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-sky-400">
+            <p class="text-[9px] text-slate-500 mt-0.5">*Otomatis diselaraskan dengan Tgl Beli jika baru dibuat</p>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Penanggung Jawab (PIC Unit)</label>
+            <input type="text" id="inputFormPIC" placeholder="Nama Kepala Unit / Teknisi" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
           </div>
         </div>
 
@@ -575,15 +587,9 @@
           <p id="typoNoticeLokasi" class="text-[10px] text-amber-400 font-bold mt-1 hidden"></p>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Harga Beli / Perolehan (Rp) *</label>
-            <input type="text" id="inputFormHarga" required oninput="formatInputRupiahRealtime(this)" placeholder="Rp 0" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-emerald-400">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Penanggung Jawab (PIC Unit)</label>
-            <input type="text" id="inputFormPIC" placeholder="Nama Kepala Unit / Teknisi" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-          </div>
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Harga Beli / Perolehan (Rp) *</label>
+          <input type="text" id="inputFormHarga" required oninput="formatInputRupiahRealtime(this)" placeholder="Rp 0" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-emerald-400">
         </div>
 
         <div>
@@ -601,7 +607,7 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL -->
+  <!-- ================= MODAL DETAIL RIWAYAT (DENGAN LOG SERVIS & MUTASI) ================= -->
   <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-800 pb-3">
@@ -632,6 +638,30 @@
         <div>
           <span class="text-slate-400 text-[10px] block">Audit Terakhir</span>
           <strong id="histSummaryAuditDate" class="text-sky-400">-</strong>
+        </div>
+      </div>
+
+      <!-- KOTAK LOG 1: RIWAYAT PEMELIHARAAN, KALIBRASI & SERVIS -->
+      <div class="border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="bg-slate-950 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200">
+          <span><i class="fa-solid fa-wrench text-sky-400 mr-2"></i>Log Pemeliharaan, Kalibrasi & Servis</span>
+        </div>
+        <div class="p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60">
+          <div id="boxHistoryServiceList" class="space-y-2">
+            <p class="text-slate-500 italic">Belum ada riwayat perbaikan/servis.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- KOTAK LOG 2: RIWAYAT MUTASI RUANGAN & PIC -->
+      <div class="border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="bg-slate-950 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200">
+          <span><i class="fa-solid fa-arrows-turn-to-dots text-teal-400 mr-2"></i>Log Mutasi Ruangan & PIC</span>
+        </div>
+        <div class="p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60">
+          <div id="boxHistoryMutasiList" class="space-y-2">
+            <p class="text-slate-500 italic">Belum ada riwayat mutasi.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -782,6 +812,7 @@
     ];
 
     let DATA_INVENTARIS = JSON.parse(localStorage.getItem('DATA_INVENTARIS')) || [];
+    let GLOBAL_LOGS = JSON.parse(localStorage.getItem('GLOBAL_LOGS')) || [];
     let SELECTED_ROW_KODE = null;
     let cameraHtml5Scanner = null;
     let chartStatusInstance = null, chartKategoriInstance = null;
@@ -934,12 +965,38 @@
       }
     }
 
-    // ================= SYNC CLOUD GOOGLE SHEETS =================
+    // ================= SYNC CLOUD & FORMAT TANGGAL BERSIH =================
     function getProp(obj, keyName) {
       const lower = keyName.toLowerCase();
       for (let k in obj) {
         if (k.toLowerCase() === lower) return obj[k];
       }
+      return '';
+    }
+
+    function cleanDateFormat(dateStr) {
+      if (!dateStr || dateStr === '-' || dateStr === 'null') return '-';
+      
+      if (typeof dateStr === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(dateStr.trim())) {
+        return dateStr.trim();
+      }
+
+      if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+        const parts = dateStr.trim().split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return String(dateStr).split('T')[0];
+      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    }
+
+    function toInputDateFormat(dateStr) {
+      if (!dateStr || dateStr === '-') return '';
+      const parts = dateStr.split('/');
+      if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
       return '';
     }
 
@@ -953,21 +1010,27 @@
         const result = await response.json();
         
         if (result.success && Array.isArray(result.data)) {
-          DATA_INVENTARIS = result.data.map(item => ({
-            kode: String(getProp(item, 'Kode') || '').trim(),
-            nama: String(getProp(item, 'Nama') || '').trim(),
-            kategori: String(getProp(item, 'Kategori') || '').trim(),
-            kelompok: String(getProp(item, 'Kelompok') || '').trim(),
-            lokasi: String(getProp(item, 'Lokasi') || '').trim(),
-            status: String(getProp(item, 'Status') || 'Operasional').trim(),
-            tglBeli: String(getProp(item, 'TglBeli') || '').trim(),
-            hargaBeli: Number(getProp(item, 'HargaBeli')) || 0,
-            pic: String(getProp(item, 'PIC') || '-').trim(),
-            tglKalibrasi: String(getProp(item, 'Kalibrasi') || '-').trim(),
-            keterangan: String(getProp(item, 'Ket') || '-').trim(),
-            fotoUrl: String(getProp(item, 'FotoUrl') || '').trim(),
-            terakhirAudit: String(getProp(item, 'TerakhirAudit') || '-').trim()
-          })).filter(a => a.kode !== "");
+          DATA_INVENTARIS = result.data.map(item => {
+            const rawTglBeli = cleanDateFormat(String(getProp(item, 'TglBeli') || ''));
+            const rawAudit = String(getProp(item, 'TerakhirAudit') || '').trim();
+            const cleanAudit = (rawAudit && rawAudit !== '-') ? cleanDateFormat(rawAudit) : rawTglBeli;
+
+            return {
+              kode: String(getProp(item, 'Kode') || '').trim(),
+              nama: String(getProp(item, 'Nama') || '').trim(),
+              kategori: String(getProp(item, 'Kategori') || '').trim(),
+              kelompok: String(getProp(item, 'Kelompok') || '').trim(),
+              lokasi: String(getProp(item, 'Lokasi') || '').trim(),
+              status: String(getProp(item, 'Status') || 'Operasional').trim(),
+              tglBeli: rawTglBeli,
+              hargaBeli: Number(getProp(item, 'HargaBeli')) || 0,
+              pic: String(getProp(item, 'PIC') || '-').trim(),
+              tglKalibrasi: String(getProp(item, 'Kalibrasi') || '-').trim(),
+              keterangan: String(getProp(item, 'Ket') || '-').trim(),
+              fotoUrl: String(getProp(item, 'FotoUrl') || '').trim(),
+              terakhirAudit: cleanAudit
+            };
+          }).filter(a => a.kode !== "");
           
           localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
           badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
@@ -1028,7 +1091,7 @@
 
     function calculateDepreciationValues(asset) {
       const harga = Number(asset.hargaBeli) || 0;
-      if (!asset.tglBeli || asset.status === 'Disposed') {
+      if (!asset.tglBeli || asset.tglBeli === '-' || asset.status === 'Disposed') {
         return { nilaiBuku: 0, sisaBulan: 0, sisaTahunStr: '0 Thn', persenDepresiasi: 100, kelompokStr: '-' };
       }
 
@@ -1036,7 +1099,10 @@
       const masaManfaatTahun = config.tahun;
       const totalBulanMasaManfaat = masaManfaatTahun * 12;
 
-      const tglBeliDate = new Date(asset.tglBeli);
+      let tglParts = asset.tglBeli.split('/');
+      let tglBeliDate = tglParts.length === 3 ? new Date(tglParts[2], tglParts[1] - 1, tglParts[0]) : new Date(asset.tglBeli);
+      if (isNaN(tglBeliDate.getTime())) tglBeliDate = new Date();
+
       const sekarang = new Date();
       const bulanBerjalan = Math.max(0, (sekarang.getFullYear() - tglBeliDate.getFullYear()) * 12 + (sekarang.getMonth() - tglBeliDate.getMonth()));
 
@@ -1068,12 +1134,28 @@
       };
     }
 
+    // ================= KALKULASI SELISIH HARI AUDIT =================
     function calculateDaysFromAudit(auditStamp) {
-      if (!auditStamp || auditStamp === '-') return 999;
-      const parts = auditStamp.split(' ')[0].split('/');
-      if (parts.length < 3) return 999;
-      const auditDate = new Date(parts[2], parts[1] - 1, parts[0]);
-      return Math.floor((new Date() - auditDate) / (1000 * 60 * 60 * 24));
+      if (!auditStamp || auditStamp === '-' || auditStamp === 'null') return 0;
+      
+      let auditDate;
+      if (typeof auditStamp === 'string' && auditStamp.includes('/')) {
+        const parts = auditStamp.split(' ')[0].split('/');
+        if (parts.length === 3) {
+          auditDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+        }
+      } else {
+        auditDate = new Date(auditStamp);
+      }
+
+      if (!auditDate || isNaN(auditDate.getTime())) return 0;
+      
+      const sekarang = new Date();
+      auditDate.setHours(0, 0, 0, 0);
+      sekarang.setHours(0, 0, 0, 0);
+
+      const diffTime = sekarang.getTime() - auditDate.getTime();
+      return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
     }
 
     function executeDataFilters() {
@@ -1103,6 +1185,7 @@
       renderInventoryTable(results);
     }
 
+    // ================= RENDER TABEL (FORMAT BERSIH + PERINGATAN MERAH > 30 HARI) =================
     function renderInventoryTable(items) {
       const tbody = document.getElementById('inventoryTableBody');
       tbody.innerHTML = '';
@@ -1124,8 +1207,8 @@
         if (item.status === 'Disposed') statusClass = 'bg-rose-500/10 text-rose-400 border border-rose-500/30 line-through';
 
         let auditTag = isOverdue
-          ? `<span class="text-rose-400 font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i>${item.terakhirAudit} (${daysAgo} hr)</span>`
-          : `<span class="text-slate-300 font-semibold">${item.terakhirAudit}</span>`;
+          ? `<span class="text-rose-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation animate-pulse"></i>${item.terakhirAudit} (${daysAgo} hr lalu)</span>`
+          : `<span class="text-slate-300 font-medium">${item.terakhirAudit}</span>`;
 
         let fotoImg = item.fotoUrl 
           ? `<img src="${item.fotoUrl}" class="h-8 w-8 object-cover rounded-lg border border-slate-700 mx-auto">` 
@@ -1148,7 +1231,7 @@
           <td class="py-3 px-3 font-medium text-amber-400">${depInfo.kelompokStr}</td>
           <td class="py-3 px-3 text-slate-200">${item.lokasi}</td>
           <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusClass}">${item.status}</span></td>
-          <td class="py-3 px-3 text-slate-400 font-mono">${item.tglBeli || '-'}</td>
+          <td class="py-3 px-3 text-slate-300 font-mono">${item.tglBeli || '-'}</td>
           <td class="py-3 px-3 font-mono font-semibold text-slate-200">Rp ${Number(item.hargaBeli || 0).toLocaleString('id-ID')}</td>
           <td class="py-3 px-3 font-mono font-bold text-emerald-400">Rp ${Number(depInfo.nilaiBuku).toLocaleString('id-ID')}</td>
           <td class="py-3 px-3">
@@ -1183,7 +1266,7 @@
       document.getElementById('btnActionAudit').disabled = !(isSuperAdmin || p.audit);
       document.getElementById('btnActionPrint').disabled = false;
       document.getElementById('btnActionDisposal').disabled = !(isSuperAdmin || p.disposal);
-      document.getElementById('btnActionDeletePermanent').disabled = !(isSuperAdmin); // Hanya Super Admin
+      document.getElementById('btnActionDeletePermanent').disabled = !(isSuperAdmin);
     }
 
     function updateKelompokCardsSummary() {
@@ -1201,7 +1284,6 @@
       document.getElementById('countKelompok4').innerText = `${c4} Unit`;
     }
 
-    // Kompresi gambar otomatis ke resolusi optimal (~100-200 KB)
     function previewSelectedImage(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1255,7 +1337,11 @@
       document.getElementById('inputFormSerial').value = '';
       document.getElementById('inputFormLokasi').value = '';
       document.getElementById('inputFormHarga').value = '';
-      document.getElementById('inputFormTglBeli').value = new Date().toISOString().split('T')[0];
+      
+      const todayISO = new Date().toISOString().split('T')[0];
+      document.getElementById('inputFormTglBeli').value = todayISO;
+      document.getElementById('inputFormAuditDate').value = todayISO;
+      
       document.getElementById('inputFormPIC').value = '';
       document.getElementById('inputFormKet').value = '';
       document.getElementById('inputFormFotoUrlExisting').value = '';
@@ -1272,14 +1358,17 @@
       const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
       if (!asset) return;
 
-      document.getElementById('modalAssetHeading').innerText = 'Edit Spesifikasi Aset';
+      document.getElementById('modalAssetHeading').innerText = 'Edit Spesifikasi & Riwayat Audit Aset';
       document.getElementById('inputFormKode').value = asset.kode;
       document.getElementById('inputFormKategori').value = asset.kategori;
       document.getElementById('inputFormNama').value = asset.nama;
       document.getElementById('inputFormStatus').value = asset.status;
       document.getElementById('inputFormLokasi').value = asset.lokasi;
       document.getElementById('inputFormHarga').value = 'Rp ' + Number(asset.hargaBeli || 0).toLocaleString('id-ID');
-      document.getElementById('inputFormTglBeli').value = asset.tglBeli || '';
+      
+      document.getElementById('inputFormTglBeli').value = toInputDateFormat(asset.tglBeli);
+      document.getElementById('inputFormAuditDate').value = toInputDateFormat(asset.terakhirAudit);
+
       document.getElementById('inputFormPIC').value = asset.pic || '';
       document.getElementById('inputFormKet').value = asset.keterangan || '';
       document.getElementById('inputFormFotoUrlExisting').value = asset.fotoUrl || '';
@@ -1308,20 +1397,28 @@
       const lokasi = document.getElementById('inputFormLokasi').value.trim();
       const status = document.getElementById('inputFormStatus').value;
       const harga = Number(document.getElementById('inputFormHarga').value.replace(/[^0-9]/g, '')) || 0;
-      const tglBeli = document.getElementById('inputFormTglBeli').value;
+      
+      const rawTglBeli = document.getElementById('inputFormTglBeli').value;
+      const cleanTglBeli = cleanDateFormat(rawTglBeli);
+      
+      const rawAuditInput = document.getElementById('inputFormAuditDate').value;
+      const cleanAudit = rawAuditInput ? cleanDateFormat(rawAuditInput) : cleanTglBeli;
+
       const pic = document.getElementById('inputFormPIC').value.trim();
       const ket = document.getElementById('inputFormKet').value.trim();
       const existingFoto = document.getElementById('inputFormFotoUrlExisting').value;
 
       const katObj = MASTER_KATEGORI.find(k => k.nama === kategori);
       const kelompok = katObj ? katObj.kelompok : 'Kelompok 1';
-      const stampNow = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
 
       const assetObj = {
         kode, nama, kategori, kelompok, lokasi, status,
-        tglBeli, hargaBeli: harga, nilaiBuku: harga,
+        tglBeli: cleanTglBeli, 
+        hargaBeli: harga, 
+        nilaiBuku: harga,
         pic, tglKalibrasi: '-', keterangan: ket,
-        fotoUrl: existingFoto, terakhirAudit: stampNow
+        fotoUrl: existingFoto, 
+        terakhirAudit: cleanAudit
       };
 
       const existingIndex = DATA_INVENTARIS.findIndex(a => a.kode === kode);
@@ -1381,7 +1478,7 @@
       sendPostToCloud({
         action: "logAction",
         log: { 
-          timestamp: `${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`, 
+          timestamp: `${cleanDateFormat(new Date())} ${new Date().toLocaleTimeString('id-ID')}`, 
           kodeAset: asset.kode, 
           tipeLog: "HAPUS PERMANEN", 
           keterangan: `Aset ${asset.nama} dihapus permanen oleh ${CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : 'Admin'}`, 
@@ -1451,6 +1548,47 @@
         fotoEl.classList.remove('hidden');
       } else {
         fotoEl.classList.add('hidden');
+      }
+
+      const svcBox = document.getElementById('boxHistoryServiceList');
+      const mutBox = document.getElementById('boxHistoryMutasiList');
+      svcBox.innerHTML = '';
+      mutBox.innerHTML = '';
+
+      const relatedLogs = GLOBAL_LOGS.filter(l => l.kodeAset === asset.kode);
+      const svcLogs = relatedLogs.filter(l => l.tipeLog === 'SERVIS');
+      const mutLogs = relatedLogs.filter(l => l.tipeLog === 'MUTASI');
+
+      if (svcLogs.length > 0) {
+        svcLogs.forEach(l => {
+          svcBox.innerHTML += `
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+              <div>
+                <strong class="text-white">${l.keterangan}</strong>
+                <span class="text-[10px] text-slate-400 block">${l.timestamp}</span>
+              </div>
+              <span class="font-semibold text-emerald-400">${l.picOrBiaya}</span>
+            </div>
+          `;
+        });
+      } else {
+        svcBox.innerHTML = `<p class="text-slate-500 italic">Belum ada riwayat perbaikan/servis.</p>`;
+      }
+
+      if (mutLogs.length > 0) {
+        mutLogs.forEach(l => {
+          mutBox.innerHTML += `
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+              <div>
+                <strong class="text-white">${l.keterangan}</strong>
+                <span class="text-[10px] text-slate-400 block">${l.timestamp}</span>
+              </div>
+              <span class="font-semibold text-sky-400">PIC: ${l.picOrBiaya}</span>
+            </div>
+          `;
+        });
+      } else {
+        mutBox.innerHTML = `<p class="text-slate-500 italic">Belum ada riwayat mutasi.</p>`;
       }
 
       document.getElementById('modalHistoryDetail').classList.remove('hidden');
@@ -1615,20 +1753,36 @@
       });
     }
 
+    // ================= AKSI STOCK OPNAME / VERIFIKASI FISIK =================
     async function actionVerifyAuditToday() {
       if (!SELECTED_ROW_KODE) return;
       const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
       if (asset) {
-        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        const stamp = cleanDateFormat(new Date());
         asset.terakhirAudit = stamp;
         
+        GLOBAL_LOGS.unshift({
+          timestamp: stamp,
+          kodeAset: asset.kode,
+          tipeLog: "OPNAME",
+          keterangan: "Fisik Terverifikasi Nyata (Opname)",
+          picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
+        });
+        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
+        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+
         await sendPostToCloud({
           action: "logAction",
-          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi", picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
+          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi Nyata", picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
+        });
+
+        await sendPostToCloud({
+          action: "saveAsset",
+          asset: asset
         });
         
         executeDataFilters();
-        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan.`);
+        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal ${stamp}.`);
       }
     }
 
@@ -1648,10 +1802,21 @@
 
       const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
       if (a) {
-        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        const stamp = cleanDateFormat(new Date());
+        const costStr = `Rp ${cost.toLocaleString('id-ID')} (${tech || 'Teknisi RS'})`;
+
+        GLOBAL_LOGS.unshift({
+          timestamp: stamp,
+          kodeAset: a.kode,
+          tipeLog: "SERVIS",
+          keterangan: act,
+          picOrBiaya: costStr
+        });
+        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
+
         await sendPostToCloud({
           action: "logAction",
-          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "SERVIS", keterangan: act, picOrBiaya: `Rp ${cost.toLocaleString('id-ID')} (${tech})` }
+          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "SERVIS", keterangan: act, picOrBiaya: costStr }
         });
         closeModal('modalActionService');
         alert('Log pemeliharaan berhasil dicatat!');
@@ -1676,10 +1841,25 @@
         a.lokasi = r;
         if (p) a.pic = p;
         
-        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        const stamp = cleanDateFormat(new Date());
+        GLOBAL_LOGS.unshift({
+          timestamp: stamp,
+          kodeAset: a.kode,
+          tipeLog: "MUTASI",
+          keterangan: `Pindah dari [${oldRoom}] ke [${r}]`,
+          picOrBiaya: p || a.pic
+        });
+        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
+        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+
         await sendPostToCloud({
           action: "logAction",
           log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "MUTASI", keterangan: `Pindah dari [${oldRoom}] ke [${r}]`, picOrBiaya: p || a.pic }
+        });
+
+        await sendPostToCloud({
+          action: "saveAsset",
+          asset: a
         });
         
         closeModal('modalActionMutasi');
@@ -1701,11 +1881,28 @@
       const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
       if (a) {
         a.status = 'Disposed';
-        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        const stamp = cleanDateFormat(new Date());
+        
+        GLOBAL_LOGS.unshift({
+          timestamp: stamp,
+          kodeAset: a.kode,
+          tipeLog: "DISPOSAL",
+          keterangan: `Metode: ${method} (BAST: ${doc})`,
+          picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
+        });
+        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
+        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+
         await sendPostToCloud({
           action: "logAction",
           log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
         });
+
+        await sendPostToCloud({
+          action: "saveAsset",
+          asset: a
+        });
+
         closeModal('modalActionDisposal');
         executeDataFilters();
         alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
