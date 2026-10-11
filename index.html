@@ -36,6 +36,7 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: #090d16; }
 
+    /* Pengaturan Cetak Stiker Tom & Jerry 50x32 mm */
     @media print {
       body * { visibility: hidden !important; }
       @page { size: auto; margin: 0mm !important; }
@@ -107,7 +108,7 @@
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
     <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- LOGO RESMI GABUNGAN -->
+      <!-- LOGO RESMI GABUNGAN PHS & RS GPI -->
       <div class="flex items-center gap-3">
         <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
           <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
@@ -123,7 +124,7 @@
         </div>
       </div>
 
-      <!-- Action Center Buttons -->
+      <!-- Tombol Aksi Header -->
       <div class="flex items-center gap-2">
         <button onclick="fetchCloudData()" title="Sinkronkan dengan Google Sheets" class="bg-slate-800 hover:bg-slate-700 text-sky-400 p-2 rounded-xl text-xs font-bold border border-slate-700 transition">
           <i id="btnRefreshIcon" class="fa-solid fa-arrows-rotate"></i>
@@ -169,7 +170,6 @@
       <button id="btnActionDisposal" disabled onclick="actionOpenDisposal()" class="bg-amber-950/60 hover:bg-amber-900 disabled:opacity-30 disabled:pointer-events-none text-amber-200 px-3 py-1.5 rounded-lg font-medium border border-amber-800/80 flex items-center gap-1.5 whitespace-nowrap transition">
         <i class="fa-solid fa-trash-can text-amber-400"></i> Disposal
       </button>
-      <!-- Tombol Hapus Permanen (Cocok untuk menghapus data contoh / dummy) -->
       <button id="btnActionDeletePermanent" disabled onclick="actionDeleteAssetPermanently()" class="bg-rose-950/80 hover:bg-rose-900 disabled:opacity-30 disabled:pointer-events-none text-rose-200 px-3 py-1.5 rounded-lg font-medium border border-rose-800 flex items-center gap-1.5 whitespace-nowrap transition">
         <i class="fa-solid fa-trash-arrow-up text-rose-400"></i> Hapus Permanen
       </button>
@@ -437,7 +437,7 @@
       <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- TAB 6: KHUSUS ADMIN -->
+    <!-- TAB 6: KHUSUS ADMIN - KELOLA USER -->
     <section id="tab-users" class="hidden space-y-4">
       <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
@@ -738,7 +738,7 @@
 
   <div id="printableReportArea" class="hidden"></div>
 
-  <!-- ================= JAVASCRIPT ================= -->
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwFZ1vwCz215Gi75ts9A0ymWXdgffrgvxGDJPmU-0VWvA_jKz1UXy_QUkwrFcGnNXc3lg/exec";
 
@@ -777,6 +777,7 @@
       'Rawat Inap Dahlia Lantai 2',
       'Gudang Farmasi Sentral',
       'Logistik PHS',
+      'Poliklinik Umum',
       'Ruang Server IT & SIMRS'
     ];
 
@@ -984,7 +985,7 @@
 
     async function sendPostToCloud(payload) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 Detik Timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
       try {
         const res = await fetch(GOOGLE_API_URL, {
           method: "POST",
@@ -1182,7 +1183,7 @@
       document.getElementById('btnActionAudit').disabled = !(isSuperAdmin || p.audit);
       document.getElementById('btnActionPrint').disabled = false;
       document.getElementById('btnActionDisposal').disabled = !(isSuperAdmin || p.disposal);
-      document.getElementById('btnActionDeletePermanent').disabled = !(isSuperAdmin || p.disposal);
+      document.getElementById('btnActionDeletePermanent').disabled = !(isSuperAdmin); // Hanya Super Admin
     }
 
     function updateKelompokCardsSummary() {
@@ -1200,7 +1201,7 @@
       document.getElementById('countKelompok4').innerText = `${c4} Unit`;
     }
 
-    // KOMPRESI GAMBAR OTOMATIS SEBELUM SIMPAN (Ukuran Maksimal 800px & Kualitas Ringan)
+    // Kompresi gambar otomatis ke resolusi optimal (~100-200 KB)
     function previewSelectedImage(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1218,7 +1219,7 @@
           canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
-          selectedBase64Image = canvas.toDataURL('image/jpeg', 0.6); // Kompres 60%
+          selectedBase64Image = canvas.toDataURL('image/jpeg', 0.6);
 
           const thumb = document.getElementById('imgPreviewThumb');
           thumb.src = selectedBase64Image;
@@ -1323,7 +1324,6 @@
         fotoUrl: existingFoto, terakhirAudit: stampNow
       };
 
-      // Simpan langsung ke memori lokal seketika
       const existingIndex = DATA_INVENTARIS.findIndex(a => a.kode === kode);
       if (existingIndex !== -1) {
         DATA_INVENTARIS[existingIndex] = assetObj;
@@ -1342,7 +1342,6 @@
       updateExecutiveKPIs();
       closeModal('modalAssetForm');
 
-      // Kirim sinkronisasi ke Google Apps Script di latar belakang
       const payload = {
         action: "saveAsset",
         asset: assetObj,
@@ -1362,17 +1361,15 @@
       alert(`Aset "${nama}" (${kode}) berhasil disimpan.`);
     }
 
-    // FUNGSI HAPUS PERMANEN (Hapus Dummy / Salah Entry)
     async function actionDeleteAssetPermanently() {
       if (!SELECTED_ROW_KODE) return;
       const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
       if (!asset) return;
 
-      if (!confirm(`Yakin ingin MENGHAPUS PERMANEN aset "${asset.nama}" (${asset.kode})? Data akan dibersihkan dari tampilan.`)) {
+      if (!confirm(`Yakin ingin MENGHAPUS PERMANEN aset "${asset.nama}" (${asset.kode})?`)) {
         return;
       }
 
-      // Hapus dari data lokal
       DATA_INVENTARIS = DATA_INVENTARIS.filter(a => a.kode !== SELECTED_ROW_KODE);
       localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
       SELECTED_ROW_KODE = null;
@@ -1381,7 +1378,6 @@
       updateExecutiveKPIs();
       updateKelompokCardsSummary();
 
-      // Kirim perintah pencatatan ke Google Sheets
       sendPostToCloud({
         action: "logAction",
         log: { 
@@ -1628,7 +1624,7 @@
         
         await sendPostToCloud({
           action: "logAction",
-          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi", picOrBiaya: CURRENT_LOGGED_USER.nama || "Admin" }
+          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi", picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
         });
         
         executeDataFilters();
@@ -1708,7 +1704,7 @@
         const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
         await sendPostToCloud({
           action: "logAction",
-          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER.nama || "Admin" }
+          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
         });
         closeModal('modalActionDisposal');
         executeDataFilters();
@@ -1716,7 +1712,7 @@
       }
     }
 
-    // ================= FUNGSI CETAK LABEL STIKER QR CODE =================
+    // ================= CETAK STIKER QR CODE =================
     function actionPrintBarcode() {
       if (!SELECTED_ROW_KODE) {
         alert("Pilih salah satu baris aset terlebih dahulu!");
