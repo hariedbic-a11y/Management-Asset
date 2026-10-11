@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Enterprise Asset Lifecycle & Depreciation Management</title>
+  <title>Enterprise Asset Lifecycle & Tracking System</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   
-  <!-- CDN External Libraries -->
+  <!-- CDN Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -40,7 +40,6 @@
       body * { visibility: hidden; }
       #printableReportArea, #printableReportArea * { visibility: visible; }
       #printableReportArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; }
-      .no-print { display: none !important; }
     }
     .barcode-sticker {
       width: 50mm; height: 25mm; border: 1.5px dashed #000; padding: 2mm;
@@ -54,37 +53,34 @@
   <!-- ================= TOP HEADER (FREEZE NAVIGATION) ================= -->
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
     <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- LOGO RESMI GABUNGAN PHS & RPI -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-md">
-          <img src="icon.svg" alt="Company Logo" class="w-full h-full object-contain">
+        <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
+          <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-sm font-extrabold tracking-tight text-white">ENTERPRISE ASSET LIFECYCLE</h1>
-            <span class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase">Tax & Accounting Ready</span>
+            <h1 class="text-sm font-extrabold tracking-tight text-white uppercase">Asset Lifecycle Pro</h1>
+            <span class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase">Enterprise Grade</span>
           </div>
-          <p class="text-[11px] text-slate-400 font-medium">PT Permata Husada Sakti &bull; Asset Depreciation & Tracking Controller</p>
+          <p class="text-[11px] text-slate-400 font-medium">PT Permata Husada Sakti &bull; RS Grha Permata Ibu</p>
         </div>
       </div>
 
+      <!-- Action Center Buttons -->
       <div class="flex items-center gap-2">
-        <div class="hidden md:flex items-center gap-2.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/70 text-xs">
-          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="font-bold text-slate-200">Admin Utama</span>
-          <span class="text-[10px] bg-brand-500/20 text-brand-400 border border-brand-500/30 px-2 py-0.5 rounded-full font-mono font-bold">SUPER ADMIN</span>
-        </div>
-        
         <button onclick="openScannerModal()" class="bg-gradient-to-r from-sky-500 to-brand-600 hover:from-sky-600 hover:to-brand-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-qrcode text-sm"></i>
-          <span>Scan Audit</span>
+          <span>Scan Audit (HP)</span>
         </button>
         <button onclick="openModalAddAsset()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-plus text-sm"></i>
-          <span class="hidden sm:inline">Pengadaan Aset</span>
+          <span class="hidden sm:inline">Pengadaan Baru</span>
         </button>
         <button onclick="openReportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i>
-          <span class="hidden sm:inline">Laporan Penyusutan</span>
+          <span class="hidden sm:inline">Laporan & Audit BAST</span>
         </button>
       </div>
     </div>
@@ -120,7 +116,7 @@
         <i class="fa-solid fa-boxes-stacked mr-1.5"></i> Master Inventaris Aset
       </button>
       <button onclick="switchMainTab('tab-depreciation', this)" class="main-tab-btn px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap">
-        <i class="fa-solid fa-calculator mr-1.5"></i> Pembagian Kelompok Penyusutan
+        <i class="fa-solid fa-scale-balanced mr-1.5"></i> 4 Kelompok Masa Manfaat
       </button>
       <button onclick="switchMainTab('tab-dashboard', this)" class="main-tab-btn px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap">
         <i class="fa-solid fa-chart-line mr-1.5"></i> Executive Dashboard & KPI
@@ -139,19 +135,20 @@
 
     <!-- ----------------- TAB 1: MASTER INVENTARIS ASET ----------------- -->
     <section id="tab-inventory" class="space-y-3 flex-1 flex flex-col">
+      <!-- Universal Filter Control Bar -->
       <div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 shadow-md flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 text-xs">
         <div class="relative flex-1">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="text" id="filterKeyword" oninput="executeDataFilters()" placeholder="Cari Barcode, Nama Barang, SN, PIC..." class="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl focus:ring-1 focus:ring-sky-500 font-medium text-slate-100">
+          <input type="text" id="filterKeyword" oninput="executeDataFilters()" placeholder="Cari Kode Barcode, Nama Barang, Merk, Serial Number, atau PIC..." class="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl focus:ring-1 focus:ring-sky-500 font-medium text-slate-100">
         </div>
         
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <select id="filterKelompokDepresiasi" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium">
             <option value="">Semua Kelompok Masa Manfaat</option>
-            <option value="Kelompok 1">Kelompok 1 (4 Tahun)</option>
-            <option value="Kelompok 2">Kelompok 2 (8 Tahun)</option>
-            <option value="Kelompok 3">Kelompok 3 (16 Tahun)</option>
-            <option value="Kelompok 4">Kelompok 4 (20 Tahun)</option>
+            <option value="Kelompok 1">Kelompok 1 (4 Tahun / 25%)</option>
+            <option value="Kelompok 2">Kelompok 2 (8 Tahun / 12.5%)</option>
+            <option value="Kelompok 3">Kelompok 3 (16 Tahun / 6.25%)</option>
+            <option value="Kelompok 4">Kelompok 4 (20 Tahun / 5%)</option>
           </select>
           <select id="filterLokasi" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium">
             <option value="">Semua Ruangan</option>
@@ -197,25 +194,24 @@
       </div>
 
       <div class="text-[11px] text-slate-400 flex flex-wrap justify-between items-center px-2 py-1">
-        <span id="labelInventoryCount">Memuat data...</span>
-        <span class="text-slate-500 font-mono"><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> Sesuai Ketentuan Pajak & Standar Akuntansi Aset Tetap</span>
+        <span id="labelInventoryCount">Memuat data aset...</span>
+        <span class="text-slate-500 font-mono"><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> Data Tersinkronisasi Otomatis & Terlindungi dari Duplikasi</span>
       </div>
     </section>
 
-    <!-- ----------------- TAB 2: PEMBAGIAN KELOMPOK PENYUSUTAN (BARU) ----------------- -->
+    <!-- ----------------- TAB 2: PANDUAN 4 KELOMPOK PENYUSUTAN ----------------- -->
     <section id="tab-depreciation" class="hidden space-y-4">
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-scale-balanced text-amber-400"></i> Panduan & Klasifikasi Masa Manfaat Aset Perusahaan
+          <i class="fa-solid fa-scale-balanced text-amber-400"></i> Standar Pembagian 4 Kelompok Masa Manfaat Aset Tetap
         </h3>
         <p class="text-xs text-slate-400 mt-1">
-          Berdasarkan standar perpajakan dan akuntansi, pembagian masa manfaat aset bukan bangunan dibagi ke dalam 4 kelompok resmi:
+          Sesuai dengan ketentuan perpajakan dan PSAK Akuntansi Aset Tetap (Metode Garis Lurus / Straight-Line):
         </p>
       </div>
 
       <!-- 4 Kelompok Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 text-xs">
-        <!-- Kelompok 1 -->
         <div class="bg-slate-900 p-5 rounded-2xl border border-sky-800/50 shadow-md flex flex-col justify-between border-t-4 border-t-sky-500">
           <div>
             <div class="flex justify-between items-center mb-2">
@@ -223,22 +219,21 @@
               <span class="font-mono text-emerald-400 font-bold">Tarif: 25% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 4 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Aset operasional ringan & teknologi dengan perputaran cepat.</p>
+            <p class="text-slate-400 mt-2 font-medium">Aset kantor ringan & perangkat teknologi berotasi cepat.</p>
             <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
               <strong>Contoh Aset:</strong>
               <p>&bull; Komputer, Laptop, Tablet</p>
               <p>&bull; Printer, Scanner, Barcode Reader</p>
-              <p>&bull; Perabot kantor dari kayu ringan</p>
+              <p>&bull; Perabot kantor kayu ringan</p>
               <p>&bull; Alat komunikasi (HT, Telepon PABX)</p>
             </div>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
-            <span>Total Unit:</span>
+            <span>Populasi:</span>
             <strong id="countKelompok1" class="text-white font-mono">0 Unit</strong>
           </div>
         </div>
 
-        <!-- Kelompok 2 -->
         <div class="bg-slate-900 p-5 rounded-2xl border border-emerald-800/50 shadow-md flex flex-col justify-between border-t-4 border-t-emerald-500">
           <div>
             <div class="flex justify-between items-center mb-2">
@@ -246,22 +241,21 @@
               <span class="font-mono text-emerald-400 font-bold">Tarif: 12.5% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 8 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Kendaraan operasional, mebel logam, mesin utilitas umum.</p>
+            <p class="text-slate-400 mt-2 font-medium">Kendaraan operasional, mebel logam, mesin utilitas gedung.</p>
             <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
               <strong>Contoh Aset:</strong>
-              <p>&bull; Mobil dinas & Ambulans</p>
-              <p>&bull; AC Split / AC Central, Genset</p>
+              <p>&bull; Mobil dinas & Ambulans RS</p>
+              <p>&bull; AC Split / Central, Genset Kantor</p>
               <p>&bull; Mebel logam, Bed Pasien Elektrik</p>
-              <p>&bull; Kulkas vaksin & Freezer medis</p>
+              <p>&bull; Kulkas vaksin & Freezer farmasi</p>
             </div>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
-            <span>Total Unit:</span>
+            <span>Populasi:</span>
             <strong id="countKelompok2" class="text-white font-mono">0 Unit</strong>
           </div>
         </div>
 
-        <!-- Kelompok 3 -->
         <div class="bg-slate-900 p-5 rounded-2xl border border-amber-800/50 shadow-md flex flex-col justify-between border-t-4 border-t-amber-500">
           <div>
             <div class="flex justify-between items-center mb-2">
@@ -269,22 +263,21 @@
               <span class="font-mono text-emerald-400 font-bold">Tarif: 6.25% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 16 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Mesin industri khusus dan peralatan berat pendukung.</p>
+            <p class="text-slate-400 mt-2 font-medium">Mesin industri khusus dan peralatan berat penunjang medis.</p>
             <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
               <strong>Contoh Aset:</strong>
-              <p>&bull; Mesin CT-Scan, MRI & Radiologi besar</p>
+              <p>&bull; Mesin CT-Scan, MRI & Radiologi</p>
               <p>&bull; Lift / Elevator pasien rumah sakit</p>
-              <p>&bull; Boiler & Pembangkit uap industri</p>
-              <p>&bull; Mesin sterilisasi CSSD kapasitas besar</p>
+              <p>&bull; Boiler & Pembangkit uap gedung</p>
+              <p>&bull; Sterilisator Autoclave CSSD kapasitas besar</p>
             </div>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
-            <span>Total Unit:</span>
+            <span>Populasi:</span>
             <strong id="countKelompok3" class="text-white font-mono">0 Unit</strong>
           </div>
         </div>
 
-        <!-- Kelompok 4 -->
         <div class="bg-slate-900 p-5 rounded-2xl border border-purple-800/50 shadow-md flex flex-col justify-between border-t-4 border-t-purple-500">
           <div>
             <div class="flex justify-between items-center mb-2">
@@ -292,17 +285,17 @@
               <span class="font-mono text-emerald-400 font-bold">Tarif: 5% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 20 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Infrastruktur berat khusus dan mesin permanen raksasa.</p>
+            <p class="text-slate-400 mt-2 font-medium">Infrastruktur industri berat dan mesin permanen raksasa.</p>
             <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
               <strong>Contoh Aset:</strong>
-              <p>&bull; Tangki Oksigen Cair / Cryogenic Tank</p>
+              <p>&bull; Tangki Oksigen Cair Cryogenic 5000L</p>
               <p>&bull; Alat berat konstruksi/pertambangan</p>
-              <p>&bull; Saluran perpipaan terpusat utama</p>
-              <p>&bull; Bangunan pabrik/struktur permanen</p>
+              <p>&bull; Saluran pipa distribusi gas sentral</p>
+              <p>&bull; Bangunan struktur permanen</p>
             </div>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
-            <span>Total Unit:</span>
+            <span>Populasi:</span>
             <strong id="countKelompok4" class="text-white font-mono">0 Unit</strong>
           </div>
         </div>
@@ -314,16 +307,16 @@
       <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <p class="text-slate-400 font-bold uppercase text-[10px]">Total Aset</p>
+            <p class="text-slate-400 font-bold uppercase text-[10px]">Total Aset Terdaftar</p>
             <h3 id="dashTotalAset" class="text-2xl font-black text-white mt-1">0</h3>
-            <p class="text-[11px] text-slate-400 mt-0.5">Unit terdaftar</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Unit resmi tercatat</p>
           </div>
           <div class="w-11 h-11 rounded-2xl bg-sky-950 text-sky-400 flex items-center justify-center text-lg border border-sky-800/50"><i class="fa-solid fa-boxes-stacked"></i></div>
         </div>
 
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <p class="text-slate-400 font-bold uppercase text-[10px]">Nilai Perolehan</p>
+            <p class="text-slate-400 font-bold uppercase text-[10px]">Nilai Perolehan Awal</p>
             <h3 id="dashTotalHarga" class="text-base font-black text-emerald-400 mt-1 truncate max-w-[150px]">Rp 0</h3>
             <p class="text-[11px] text-slate-400 mt-0.5">Kapitalisasi Aset</p>
           </div>
@@ -341,9 +334,9 @@
 
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <p class="text-slate-400 font-bold uppercase text-[10px]">Total Akumulasi Depresiasi</p>
+            <p class="text-slate-400 font-bold uppercase text-[10px]">Akumulasi Depresiasi</p>
             <h3 id="dashTotalDepresiasi" class="text-base font-black text-amber-400 mt-1 truncate max-w-[150px]">Rp 0</h3>
-            <p class="text-[11px] text-amber-500 mt-0.5">Biaya Penyusutan</p>
+            <p class="text-[11px] text-amber-500 mt-0.5">Beban Penyusutan</p>
           </div>
           <div class="w-11 h-11 rounded-2xl bg-amber-950 text-amber-400 flex items-center justify-center text-lg border border-amber-800/50"><i class="fa-solid fa-calculator"></i></div>
         </div>
@@ -352,7 +345,7 @@
           <div>
             <p class="text-rose-400 font-bold uppercase text-[10px]">Terlewat Audit (>30 Hari)</p>
             <h3 id="dashTotalOverdue" class="text-2xl font-black text-rose-500 mt-1">0</h3>
-            <p class="text-[11px] text-rose-400 mt-0.5">Perlu Opname Fisik</p>
+            <p class="text-[11px] text-rose-400 mt-0.5">Perlu Stock Opname</p>
           </div>
           <div class="w-11 h-11 rounded-2xl bg-rose-900/50 text-rose-400 flex items-center justify-center text-lg border border-rose-800"><i class="fa-solid fa-triangle-exclamation"></i></div>
         </div>
@@ -362,7 +355,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
           <h4 class="font-bold text-slate-200 text-xs mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-pie text-sky-400"></i> Proporsi Nilai Perolehan vs Nilai Buku
+            <i class="fa-solid fa-chart-pie text-sky-400"></i> Perbandingan Nilai Buku vs Akumulasi Penyusutan
           </h4>
           <div class="h-60 relative flex items-center justify-center">
             <canvas id="canvasChartStatus"></canvas>
@@ -371,7 +364,7 @@
 
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
           <h4 class="font-bold text-slate-200 text-xs mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-column text-emerald-400"></i> Distribusi Aset Berdasarkan Kelompok Penyusutan
+            <i class="fa-solid fa-chart-column text-emerald-400"></i> Sebaran Unit Berdasarkan 4 Kelompok Masa Manfaat
           </h4>
           <div class="h-60 relative">
             <canvas id="canvasChartKategori"></canvas>
@@ -385,16 +378,14 @@
       <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
           <h3 class="text-sm font-bold text-white">Master Kategori & Mapping Kelompok Penyusutan</h3>
-          <p class="text-xs text-slate-400">Kategori aset secara otomatis terhubung dengan salah satu dari 4 Kelompok Penyusutan</p>
+          <p class="text-xs text-slate-400">Setiap kategori otomatis mengunci masa manfaat dan tarif penyusutan resmi</p>
         </div>
         <button onclick="openModalAddKategori()" class="bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Kategori
         </button>
       </div>
 
-      <div id="gridContainerKategori" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <!-- Rendered Dynamic Horizontal Cards -->
-      </div>
+      <div id="gridContainerKategori" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
     <!-- ----------------- TAB 5: MASTER LOKASI & UNIT KERJA ----------------- -->
@@ -409,22 +400,20 @@
         </button>
       </div>
 
-      <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <!-- Rendered Dynamic Horizontal Cards -->
-      </div>
+      <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
   </main>
 
   <!-- ================= MODALS DIALOG SECTION ================= -->
 
-  <!-- MODAL REGISTRASI / EDIT ASET -->
+  <!-- 1. MODAL REGISTRASI / EDIT ASET -->
   <div id="modalAssetForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 border border-slate-800 max-h-[92vh] overflow-y-auto custom-scroll shadow-2xl">
       <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
         <div>
           <h3 id="modalAssetHeading" class="text-base font-bold text-white">Registrasi Pengadaan Aset Baru</h3>
-          <p class="text-xs text-slate-400">Penentuan Masa Manfaat & Penyusutan Otomatis</p>
+          <p class="text-xs text-slate-400">Penentuan Masa Manfaat & Kelompok Depresiasi Otomatis</p>
         </div>
         <button onclick="closeModal('modalAssetForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
@@ -436,14 +425,14 @@
             <select id="inputFormKategori" required onchange="onFormKategoriChanged()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500"></select>
           </div>
           <div>
-            <label class="block font-bold text-slate-300 mb-1">Kelompok Penyusutan (Terkunci Otomatis)</label>
+            <label class="block font-bold text-slate-300 mb-1">Kelompok Depresiasi (Terkunci Otomatis)</label>
             <input type="text" id="inputFormKelompokPenyusutan" readonly class="w-full bg-slate-800/80 border border-slate-700 p-2.5 rounded-xl font-semibold text-amber-400 cursor-not-allowed">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-300 mb-1">Kode Barcode (Auto) *</label>
+            <label class="block font-bold text-slate-300 mb-1">Kode Barcode (Auto-Generated) *</label>
             <input type="text" id="inputFormKode" required class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded-xl font-mono font-bold text-sky-400">
           </div>
           <div>
@@ -459,12 +448,12 @@
 
         <div>
           <label class="block font-bold text-slate-300 mb-1">Nama Barang & Spesifikasi Lengkap *</label>
-          <input type="text" id="inputFormNama" required placeholder="Contoh: Defibrillator Mindray BeneHeart D3" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-slate-100">
+          <input type="text" id="inputFormNama" required placeholder="Contoh: Mesin USG Mindray Resona 7" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-slate-100">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-300 mb-1">Nomor Seri Pabrik (SN) / PO</label>
+            <label class="block font-bold text-slate-300 mb-1">Nomor Seri Pabrik (SN) / No PO</label>
             <input type="text" id="inputFormSerial" placeholder="Contoh: SN-8829102-MND" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
           </div>
           <div>
@@ -505,7 +494,7 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL RIWAYAT -->
+  <!-- 2. MODAL DETAIL RIWAYAT -->
   <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-800 pb-3">
@@ -559,13 +548,82 @@
     </div>
   </div>
 
-  <!-- MODAL LAPORAN & AUDIT STOCK OPNAME CENTER -->
+  <!-- 3. MODAL MAINTENANCE / SERVIS -->
+  <div id="modalActionService" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-wrench text-sky-400"></i> Catat Servis / Kalibrasi</h3>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Tindakan Perbaikan / Kalibrasi *</label>
+        <input type="text" id="inputSvcTindakan" placeholder="Contoh: Kalibrasi Tahunan, Ganti Sensor" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Biaya Perbaikan (Rp)</label>
+        <input type="text" id="inputSvcBiaya" oninput="formatInputRupiahRealtime(this)" placeholder="Rp 0" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-emerald-400">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Teknisi / Rekanan</label>
+        <input type="text" id="inputSvcTeknisi" placeholder="Teknisi RS / PT Vendor" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2">
+        <button onclick="closeModal('modalActionService')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button onclick="submitServiceLog()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan Log Servis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL MUTASI RUANGAN -->
+  <div id="modalActionMutasi" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Mutasi Ruangan & Lokasi</h3>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Pindah ke Ruangan Baru *</label>
+        <select id="inputMutasiTargetRoom" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200"></select>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Penanggung Jawab Penerima (PIC Baru) *</label>
+        <input type="text" id="inputMutasiNewPIC" placeholder="Nama Staf / Kepala Ruangan Baru" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2">
+        <button onclick="closeModal('modalActionMutasi')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button onclick="submitMutasiLog()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold">Sahkan Mutasi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MODAL DISPOSAL -->
+  <div id="modalActionDisposal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-rose-900/50 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex items-center gap-2 text-rose-400">
+        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+        <h3 class="text-sm font-bold text-white">Penghapusan Aset (Disposal)</h3>
+      </div>
+      <div>
+        <label class="block text-slate-300 font-bold mb-1">Metode Penghapusan *</label>
+        <select id="inputDisposalMethod" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          <option value="Afkir / Rusak Total">Afkir / Rusak Total (Scrap)</option>
+          <option value="Dijual / Lelang">Dijual / Lelang Aset Bekas</option>
+          <option value="Dihibahkan">Dihibahkan</option>
+          <option value="Hilang">Hilang</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-slate-300 font-bold mb-1">Nomor Berita Acara (BAST Penghapusan) *</label>
+        <input type="text" id="inputDisposalDocNo" placeholder="Contoh: BA-DISP/PHS/2026/045" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button onclick="closeModal('modalActionDisposal')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button onclick="submitDisposalLog()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold">Sahkan Penghapusan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. MODAL LAPORAN & AUDIT BAST -->
   <div id="modalReportCenter" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <div>
           <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Laporan Rekapitulasi & Depresiasi Aset</h3>
-          <p class="text-xs text-slate-400">Ekspor rekapitulasi nilai buku sesuai 4 Kelompok Penyusutan</p>
+          <p class="text-xs text-slate-400">Ekspor rekapitulasi nilai buku sesuai 4 Kelompok Masa Manfaat</p>
         </div>
         <button onclick="closeModal('modalReportCenter')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
@@ -588,13 +646,13 @@
           <i class="fa-solid fa-file-excel text-emerald-400"></i> Unduh Excel (.CSV)
         </button>
         <button onclick="generatePrintableFormalReport()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold flex items-center gap-1.5">
-          <i class="fa-solid fa-print"></i> Cetak Laporan Formal
+          <i class="fa-solid fa-print"></i> Cetak Berita Acara Resmi
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL SCANNER HP -->
+  <!-- 7. MODAL SCANNER HP -->
   <div id="modalCameraScanner" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 text-center relative shadow-2xl">
       <button onclick="closeScannerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -611,7 +669,6 @@
 
   <!-- ================= JAVASCRIPT SYSTEM LOGIC ================= -->
   <script>
-    // Master Mapping: 4 Kelompok Penyusutan Resmi
     const KELOMPOK_PENYUSUTAN_CONFIG = {
       'Kelompok 1': { tahun: 4, tarifTahunan: 0.25, label: 'Kelompok 1 (4 Thn / 25%)' },
       'Kelompok 2': { tahun: 8, tarifTahunan: 0.125, label: 'Kelompok 2 (8 Thn / 12.5%)' },
@@ -625,7 +682,7 @@
       { prefix: 'KO', nama: 'Kendaraan Operasional', kelompok: 'Kelompok 2', desc: 'Ambulans, Mobil Dinas Operasional' },
       { prefix: 'FM', nama: 'Furniture & Mebeler', kelompok: 'Kelompok 2', desc: 'Mebel Logam, Bed Pasien 3 Crank, Brankar Besi' },
       { prefix: 'ML', nama: 'Medis & Laboratorium Berat', kelompok: 'Kelompok 3', desc: 'CT-Scan, X-Ray, Ventilator Utama, Sterilisator CSSD' },
-      { prefix: 'TK', nama: 'Tangki & Infrastruktur Berat', kelompok: 'Kelompok 4', desc: 'Tangki Oksigen Cair / Cryogenic Tank, Saluran Pipa Sentral' }
+      { prefix: 'TK', nama: 'Tangki & Infrastruktur Berat', kelompok: 'Kelompok 4', desc: 'Tangki Oksigen Cair Cryogenic 5000L, Perpipaan Sentral' }
     ];
 
     let MASTER_LOKASI = [
@@ -712,7 +769,6 @@
       updateKelompokCardsSummary();
     });
 
-    // ================= MAIN TABS NAVIGATION =================
     function switchMainTab(targetTabId, btnEl) {
       document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
       document.querySelectorAll('.main-tab-btn').forEach(btn => {
@@ -728,7 +784,6 @@
       if (targetTabId === 'tab-depreciation') updateKelompokCardsSummary();
     }
 
-    // ================= KALKULASI DEPRESIASI RESMI =================
     function getAssetKelompokConfig(asset) {
       const kat = MASTER_KATEGORI.find(k => k.nama === asset.kategori);
       const namaKelompok = kat ? kat.kelompok : 'Kelompok 1';
@@ -749,12 +804,12 @@
       const totalBulanMasaManfaat = masaManfaatTahun * 12;
 
       const tglBeliDate = new Date(asset.tglBeli);
-      const sekarang = new Date(); // Current context: 2026
+      const sekarang = new Date();
       const bulanBerjalan = Math.max(0, (sekarang.getFullYear() - tglBeliDate.getFullYear()) * 12 + (sekarang.getMonth() - tglBeliDate.getMonth()));
 
       if (bulanBerjalan >= totalBulanMasaManfaat) {
         return {
-          nilaiBuku: Math.round(harga * 0.01), // Nilai residu nominal 1%
+          nilaiBuku: Math.round(harga * 0.01),
           sisaBulan: 0,
           sisaTahunStr: 'Habis Masa Manfaat',
           persenDepresiasi: 100,
@@ -788,7 +843,6 @@
       return Math.floor((new Date() - auditDate) / (1000 * 60 * 60 * 24));
     }
 
-    // ================= FILTER & RENDER TABEL =================
     function executeDataFilters() {
       const q = document.getElementById('filterKeyword').value.toLowerCase().trim();
       const fKelompok = document.getElementById('filterKelompokDepresiasi').value;
@@ -851,9 +905,7 @@
             <span class="font-bold text-white block">${item.nama}</span>
             <span class="text-[10px] text-slate-400 font-mono">SN: ${item.serialNumber || '-'}</span>
           </td>
-          <td class="py-3 px-3 font-medium text-amber-400">
-            ${depInfo.kelompokStr}
-          </td>
+          <td class="py-3 px-3 font-medium text-amber-400">${depInfo.kelompokStr}</td>
           <td class="py-3 px-3 text-slate-200">${item.lokasi}</td>
           <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusClass}">${item.status}</span></td>
           <td class="py-3 px-3 text-slate-400 font-mono">${item.tglBeli || '-'}</td>
@@ -901,7 +953,6 @@
       document.getElementById('countKelompok4').innerText = `${c4} Unit`;
     }
 
-    // ================= FORM ASET PENGADAAN & AUTO LOCK KELOMPOK =================
     function onFormKategoriChanged() {
       const katName = document.getElementById('inputFormKategori').value;
       const katObj = MASTER_KATEGORI.find(k => k.nama === katName);
@@ -933,6 +984,25 @@
       document.getElementById('modalAssetForm').classList.remove('hidden');
 
       if (!prefillBarcode) onFormKategoriChanged();
+    }
+
+    function actionEditAsset() {
+      if (!SELECTED_ROW_KODE) return;
+      const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
+      if (!asset) return;
+
+      document.getElementById('modalAssetHeading').innerText = 'Edit Spesifikasi Aset';
+      document.getElementById('inputFormKode').value = asset.kode;
+      document.getElementById('inputFormKategori').value = asset.kategori;
+      document.getElementById('inputFormNama').value = asset.nama;
+      document.getElementById('inputFormSerial').value = asset.serialNumber || '';
+      document.getElementById('inputFormStatus').value = asset.status;
+      document.getElementById('inputFormLokasi').value = asset.lokasi;
+      document.getElementById('inputFormHarga').value = 'Rp ' + Number(asset.hargaBeli || 0).toLocaleString('id-ID');
+      document.getElementById('inputFormTglBeli').value = asset.tglBeli || '';
+      document.getElementById('inputFormPIC').value = asset.pic || '';
+      document.getElementById('inputFormKet').value = asset.keterangan || '';
+      document.getElementById('modalAssetForm').classList.remove('hidden');
     }
 
     function handleFormAssetSubmit(e) {
@@ -981,7 +1051,6 @@
       alert(`Aset "${nama}" (${kode}) berhasil disimpan.`);
     }
 
-    // ================= AUTOCOMPLETE ANTI-TYPO =================
     function handleAutocompleteLokasi(queryVal) {
       const drop = document.getElementById('autocompleteDropdownLokasi');
       const typoNotice = document.getElementById('typoNoticeLokasi');
@@ -1022,7 +1091,6 @@
       }
     }
 
-    // ================= DETAIL MODAL =================
     function openHistoryDetailModal(kode) {
       const asset = DATA_INVENTARIS.find(a => a.kode === kode);
       if (!asset) return;
@@ -1039,7 +1107,6 @@
       document.getElementById('modalHistoryDetail').classList.remove('hidden');
     }
 
-    // ================= EXECUTIVE DASHBOARD CHARTS =================
     function updateExecutiveKPIs() {
       let totalHarga = 0, totalBuku = 0, overdueCount = 0;
       const kelompokCounter = { 'Kelompok 1': 0, 'Kelompok 2': 0, 'Kelompok 3': 0, 'Kelompok 4': 0 };
@@ -1089,7 +1156,6 @@
       });
     }
 
-    // ================= SCANNER AUDIT DENGAN KAMERA HP =================
     function openScannerModal() {
       document.getElementById('modalCameraScanner').classList.remove('hidden');
       document.getElementById('cameraStatusMsg').innerText = 'Mengakses kamera ponsel...';
@@ -1127,7 +1193,6 @@
       }
     }
 
-    // ================= REPORTING / BAST FORMAL =================
     function openReportModal() {
       document.getElementById('modalReportCenter').classList.remove('hidden');
     }
@@ -1185,10 +1250,10 @@
       printArea.innerHTML = `
         <div style="font-family: Arial, sans-serif; color: #000; padding: 10px;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
-            <div style="width: 250px;"><img src="icon.svg" style="max-height: 45px; object-fit: contain;"></div>
+            <div style="width: 280px;"><img src="icon.svg" style="max-height: 48px; object-fit: contain;"></div>
             <div style="text-align: right;">
-              <h2 style="margin: 0; font-size: 14px; font-weight: bold;">LAPORAN PENYUSUTAN & NILAI BUKU ASET TETAP</h2>
-              <p style="margin: 2px 0 0 0; font-size: 10px; color: #444;">Standar 4 Kelompok Masa Manfaat &bull; Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}</p>
+              <h2 style="margin: 0; font-size: 14px; font-weight: bold;">BERITA ACARA AUDIT & REKAPITULASI PENYUSUTAN ASET</h2>
+              <p style="margin: 2px 0 0 0; font-size: 10px; color: #444;">PT Permata Husada Sakti &bull; RS Grha Permata Ibu</p>
             </div>
           </div>
 
@@ -1221,7 +1286,6 @@
       window.print();
     }
 
-    // ================= HELPERS & DROPDOWNS =================
     function populateKategoriDropdowns() {
       const inKat = document.getElementById('inputFormKategori');
       inKat.innerHTML = '';
@@ -1276,17 +1340,106 @@
       });
     }
 
+    function actionVerifyAuditToday() {
+      if (!SELECTED_ROW_KODE) return;
+      const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
+      if (asset) {
+        asset.terakhirAudit = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        executeDataFilters();
+        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) berhasil disahkan.`);
+      }
+    }
+
+    function actionOpenService() {
+      if (!SELECTED_ROW_KODE) return;
+      document.getElementById('inputSvcTindakan').value = '';
+      document.getElementById('inputSvcBiaya').value = '';
+      document.getElementById('inputSvcTeknisi').value = '';
+      document.getElementById('modalActionService').classList.remove('hidden');
+    }
+
+    function submitServiceLog() {
+      const act = document.getElementById('inputSvcTindakan').value.trim();
+      const cost = Number(document.getElementById('inputSvcBiaya').value.replace(/[^0-9]/g, '')) || 0;
+      const tech = document.getElementById('inputSvcTeknisi').value.trim();
+      if (!act) return alert('Tindakan wajib diisi.');
+
+      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
+      if (a) {
+        a.serviceLogs.unshift({ date: new Date().toLocaleDateString('id-ID'), action: act, cost, tech: tech || 'Teknisi RS' });
+        closeModal('modalActionService');
+        executeDataFilters();
+        alert('Log pemeliharaan berhasil dicatat.');
+      }
+    }
+
+    function actionOpenMutasi() {
+      if (!SELECTED_ROW_KODE) return;
+      const sel = document.getElementById('inputMutasiTargetRoom');
+      sel.innerHTML = '';
+      MASTER_LOKASI.forEach(r => sel.innerHTML += `<option value="${r}">${r}</option>`);
+      document.getElementById('inputMutasiNewPIC').value = '';
+      document.getElementById('modalActionMutasi').classList.remove('hidden');
+    }
+
+    function submitMutasiLog() {
+      const r = document.getElementById('inputMutasiTargetRoom').value;
+      const p = document.getElementById('inputMutasiNewPIC').value.trim();
+      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
+      if (a) {
+        a.lokasi = r;
+        if (p) a.pic = p;
+        closeModal('modalActionMutasi');
+        executeDataFilters();
+        alert(`Aset berhasil dimutasikan ke ${r}.`);
+      }
+    }
+
+    function actionOpenDisposal() {
+      if (!SELECTED_ROW_KODE) return;
+      document.getElementById('inputDisposalDocNo').value = '';
+      document.getElementById('modalActionDisposal').classList.remove('hidden');
+    }
+
+    function submitDisposalLog() {
+      const doc = document.getElementById('inputDisposalDocNo').value.trim();
+      if (!doc) return alert('Nomor BAST wajib diisi.');
+      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
+      if (a) {
+        a.status = 'Disposed';
+        closeModal('modalActionDisposal');
+        executeDataFilters();
+        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
+      }
+    }
+
+    function actionPrintBarcode() {
+      if (!SELECTED_ROW_KODE) return;
+      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
+      const printBox = document.getElementById('printableReportArea');
+      printBox.innerHTML = `
+        <div class="barcode-sticker">
+          <p style="font-size: 8px; font-weight: 800; margin: 0; text-align: center;">PT PERMATA HUSADA SAKTI</p>
+          <svg id="canvasPrintSticker"></svg>
+          <p style="font-size: 8px; font-family: monospace; font-weight: bold; margin: 1px 0 0 0;">${a.kode}</p>
+          <p style="font-size: 7px; margin: 0; text-align: center; max-width: 44mm; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${a.nama}</p>
+        </div>
+      `;
+      JsBarcode("#canvasPrintSticker", a.kode, { format: "CODE128", width: 1.2, height: 26, displayValue: false, margin: 0 });
+      window.print();
+    }
+
     function formatInputRupiahRealtime(el) {
       let num = el.value.replace(/[^0-9]/g, '');
       el.value = num ? 'Rp ' + Number(num).toLocaleString('id-ID') : '';
     }
 
-    function toggleAccordion(accId) {
-      document.getElementById(accId).classList.toggle('hidden');
+    function toggleAccordion(id) {
+      document.getElementById(id).classList.toggle('hidden');
     }
 
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.add('hidden');
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
     }
   </script>
 </body>
