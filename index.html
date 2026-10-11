@@ -607,7 +607,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL DETAIL RIWAYAT (DENGAN LOG SERVIS & MUTASI) ================= -->
+  <!-- ================= MODAL DETAIL RIWAYAT (DENGAN ACCORDION EXPAND-COLLAPSE) ================= -->
   <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-800 pb-3">
@@ -641,24 +641,34 @@
         </div>
       </div>
 
-      <!-- KOTAK LOG 1: RIWAYAT PEMELIHARAAN, KALIBRASI & SERVIS -->
-      <div class="border border-slate-800 rounded-2xl overflow-hidden">
-        <div class="bg-slate-950 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200">
-          <span><i class="fa-solid fa-wrench text-sky-400 mr-2"></i>Log Pemeliharaan, Kalibrasi & Servis</span>
-        </div>
-        <div class="p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60">
+      <!-- KOTAK LOG 1: RIWAYAT PEMELIHARAAN, KALIBRASI & SERVIS (ACCORDION BUKA-TUTUP) -->
+      <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
+        <button type="button" onclick="toggleAccordion('boxHistoryServiceContent', 'iconChevronService')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-wrench text-sky-400"></i>
+            <span>Log Pemeliharaan, Kalibrasi & Servis</span>
+            <span id="badgeServiceCount" class="text-[10px] bg-sky-950 text-sky-400 border border-sky-800/80 px-2 py-0.5 rounded-full font-mono">0</span>
+          </span>
+          <i id="iconChevronService" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"></i>
+        </button>
+        <div id="boxHistoryServiceContent" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60 max-h-60 overflow-y-auto custom-scroll">
           <div id="boxHistoryServiceList" class="space-y-2">
             <p class="text-slate-500 italic">Belum ada riwayat perbaikan/servis.</p>
           </div>
         </div>
       </div>
 
-      <!-- KOTAK LOG 2: RIWAYAT MUTASI RUANGAN & PIC -->
-      <div class="border border-slate-800 rounded-2xl overflow-hidden">
-        <div class="bg-slate-950 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200">
-          <span><i class="fa-solid fa-arrows-turn-to-dots text-teal-400 mr-2"></i>Log Mutasi Ruangan & PIC</span>
-        </div>
-        <div class="p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60">
+      <!-- KOTAK LOG 2: RIWAYAT MUTASI RUANGAN & PIC (ACCORDION BUKA-TUTUP) -->
+      <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
+        <button type="button" onclick="toggleAccordion('boxHistoryMutasiContent', 'iconChevronMutasi')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i>
+            <span>Log Mutasi Ruangan & PIC</span>
+            <span id="badgeMutasiCount" class="text-[10px] bg-teal-950 text-teal-400 border border-teal-800/80 px-2 py-0.5 rounded-full font-mono">0</span>
+          </span>
+          <i id="iconChevronMutasi" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"></i>
+        </button>
+        <div id="boxHistoryMutasiContent" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60 max-h-60 overflow-y-auto custom-scroll">
           <div id="boxHistoryMutasiList" class="space-y-2">
             <p class="text-slate-500 italic">Belum ada riwayat mutasi.</p>
           </div>
@@ -835,6 +845,21 @@
       executeDataFilters();
       fetchCloudData();
     });
+
+    // ================= FUNGSI EXPAND / COLLAPSE (ACCORDION) =================
+    function toggleAccordion(contentId, iconId) {
+      const content = document.getElementById(contentId);
+      const icon = document.getElementById(iconId);
+      if (!content) return;
+
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+      }
+    }
 
     // ================= LOGIN & OTORISASI =================
     function handleLoginSubmit(e) {
@@ -1185,7 +1210,7 @@
       renderInventoryTable(results);
     }
 
-    // ================= RENDER TABEL (FORMAT BERSIH + PERINGATAN MERAH > 30 HARI) =================
+    // ================= RENDER TABEL =================
     function renderInventoryTable(items) {
       const tbody = document.getElementById('inventoryTableBody');
       tbody.innerHTML = '';
@@ -1529,6 +1554,7 @@
       }
     }
 
+    // ================= MENAMPILKAN DETAIL ASET BESERTA ACCORDION LOG =================
     function openHistoryDetailModal(kode) {
       const asset = DATA_INVENTARIS.find(a => a.kode === kode);
       if (!asset) return;
@@ -1550,6 +1576,17 @@
         fotoEl.classList.add('hidden');
       }
 
+      // Reset state accordion ke tertutup saat awal modal dibuka
+      const contentSvc = document.getElementById('boxHistoryServiceContent');
+      const iconSvc = document.getElementById('iconChevronService');
+      const contentMut = document.getElementById('boxHistoryMutasiContent');
+      const iconMut = document.getElementById('iconChevronMutasi');
+      
+      contentSvc.classList.add('hidden');
+      if (iconSvc) iconSvc.classList.remove('rotate-180');
+      contentMut.classList.add('hidden');
+      if (iconMut) iconMut.classList.remove('rotate-180');
+
       const svcBox = document.getElementById('boxHistoryServiceList');
       const mutBox = document.getElementById('boxHistoryMutasiList');
       svcBox.innerHTML = '';
@@ -1558,6 +1595,10 @@
       const relatedLogs = GLOBAL_LOGS.filter(l => l.kodeAset === asset.kode);
       const svcLogs = relatedLogs.filter(l => l.tipeLog === 'SERVIS');
       const mutLogs = relatedLogs.filter(l => l.tipeLog === 'MUTASI');
+
+      // Tampilkan jumlah log di badge
+      document.getElementById('badgeServiceCount').innerText = `${svcLogs.length} Log`;
+      document.getElementById('badgeMutasiCount').innerText = `${mutLogs.length} Log`;
 
       if (svcLogs.length > 0) {
         svcLogs.forEach(l => {
