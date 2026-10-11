@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <!-- Library QR Code Generator Resmi & Cepat -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -37,7 +36,7 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: #090d16; }
 
-    /* PENGATURAN CETAK KHUSUS LABEL TOM & JERRY */
+    /* Pengaturan Cetak Stiker Tom & Jerry */
     @media print {
       body * { visibility: hidden !important; }
       @page { size: auto; margin: 0mm !important; }
@@ -57,7 +56,6 @@
       }
     }
 
-    /* KARTU STIKER TOM & JERRY (Ukuran Presisi Standar Label Aset 50mm x 32mm) */
     .tj-asset-label {
       width: 50mm !important;
       height: 32mm !important;
@@ -106,11 +104,11 @@
     </div>
   </div>
 
-  <!-- ================= TOP HEADER (FREEZE NAVIGATION) ================= -->
+  <!-- ================= TOP HEADER ================= -->
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
     <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- LOGO RESMI GABUNGAN PHS & RPI -->
+      <!-- LOGO RESMI GABUNGAN -->
       <div class="flex items-center gap-3">
         <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
           <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
@@ -254,9 +252,7 @@
               <th class="py-3 px-3 text-center">Riwayat</th>
             </tr>
           </thead>
-          <tbody id="inventoryTableBody" class="divide-y divide-slate-800/80 font-medium text-slate-300">
-            <!-- Diinjeksi otomatis via JS -->
-          </tbody>
+          <tbody id="inventoryTableBody" class="divide-y divide-slate-800/80 font-medium text-slate-300"></tbody>
         </table>
       </div>
 
@@ -460,9 +456,7 @@
               <th class="p-3 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody id="userListTableBody" class="divide-y divide-slate-800 text-slate-300">
-            <!-- Render User Staf -->
-          </tbody>
+          <tbody id="userListTableBody" class="divide-y divide-slate-800 text-slate-300"></tbody>
         </table>
       </div>
     </section>
@@ -803,8 +797,8 @@
       renderGridKategoriCards();
       renderGridLokasiCards();
       initChartInstances();
-      fetchCloudData();
       renderStaffUsersList();
+      fetchCloudData(); // Memuat data awal dari Google Sheets
     });
 
     // ================= LOGIN & OTORISASI =================
@@ -937,6 +931,15 @@
     }
 
     // ================= SYNC CLOUD GOOGLE SHEETS =================
+    // Fungsi pembantu agar tidak sensitif huruf besar/kecil (case-insensitive)
+    function getProp(obj, keyName) {
+      const lower = keyName.toLowerCase();
+      for (let k in obj) {
+        if (k.toLowerCase() === lower) return obj[k];
+      }
+      return '';
+    }
+
     async function fetchCloudData() {
       const badge = document.getElementById('cloudStatusBadge');
       const icon = document.getElementById('btnRefreshIcon');
@@ -946,28 +949,28 @@
         const response = await fetch(GOOGLE_API_URL);
         const result = await response.json();
         
-        if (result.success && result.data) {
+        if (result.success && Array.isArray(result.data)) {
           DATA_INVENTARIS = result.data.map(item => ({
-            kode: String(item.Kode || item.kode || ''),
-            nama: String(item.Nama || item.nama || ''),
-            kategori: String(item.Kategori || item.kategori || ''),
-            kelompok: String(item.Kelompok || item.kelompok || ''),
-            lokasi: String(item.Lokasi || item.lokasi || ''),
-            status: String(item.Status || item.status || 'Operasional'),
-            tglBeli: String(item.TglBeli || item.tglBeli || ''),
-            hargaBeli: Number(item.HargaBeli || item.hargaBeli) || 0,
-            pic: String(item.PIC || item.pic || '-'),
-            tglKalibrasi: String(item.Kalibrasi || item.tglKalibrasi || '-'),
-            keterangan: String(item.Ket || item.keterangan || '-'),
-            fotoUrl: String(item.FotoUrl || item.fotoUrl || ''),
-            terakhirAudit: String(item.TerakhirAudit || item.terakhirAudit || '-')
-          }));
+            kode: String(getProp(item, 'Kode') || '').trim(),
+            nama: String(getProp(item, 'Nama') || '').trim(),
+            kategori: String(getProp(item, 'Kategori') || '').trim(),
+            kelompok: String(getProp(item, 'Kelompok') || '').trim(),
+            lokasi: String(getProp(item, 'Lokasi') || '').trim(),
+            status: String(getProp(item, 'Status') || 'Operasional').trim(),
+            tglBeli: String(getProp(item, 'TglBeli') || '').trim(),
+            hargaBeli: Number(getProp(item, 'HargaBeli')) || 0,
+            pic: String(getProp(item, 'PIC') || '-').trim(),
+            tglKalibrasi: String(getProp(item, 'Kalibrasi') || '-').trim(),
+            keterangan: String(getProp(item, 'Ket') || '-').trim(),
+            fotoUrl: String(getProp(item, 'FotoUrl') || '').trim(),
+            terakhirAudit: String(getProp(item, 'TerakhirAudit') || '-').trim()
+          })).filter(a => a.kode !== ""); // Abaikan baris kosong
           
           badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
           badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Google Sheets Sync`;
         }
       } catch (err) {
-        console.warn("Gagal terhubung ke Cloud, menggunakan cache:", err);
+        console.warn("Gagal terhubung ke Cloud:", err);
       } finally {
         if (icon) icon.classList.remove('fa-spin');
         executeDataFilters();
@@ -1006,7 +1009,7 @@
 
     function getAssetKelompokConfig(asset) {
       const kat = MASTER_KATEGORI.find(k => k.nama === asset.kategori);
-      const namaKelompok = kat ? kat.kelompok : 'Kelompok 1';
+      const namaKelompok = kat ? kat.kelompok : (asset.kelompok || 'Kelompok 1');
       return {
         namaKelompok: namaKelompok,
         config: KELOMPOK_PENYUSUTAN_CONFIG[namaKelompok] || KELOMPOK_PENYUSUTAN_CONFIG['Kelompok 1']
@@ -1659,7 +1662,6 @@
       const printBox = document.getElementById('printableReportArea');
       printBox.classList.remove('hidden');
 
-      // Tata Letak Stiker Tom & Jerry 50x32 mm (Header Logo + Isi QR Code + Detail Aset)
       printBox.innerHTML = `
         <div class="tj-asset-label">
           <!-- 1. Header: Logo Resmi & Teks Identitas -->
@@ -1672,10 +1674,8 @@
 
           <!-- 2. Konten Utama: QR Code (Kiri) & Keterangan Identitas Aset (Kanan) -->
           <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; margin: 1.5px 0;">
-            <!-- Box QR Code Presisi 19mm x 19mm -->
             <div id="qrcodeStickerContainer" style="width: 19mm; height: 19mm; display: flex; align-items: center; justify-content: center; background: #fff;"></div>
 
-            <!-- Box Teks Kanan -->
             <div style="flex: 1; padding-left: 2.5mm; text-align: left; overflow: hidden;">
               <p style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 900; margin: 0; color: #0284c7; line-height: 1;">
                 ${a.kode}
@@ -1701,7 +1701,6 @@
         </div>
       `;
 
-      // Render Gambar QR Code Tajam & Presisi
       new QRCode(document.getElementById("qrcodeStickerContainer"), {
         text: a.kode,
         width: 72,
@@ -1711,7 +1710,6 @@
         correctLevel: QRCode.CorrectLevel.M
       });
 
-      // Tunggu render selesai lalu buka pratinjau cetak browser
       setTimeout(() => {
         window.print();
       }, 250);
