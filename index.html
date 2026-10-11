@@ -54,7 +54,7 @@
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
     <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- LOGO RESMI GABUNGAN PHS & RPI -->
+      <!-- LOGO GABUNGAN PHS & RPI -->
       <div class="flex items-center gap-3">
         <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
           <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
@@ -62,7 +62,9 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-sm font-extrabold tracking-tight text-white uppercase">Asset Lifecycle Pro</h1>
-            <span class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase">Enterprise Grade</span>
+            <span id="cloudStatusBadge" class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Connected
+            </span>
           </div>
           <p class="text-[11px] text-slate-400 font-medium">PT Permata Husada Sakti &bull; RS Grha Permata Ibu</p>
         </div>
@@ -70,6 +72,9 @@
 
       <!-- Action Center Buttons -->
       <div class="flex items-center gap-2">
+        <button onclick="fetchCloudData()" title="Sinkronkan dengan Google Sheets" class="bg-slate-800 hover:bg-slate-700 text-sky-400 p-2 rounded-xl text-xs font-bold border border-slate-700 transition">
+          <i id="btnRefreshIcon" class="fa-solid fa-arrows-rotate"></i>
+        </button>
         <button onclick="openScannerModal()" class="bg-gradient-to-r from-sky-500 to-brand-600 hover:from-sky-600 hover:to-brand-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-qrcode text-sm"></i>
           <span>Scan Audit (HP)</span>
@@ -80,7 +85,7 @@
         </button>
         <button onclick="openReportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i>
-          <span class="hidden sm:inline">Laporan & Audit BAST</span>
+          <span class="hidden sm:inline">Laporan & BAST</span>
         </button>
       </div>
     </div>
@@ -100,13 +105,13 @@
         <i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Mutasi Ruangan
       </button>
       <button id="btnActionAudit" disabled onclick="actionVerifyAuditToday()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
-        <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Verifikasi Opname Hari Ini
+        <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Verifikasi Opname
       </button>
       <button id="btnActionPrint" disabled onclick="actionPrintBarcode()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
         <i class="fa-solid fa-barcode text-indigo-400"></i> Cetak Label Stiker
       </button>
       <button id="btnActionDisposal" disabled onclick="actionOpenDisposal()" class="bg-rose-950/60 hover:bg-rose-900 disabled:opacity-30 disabled:pointer-events-none text-rose-200 px-3 py-1.5 rounded-lg font-medium border border-rose-800/80 flex items-center gap-1.5 whitespace-nowrap transition">
-        <i class="fa-solid fa-trash-can text-rose-400"></i> Penghapusan / Disposal
+        <i class="fa-solid fa-trash-can text-rose-400"></i> Disposal
       </button>
     </div>
 
@@ -133,13 +138,12 @@
   <!-- ================= MAIN BODY CONTENT ================= -->
   <main class="flex-1 p-4 max-w-full overflow-hidden flex flex-col space-y-4">
 
-    <!-- ----------------- TAB 1: MASTER INVENTARIS ASET ----------------- -->
+    <!-- TAB 1: MASTER INVENTARIS ASET -->
     <section id="tab-inventory" class="space-y-3 flex-1 flex flex-col">
-      <!-- Universal Filter Control Bar -->
       <div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 shadow-md flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 text-xs">
         <div class="relative flex-1">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="text" id="filterKeyword" oninput="executeDataFilters()" placeholder="Cari Kode Barcode, Nama Barang, Merk, Serial Number, atau PIC..." class="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl focus:ring-1 focus:ring-sky-500 font-medium text-slate-100">
+          <input type="text" id="filterKeyword" oninput="executeDataFilters()" placeholder="Cari Kode Barcode, Nama Barang, SN, PIC..." class="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl focus:ring-1 focus:ring-sky-500 font-medium text-slate-100">
         </div>
         
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -168,19 +172,20 @@
         </div>
       </div>
 
-      <!-- Enterprise Full-Width Table Container -->
+      <!-- Tabel Kontainer -->
       <div class="table-container bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-x-auto flex-1 custom-scroll">
-        <table class="w-full text-left text-xs border-collapse min-w-[1650px]">
+        <table class="w-full text-left text-xs border-collapse min-w-[1700px]">
           <thead class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[11px] sticky top-0 z-10 border-b border-slate-800">
             <tr>
               <th class="py-3 px-3 w-10 text-center">Pilih</th>
+              <th class="py-3 px-3">Foto</th>
               <th class="py-3 px-3">Kode Barcode</th>
-              <th class="py-3 px-3">Nama Aset & SN</th>
-              <th class="py-3 px-3">Kelompok Manfaat & Tarif</th>
+              <th class="py-3 px-3">Nama Aset</th>
+              <th class="py-3 px-3">Kelompok & Tarif</th>
               <th class="py-3 px-3">Lokasi Ruangan</th>
               <th class="py-3 px-3">Status</th>
               <th class="py-3 px-3">Tgl Beli</th>
-              <th class="py-3 px-3">Harga Beli</th>
+              <th class="py-3 px-3">Harga Perolehan</th>
               <th class="py-3 px-3">Nilai Buku Saat Ini</th>
               <th class="py-3 px-3">Sisa Usia Ekonomis</th>
               <th class="py-3 px-3">Audit Terakhir</th>
@@ -188,45 +193,37 @@
             </tr>
           </thead>
           <tbody id="inventoryTableBody" class="divide-y divide-slate-800/80 font-medium text-slate-300">
-            <!-- Dynamic Data Rows Injected via JS -->
+            <!-- Diinjeksi otomatis via JS -->
           </tbody>
         </table>
       </div>
 
       <div class="text-[11px] text-slate-400 flex flex-wrap justify-between items-center px-2 py-1">
-        <span id="labelInventoryCount">Memuat data aset...</span>
-        <span class="text-slate-500 font-mono"><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> Data Tersinkronisasi Otomatis & Terlindungi dari Duplikasi</span>
+        <span id="labelInventoryCount">Memuat data dari Google Sheets...</span>
+        <span class="text-slate-500 font-mono"><i class="fa-solid fa-cloud text-emerald-400 mr-1"></i> Data Tersimpan Aman di Google Drive & Spreadsheet Terpusat</span>
       </div>
     </section>
 
-    <!-- ----------------- TAB 2: PANDUAN 4 KELOMPOK PENYUSUTAN ----------------- -->
+    <!-- TAB 2: 4 KELOMPOK PENYUSUTAN -->
     <section id="tab-depreciation" class="hidden space-y-4">
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-scale-balanced text-amber-400"></i> Standar Pembagian 4 Kelompok Masa Manfaat Aset Tetap
         </h3>
         <p class="text-xs text-slate-400 mt-1">
-          Sesuai dengan ketentuan perpajakan dan PSAK Akuntansi Aset Tetap (Metode Garis Lurus / Straight-Line):
+          Sesuai dengan PSAK Akuntansi Aset Tetap & Regulasi Pajak (Metode Garis Lurus / Straight-Line):
         </p>
       </div>
 
-      <!-- 4 Kelompok Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 text-xs">
         <div class="bg-slate-900 p-5 rounded-2xl border border-sky-800/50 shadow-md flex flex-col justify-between border-t-4 border-t-sky-500">
           <div>
             <div class="flex justify-between items-center mb-2">
               <span class="px-2.5 py-1 rounded-full font-bold bg-sky-950 text-sky-400 border border-sky-800">Kelompok 1</span>
-              <span class="font-mono text-emerald-400 font-bold">Tarif: 25% / Thn</span>
+              <span class="font-mono text-emerald-400 font-bold">25% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 4 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Aset kantor ringan & perangkat teknologi berotasi cepat.</p>
-            <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
-              <strong>Contoh Aset:</strong>
-              <p>&bull; Komputer, Laptop, Tablet</p>
-              <p>&bull; Printer, Scanner, Barcode Reader</p>
-              <p>&bull; Perabot kantor kayu ringan</p>
-              <p>&bull; Alat komunikasi (HT, Telepon PABX)</p>
-            </div>
+            <p class="text-slate-400 mt-2 font-medium">Komputer, laptop, printer, scanner, perabot kayu ringan, HT.</p>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
             <span>Populasi:</span>
@@ -238,17 +235,10 @@
           <div>
             <div class="flex justify-between items-center mb-2">
               <span class="px-2.5 py-1 rounded-full font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">Kelompok 2</span>
-              <span class="font-mono text-emerald-400 font-bold">Tarif: 12.5% / Thn</span>
+              <span class="font-mono text-emerald-400 font-bold">12.5% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 8 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Kendaraan operasional, mebel logam, mesin utilitas gedung.</p>
-            <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
-              <strong>Contoh Aset:</strong>
-              <p>&bull; Mobil dinas & Ambulans RS</p>
-              <p>&bull; AC Split / Central, Genset Kantor</p>
-              <p>&bull; Mebel logam, Bed Pasien Elektrik</p>
-              <p>&bull; Kulkas vaksin & Freezer farmasi</p>
-            </div>
+            <p class="text-slate-400 mt-2 font-medium">Mobil dinas, ambulans, AC split/central, genset, mebel logam, kulkas vaksin.</p>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
             <span>Populasi:</span>
@@ -260,17 +250,10 @@
           <div>
             <div class="flex justify-between items-center mb-2">
               <span class="px-2.5 py-1 rounded-full font-bold bg-amber-950 text-amber-400 border border-amber-800">Kelompok 3</span>
-              <span class="font-mono text-emerald-400 font-bold">Tarif: 6.25% / Thn</span>
+              <span class="font-mono text-emerald-400 font-bold">6.25% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 16 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Mesin industri khusus dan peralatan berat penunjang medis.</p>
-            <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
-              <strong>Contoh Aset:</strong>
-              <p>&bull; Mesin CT-Scan, MRI & Radiologi</p>
-              <p>&bull; Lift / Elevator pasien rumah sakit</p>
-              <p>&bull; Boiler & Pembangkit uap gedung</p>
-              <p>&bull; Sterilisator Autoclave CSSD kapasitas besar</p>
-            </div>
+            <p class="text-slate-400 mt-2 font-medium">Mesin CT-Scan, MRI, X-Ray, elevator rumah sakit, sterilisator autoclave CSSD.</p>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
             <span>Populasi:</span>
@@ -282,17 +265,10 @@
           <div>
             <div class="flex justify-between items-center mb-2">
               <span class="px-2.5 py-1 rounded-full font-bold bg-purple-950 text-purple-400 border border-purple-800">Kelompok 4</span>
-              <span class="font-mono text-emerald-400 font-bold">Tarif: 5% / Thn</span>
+              <span class="font-mono text-emerald-400 font-bold">5% / Thn</span>
             </div>
             <h4 class="text-base font-black text-white mt-1">Masa Manfaat: 20 Tahun</h4>
-            <p class="text-slate-400 mt-2 font-medium">Infrastruktur industri berat dan mesin permanen raksasa.</p>
-            <div class="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
-              <strong>Contoh Aset:</strong>
-              <p>&bull; Tangki Oksigen Cair Cryogenic 5000L</p>
-              <p>&bull; Alat berat konstruksi/pertambangan</p>
-              <p>&bull; Saluran pipa distribusi gas sentral</p>
-              <p>&bull; Bangunan struktur permanen</p>
-            </div>
+            <p class="text-slate-400 mt-2 font-medium">Tangki Cryogenic O2 5000L, instalasi pipa gas sentral, gedung dan bangunan fisik.</p>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-slate-400">
             <span>Populasi:</span>
@@ -302,21 +278,21 @@
       </div>
     </section>
 
-    <!-- ----------------- TAB 3: EXECUTIVE DASHBOARD & KPI ----------------- -->
+    <!-- TAB 3: EXECUTIVE DASHBOARD & KPI -->
     <section id="tab-dashboard" class="hidden space-y-4">
       <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <p class="text-slate-400 font-bold uppercase text-[10px]">Total Aset Terdaftar</p>
+            <p class="text-slate-400 font-bold uppercase text-[10px]">Total Aset</p>
             <h3 id="dashTotalAset" class="text-2xl font-black text-white mt-1">0</h3>
-            <p class="text-[11px] text-slate-400 mt-0.5">Unit resmi tercatat</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Unit terdaftar</p>
           </div>
           <div class="w-11 h-11 rounded-2xl bg-sky-950 text-sky-400 flex items-center justify-center text-lg border border-sky-800/50"><i class="fa-solid fa-boxes-stacked"></i></div>
         </div>
 
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <p class="text-slate-400 font-bold uppercase text-[10px]">Nilai Perolehan Awal</p>
+            <p class="text-slate-400 font-bold uppercase text-[10px]">Nilai Perolehan</p>
             <h3 id="dashTotalHarga" class="text-base font-black text-emerald-400 mt-1 truncate max-w-[150px]">Rp 0</h3>
             <p class="text-[11px] text-slate-400 mt-0.5">Kapitalisasi Aset</p>
           </div>
@@ -351,7 +327,6 @@
         </div>
       </div>
 
-      <!-- Dashboard Visual Charts -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
           <h4 class="font-bold text-slate-200 text-xs mb-3 flex items-center gap-2">
@@ -373,7 +348,7 @@
       </div>
     </section>
 
-    <!-- ----------------- TAB 4: MASTER KATEGORI ----------------- -->
+    <!-- TAB 4: MASTER KATEGORI -->
     <section id="tab-categories" class="hidden space-y-4">
       <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
@@ -384,36 +359,34 @@
           <i class="fa-solid fa-plus"></i> Tambah Kategori
         </button>
       </div>
-
       <div id="gridContainerKategori" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- ----------------- TAB 5: MASTER LOKASI & UNIT KERJA ----------------- -->
+    <!-- TAB 5: MASTER LOKASI -->
     <section id="tab-rooms" class="hidden space-y-4">
       <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
           <h3 class="text-sm font-bold text-white">Master Lokasi, Ruangan & Unit Kerja</h3>
-          <p class="text-xs text-slate-400">Daftar unit penempatan aset resmi sebagai acuan mutasi dan stock opname fisik</p>
+          <p class="text-xs text-slate-400">Daftar penempatan aset resmi sebagai acuan mutasi dan stock opname fisik</p>
         </div>
         <button onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Unit Ruangan
         </button>
       </div>
-
       <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
   </main>
 
-  <!-- ================= MODALS DIALOG SECTION ================= -->
+  <!-- ================= MODALS DIALOG ================= -->
 
-  <!-- 1. MODAL REGISTRASI / EDIT ASET -->
+  <!-- 1. MODAL REGISTRASI / EDIT ASET DENGAN UPLOAD FOTO DRIVE -->
   <div id="modalAssetForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 border border-slate-800 max-h-[92vh] overflow-y-auto custom-scroll shadow-2xl">
       <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
         <div>
           <h3 id="modalAssetHeading" class="text-base font-bold text-white">Registrasi Pengadaan Aset Baru</h3>
-          <p class="text-xs text-slate-400">Penentuan Masa Manfaat & Kelompok Depresiasi Otomatis</p>
+          <p class="text-xs text-slate-400">Tersinkronisasi ke Google Sheets & Foto Google Drive</p>
         </div>
         <button onclick="closeModal('modalAssetForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
@@ -451,6 +424,16 @@
           <input type="text" id="inputFormNama" required placeholder="Contoh: Mesin USG Mindray Resona 7" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-slate-100">
         </div>
 
+        <!-- Unggah Foto Fisik Aset (Kamera / File) -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Foto Fisik Aset (Otomatis Masuk Google Drive)</label>
+          <div class="flex items-center gap-3">
+            <input type="file" id="inputFormFotoFile" accept="image/*" capture="environment" onchange="previewSelectedImage(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer">
+            <img id="imgPreviewThumb" class="hidden h-10 w-10 object-cover rounded-lg border border-slate-700">
+          </div>
+          <input type="hidden" id="inputFormFotoUrlExisting">
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-300 mb-1">Nomor Seri Pabrik (SN) / No PO</label>
@@ -462,7 +445,7 @@
           </div>
         </div>
 
-        <!-- Smart Autocomplete Unit Ruangan (Anti-Typo) -->
+        <!-- Smart Autocomplete Unit Ruangan -->
         <div class="relative">
           <label class="block font-bold text-slate-300 mb-1">Lokasi Ruangan / Unit Penempatan *</label>
           <input type="text" id="inputFormLokasi" required autocomplete="off" oninput="handleAutocompleteLokasi(this.value)" placeholder="Ketik minimal 2 huruf untuk rekomendasi ruangan..." class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
@@ -488,7 +471,9 @@
 
         <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
           <button type="button" onclick="closeModal('modalAssetForm')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">Batal</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold shadow-lg shadow-sky-600/30">Simpan Aset</button>
+          <button id="btnSubmitFormAset" type="submit" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold shadow-lg shadow-sky-600/30 flex items-center gap-2">
+            <span>Simpan ke Cloud</span>
+          </button>
         </div>
       </form>
     </div>
@@ -498,15 +483,17 @@
   <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-800 pb-3">
-        <div>
-          <span id="histDetailStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Operasional</span>
-          <h3 id="histDetailNamaAset" class="text-base font-bold text-white mt-1">Nama Aset</h3>
-          <p id="histDetailKodeAset" class="text-xs font-mono font-bold text-sky-400">AST-000</p>
+        <div class="flex gap-3 items-center">
+          <img id="histDetailFoto" src="" class="hidden h-14 w-14 object-cover rounded-xl border border-slate-700 shadow-md">
+          <div>
+            <span id="histDetailStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Operasional</span>
+            <h3 id="histDetailNamaAset" class="text-base font-bold text-white mt-1">Nama Aset</h3>
+            <p id="histDetailKodeAset" class="text-xs font-mono font-bold text-sky-400">AST-000</p>
+          </div>
         </div>
         <button onclick="closeModal('modalHistoryDetail')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
-      <!-- Ringkasan Finansial Siklus Hidup & Depresiasi -->
       <div class="grid grid-cols-4 gap-2 p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-center">
         <div>
           <span class="text-slate-400 text-[10px] block">Harga Perolehan</span>
@@ -566,7 +553,7 @@
       </div>
       <div class="pt-2 flex justify-end gap-2">
         <button onclick="closeModal('modalActionService')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button onclick="submitServiceLog()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan Log Servis</button>
+        <button onclick="submitServiceLog()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan ke Cloud</button>
       </div>
     </div>
   </div>
@@ -664,11 +651,13 @@
     </div>
   </div>
 
-  <!-- PRINTABLE HIDDEN REPORT CONTAINER -->
   <div id="printableReportArea" class="hidden"></div>
 
-  <!-- ================= JAVASCRIPT SYSTEM LOGIC ================= -->
+  <!-- ================= JAVASCRIPT LOGIKA LENGKAP ================= -->
   <script>
+    // URL WEB APP RESMI ANDA
+    const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwFZ1vwCz215Gi75ts9A0ymWXdgffrgvxGDJPmU-0VWvA_jKz1UXy_QUkwrFcGnNXc3lg/exec";
+
     const KELOMPOK_PENYUSUTAN_CONFIG = {
       'Kelompok 1': { tahun: 4, tarifTahunan: 0.25, label: 'Kelompok 1 (4 Thn / 25%)' },
       'Kelompok 2': { tahun: 8, tarifTahunan: 0.125, label: 'Kelompok 2 (8 Thn / 12.5%)' },
@@ -696,79 +685,77 @@
       'Ruang Server IT & SIMRS'
     ];
 
-    let DATA_INVENTARIS = [
-      {
-        kode: 'IT001',
-        nama: 'Workstation PC All-in-One Dell OptiPlex 7400 Core i7',
-        kategori: 'Perangkat IT & Jaringan',
-        serialNumber: 'SN-DLL-00921',
-        lokasi: 'Laboratorium Patologi Klinik',
-        status: 'Operasional',
-        tglBeli: '2025-02-20',
-        hargaBeli: 18000000,
-        pic: 'Staf IT SIMRS',
-        keterangan: 'Dedicated station alat Hematology Analyzer.',
-        terakhirAudit: '10/10/2026 08:30',
-        serviceLogs: [], mutasiLogs: [], auditTrails: []
-      },
-      {
-        kode: 'EU001',
-        nama: 'AC Split Panasonic 2PK Inverter (Nanoe-X)',
-        kategori: 'Elektronik & Utility',
-        serialNumber: 'SN-PNS-29181',
-        lokasi: 'Instalasi Gawat Darurat (IGD)',
-        status: 'Dalam Perbaikan',
-        tglBeli: '2023-05-10',
-        hargaBeli: 8500000,
-        pic: 'Tim Fasilitas GA',
-        keterangan: 'Pendingin ruang tindakan IGD.',
-        terakhirAudit: '12/04/2026 09:15',
-        serviceLogs: [], mutasiLogs: [], auditTrails: []
-      },
-      {
-        kode: 'ML001',
-        nama: 'Mesin CT-Scan Siemens Somatom 64 Slices',
-        kategori: 'Medis & Laboratorium Berat',
-        serialNumber: 'SN-SMS-44829',
-        lokasi: 'Radiologi & CT-Scan',
-        status: 'Operasional',
-        tglBeli: '2021-08-15',
-        hargaBeli: 6500000000,
-        pic: 'Radiografer Kepala',
-        keterangan: 'Alat diagnostik utama instalasi radiologi.',
-        terakhirAudit: '10/10/2026 14:20',
-        serviceLogs: [], mutasiLogs: [], auditTrails: []
-      },
-      {
-        kode: 'TK001',
-        nama: 'Tangki Penampungan Oksigen Cair Cryogenic 5000L',
-        kategori: 'Tangki & Infrastruktur Berat',
-        serialNumber: 'SN-CRYO-001',
-        lokasi: 'Gudang Farmasi Sentral',
-        status: 'Operasional',
-        tglBeli: '2020-01-10',
-        hargaBeli: 450000000,
-        pic: 'Teknisi Gas Medis',
-        keterangan: 'Suplai sentral gas medis seluruh gedung rumah sakit.',
-        terakhirAudit: '05/10/2026 11:00',
-        serviceLogs: [], mutasiLogs: [], auditTrails: []
-      }
-    ];
-
+    let DATA_INVENTARIS = [];
     let SELECTED_ROW_KODE = null;
     let cameraHtml5Scanner = null;
     let chartStatusInstance = null, chartKategoriInstance = null;
+    let selectedBase64Image = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       populateKategoriDropdowns();
       populateLokasiDropdowns();
       renderGridKategoriCards();
       renderGridLokasiCards();
-      executeDataFilters();
       initChartInstances();
-      updateKelompokCardsSummary();
+      fetchCloudData();
     });
 
+    // ================= CLOUD DATA SYNC (GOOGLE SHEETS) =================
+    async function fetchCloudData() {
+      const badge = document.getElementById('cloudStatusBadge');
+      const icon = document.getElementById('btnRefreshIcon');
+      if (icon) icon.classList.add('fa-spin');
+      
+      try {
+        const response = await fetch(GOOGLE_API_URL);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          DATA_INVENTARIS = result.data.map(item => ({
+            kode: item.Kode || item.kode,
+            nama: item.Nama || item.nama,
+            kategori: item.Kategori || item.kategori,
+            kelompok: item.Kelompok || item.kelompok,
+            lokasi: item.Lokasi || item.lokasi,
+            status: item.Status || item.status,
+            tglBeli: item.TglBeli || item.tglBeli,
+            hargaBeli: Number(item.HargaBeli || item.hargaBeli) || 0,
+            pic: item.PIC || item.pic,
+            tglKalibrasi: item.Kalibrasi || item.tglKalibrasi,
+            keterangan: item.Ket || item.keterangan,
+            fotoUrl: item.FotoUrl || item.fotoUrl || '',
+            terakhirAudit: item.TerakhirAudit || item.terakhirAudit || '-'
+          }));
+          
+          badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Google Sheets Sync`;
+        }
+      } catch (err) {
+        console.warn("Gagal terhubung ke Cloud, menggunakan cache:", err);
+        badge.className = "text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Offline Cache`;
+      } finally {
+        if (icon) icon.classList.remove('fa-spin');
+        executeDataFilters();
+        updateExecutiveKPIs();
+        updateKelompokCardsSummary();
+      }
+    }
+
+    async function sendPostToCloud(payload) {
+      try {
+        const res = await fetch(GOOGLE_API_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        return await res.json();
+      } catch (e) {
+        console.error("Gagal kirim POST ke Cloud:", e);
+        return { success: false };
+      }
+    }
+
+    // ================= TAB NAVIGATION =================
     function switchMainTab(targetTabId, btnEl) {
       document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
       document.querySelectorAll('.main-tab-btn').forEach(btn => {
@@ -852,7 +839,7 @@
 
       const results = DATA_INVENTARIS.filter(item => {
         const { namaKelompok } = getAssetKelompokConfig(item);
-        const matchKeyword = !q || item.kode.toLowerCase().includes(q) || item.nama.toLowerCase().includes(q) || (item.serialNumber && item.serialNumber.toLowerCase().includes(q));
+        const matchKeyword = !q || item.kode.toLowerCase().includes(q) || item.nama.toLowerCase().includes(q) || (item.pic && item.pic.toLowerCase().includes(q));
         const matchKelompok = !fKelompok || namaKelompok === fKelompok;
         const matchLok = !fLok || item.lokasi === fLok;
         const matchStatus = !fStatus || item.status === fStatus;
@@ -875,8 +862,8 @@
       tbody.innerHTML = '';
 
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="py-10 text-center text-slate-500 font-semibold">Tidak ditemukan aset yang cocok dengan filter.</td></tr>`;
-        document.getElementById('labelInventoryCount').innerText = `Menampilkan 0 dari ${DATA_INVENTARIS.length} total aset`;
+        tbody.innerHTML = `<tr><td colspan="13" class="py-10 text-center text-slate-500 font-semibold">Tidak ditemukan data aset.</td></tr>`;
+        document.getElementById('labelInventoryCount').innerText = `Menampilkan 0 aset terdaftar`;
         return;
       }
 
@@ -891,8 +878,12 @@
         if (item.status === 'Disposed') statusClass = 'bg-rose-500/10 text-rose-400 border border-rose-500/30 line-through';
 
         let auditTag = isOverdue
-          ? `<span class="text-rose-400 font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i>${item.terakhirAudit} (${daysAgo} hr lalu)</span>`
+          ? `<span class="text-rose-400 font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i>${item.terakhirAudit} (${daysAgo} hr)</span>`
           : `<span class="text-slate-300 font-semibold">${item.terakhirAudit}</span>`;
+
+        let fotoImg = item.fotoUrl 
+          ? `<img src="${item.fotoUrl}" class="h-8 w-8 object-cover rounded-lg border border-slate-700 mx-auto">` 
+          : `<div class="h-8 w-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 text-xs mx-auto"><i class="fa-solid fa-image"></i></div>`;
 
         const tr = document.createElement('tr');
         tr.className = `hover:bg-slate-800/60 transition cursor-pointer border-b border-slate-800/60 ${isSelected ? 'bg-sky-950/40 font-semibold' : ''}`;
@@ -900,10 +891,11 @@
 
         tr.innerHTML = `
           <td class="py-3 px-3 text-center"><input type="radio" name="rowSelector" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); selectTableRow('${item.kode}')"></td>
+          <td class="py-3 px-2 text-center">${fotoImg}</td>
           <td class="py-3 px-3 font-mono font-bold text-sky-400">${item.kode}</td>
           <td class="py-3 px-3">
             <span class="font-bold text-white block">${item.nama}</span>
-            <span class="text-[10px] text-slate-400 font-mono">SN: ${item.serialNumber || '-'}</span>
+            <span class="text-[10px] text-slate-400 font-mono">PIC: ${item.pic || '-'}</span>
           </td>
           <td class="py-3 px-3 font-medium text-amber-400">${depInfo.kelompokStr}</td>
           <td class="py-3 px-3 text-slate-200">${item.lokasi}</td>
@@ -953,6 +945,19 @@
       document.getElementById('countKelompok4').innerText = `${c4} Unit`;
     }
 
+    function previewSelectedImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        selectedBase64Image = evt.target.result;
+        const thumb = document.getElementById('imgPreviewThumb');
+        thumb.src = selectedBase64Image;
+        thumb.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
     function onFormKategoriChanged() {
       const katName = document.getElementById('inputFormKategori').value;
       const katObj = MASTER_KATEGORI.find(k => k.nama === katName);
@@ -981,6 +986,10 @@
       document.getElementById('inputFormTglBeli').value = new Date().toISOString().split('T')[0];
       document.getElementById('inputFormPIC').value = '';
       document.getElementById('inputFormKet').value = '';
+      document.getElementById('inputFormFotoUrlExisting').value = '';
+      document.getElementById('inputFormFotoFile').value = '';
+      document.getElementById('imgPreviewThumb').classList.add('hidden');
+      selectedBase64Image = null;
       document.getElementById('modalAssetForm').classList.remove('hidden');
 
       if (!prefillBarcode) onFormKategoriChanged();
@@ -995,21 +1004,34 @@
       document.getElementById('inputFormKode').value = asset.kode;
       document.getElementById('inputFormKategori').value = asset.kategori;
       document.getElementById('inputFormNama').value = asset.nama;
-      document.getElementById('inputFormSerial').value = asset.serialNumber || '';
       document.getElementById('inputFormStatus').value = asset.status;
       document.getElementById('inputFormLokasi').value = asset.lokasi;
       document.getElementById('inputFormHarga').value = 'Rp ' + Number(asset.hargaBeli || 0).toLocaleString('id-ID');
       document.getElementById('inputFormTglBeli').value = asset.tglBeli || '';
       document.getElementById('inputFormPIC').value = asset.pic || '';
       document.getElementById('inputFormKet').value = asset.keterangan || '';
+      document.getElementById('inputFormFotoUrlExisting').value = asset.fotoUrl || '';
+      
+      const thumb = document.getElementById('imgPreviewThumb');
+      if (asset.fotoUrl) {
+        thumb.src = asset.fotoUrl;
+        thumb.classList.remove('hidden');
+      } else {
+        thumb.classList.add('hidden');
+      }
+      
+      selectedBase64Image = null;
       document.getElementById('modalAssetForm').classList.remove('hidden');
     }
 
-    function handleFormAssetSubmit(e) {
+    async function handleFormAssetSubmit(e) {
       e.preventDefault();
+      const btnSubmit = document.getElementById('btnSubmitFormAset');
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...`;
+
       const kode = document.getElementById('inputFormKode').value.trim();
       const nama = document.getElementById('inputFormNama').value.trim();
-      const serial = document.getElementById('inputFormSerial').value.trim();
       const kategori = document.getElementById('inputFormKategori').value;
       const lokasi = document.getElementById('inputFormLokasi').value.trim();
       const status = document.getElementById('inputFormStatus').value;
@@ -1017,26 +1039,36 @@
       const tglBeli = document.getElementById('inputFormTglBeli').value;
       const pic = document.getElementById('inputFormPIC').value.trim();
       const ket = document.getElementById('inputFormKet').value.trim();
+      const existingFoto = document.getElementById('inputFormFotoUrlExisting').value;
 
-      const existingIndex = DATA_INVENTARIS.findIndex(a => a.kode === kode);
+      const katObj = MASTER_KATEGORI.find(k => k.nama === kategori);
+      const kelompok = katObj ? katObj.kelompok : 'Kelompok 1';
       const stampNow = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
 
+      const assetObj = {
+        kode, nama, kategori, kelompok, lokasi, status,
+        tglBeli, hargaBeli: harga, nilaiBuku: harga,
+        pic, tglKalibrasi: '-', keterangan: ket,
+        fotoUrl: existingFoto, terakhirAudit: stampNow
+      };
+
+      const payload = {
+        action: "saveAsset",
+        asset: assetObj,
+        imageFile: selectedBase64Image ? { base64: selectedBase64Image, mimeType: "image/jpeg" } : null
+      };
+
+      const cloudRes = await sendPostToCloud(payload);
+      if (cloudRes.success && cloudRes.photoUrl) {
+        assetObj.fotoUrl = cloudRes.photoUrl;
+      }
+
+      // Update state lokal
+      const existingIndex = DATA_INVENTARIS.findIndex(a => a.kode === kode);
       if (existingIndex !== -1) {
-        DATA_INVENTARIS[existingIndex].nama = nama;
-        DATA_INVENTARIS[existingIndex].serialNumber = serial;
-        DATA_INVENTARIS[existingIndex].kategori = kategori;
-        DATA_INVENTARIS[existingIndex].lokasi = lokasi;
-        DATA_INVENTARIS[existingIndex].status = status;
-        DATA_INVENTARIS[existingIndex].hargaBeli = harga;
-        DATA_INVENTARIS[existingIndex].tglBeli = tglBeli;
-        DATA_INVENTARIS[existingIndex].pic = pic;
-        DATA_INVENTARIS[existingIndex].keterangan = ket;
+        DATA_INVENTARIS[existingIndex] = assetObj;
       } else {
-        DATA_INVENTARIS.unshift({
-          kode, nama, serialNumber: serial, kategori, lokasi, status,
-          tglBeli, hargaBeli: harga, pic, keterangan: ket,
-          terakhirAudit: stampNow, serviceLogs: [], mutasiLogs: [], auditTrails: []
-        });
+        DATA_INVENTARIS.unshift(assetObj);
       }
 
       if (!MASTER_LOKASI.includes(lokasi)) {
@@ -1045,10 +1077,12 @@
         renderGridLokasiCards();
       }
 
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = `<span>Simpan ke Cloud</span>`;
       closeModal('modalAssetForm');
       executeDataFilters();
-      updateKelompokCardsSummary();
-      alert(`Aset "${nama}" (${kode}) berhasil disimpan.`);
+      updateExecutiveKPIs();
+      alert(`Aset "${nama}" (${kode}) berhasil disimpan ke Google Sheets & Drive!`);
     }
 
     function handleAutocompleteLokasi(queryVal) {
@@ -1097,12 +1131,20 @@
 
       const depInfo = calculateDepreciationValues(asset);
       document.getElementById('histDetailNamaAset').innerText = asset.nama;
-      document.getElementById('histDetailKodeAset').innerText = `${asset.kode} • SN: ${asset.serialNumber || '-'}`;
+      document.getElementById('histDetailKodeAset').innerText = `${asset.kode} • PIC: ${asset.pic || '-'}`;
       document.getElementById('histDetailStatusBadge').innerText = asset.status;
       document.getElementById('histSummaryHargaAwal').innerText = `Rp ${Number(asset.hargaBeli || 0).toLocaleString('id-ID')}`;
       document.getElementById('histSummaryKelompok').innerText = depInfo.kelompokStr;
       document.getElementById('histSummaryNilaiBuku').innerText = `Rp ${Number(depInfo.nilaiBuku).toLocaleString('id-ID')}`;
       document.getElementById('histSummaryAuditDate').innerText = asset.terakhirAudit;
+
+      const fotoEl = document.getElementById('histDetailFoto');
+      if (asset.fotoUrl) {
+        fotoEl.src = asset.fotoUrl;
+        fotoEl.classList.remove('hidden');
+      } else {
+        fotoEl.classList.add('hidden');
+      }
 
       document.getElementById('modalHistoryDetail').classList.remove('hidden');
     }
@@ -1204,16 +1246,16 @@
         dataset = dataset.filter(a => getAssetKelompokConfig(a).namaKelompok === kelompok);
       }
 
-      let csv = "Kode Barcode,Nama Aset,Serial Number,Kategori,Kelompok Masa Manfaat,Tarif,Lokasi,Tgl Beli,Harga Perolehan,Nilai Buku,Sisa Usia\n";
+      let csv = "Kode Barcode,Nama Aset,Kategori,Kelompok,Lokasi,Tgl Beli,Harga Perolehan,Nilai Buku,Foto Drive\n";
       dataset.forEach(a => {
         const dep = calculateDepreciationValues(a);
-        csv += `"${a.kode}","${a.nama}","${a.serialNumber || ''}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${dep.sisaTahunStr}"\n`;
+        csv += `"${a.kode}","${a.nama}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${a.fotoUrl}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `Laporan_Depresiasi_Aset_${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `Laporan_Aset_${new Date().toISOString().split('T')[0]}.csv`;
       link.click();
       closeModal('modalReportCenter');
     }
@@ -1236,7 +1278,7 @@
           <tr style="border-bottom: 1px solid #ddd; font-size: 10px;">
             <td style="padding: 6px; text-align: center;">${idx + 1}</td>
             <td style="padding: 6px; font-family: monospace; font-weight: bold;">${a.kode}</td>
-            <td style="padding: 6px;"><b>${a.nama}</b><br><span style="color:#666;">SN: ${a.serialNumber || '-'}</span></td>
+            <td style="padding: 6px;"><b>${a.nama}</b></td>
             <td style="padding: 6px;">${dep.kelompokStr}</td>
             <td style="padding: 6px;">${a.lokasi}</td>
             <td style="padding: 6px; text-align: right;">Rp ${Number(a.hargaBeli || 0).toLocaleString('id-ID')}</td>
@@ -1263,7 +1305,7 @@
                 <th style="padding: 6px; width: 30px;">No</th>
                 <th style="padding: 6px; text-align: left;">Kode</th>
                 <th style="padding: 6px; text-align: left;">Nama Aset</th>
-                <th style="padding: 6px; text-align: left;">Kelompok Penyusutan</th>
+                <th style="padding: 6px; text-align: left;">Kelompok</th>
                 <th style="padding: 6px; text-align: left;">Lokasi</th>
                 <th style="padding: 6px; text-align: right;">Harga Perolehan</th>
                 <th style="padding: 6px; text-align: right;">Nilai Buku</th>
@@ -1340,13 +1382,20 @@
       });
     }
 
-    function actionVerifyAuditToday() {
+    async function actionVerifyAuditToday() {
       if (!SELECTED_ROW_KODE) return;
       const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
       if (asset) {
-        asset.terakhirAudit = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        asset.terakhirAudit = stamp;
+        
+        await sendPostToCloud({
+          action: "logAction",
+          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi", picOrBiaya: "Admin" }
+        });
+        
         executeDataFilters();
-        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) berhasil disahkan.`);
+        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan & dicatat ke Google Sheets.`);
       }
     }
 
@@ -1358,7 +1407,7 @@
       document.getElementById('modalActionService').classList.remove('hidden');
     }
 
-    function submitServiceLog() {
+    async function submitServiceLog() {
       const act = document.getElementById('inputSvcTindakan').value.trim();
       const cost = Number(document.getElementById('inputSvcBiaya').value.replace(/[^0-9]/g, '')) || 0;
       const tech = document.getElementById('inputSvcTeknisi').value.trim();
@@ -1366,10 +1415,13 @@
 
       const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
       if (a) {
-        a.serviceLogs.unshift({ date: new Date().toLocaleDateString('id-ID'), action: act, cost, tech: tech || 'Teknisi RS' });
+        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        await sendPostToCloud({
+          action: "logAction",
+          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "SERVIS", keterangan: act, picOrBiaya: `Rp ${cost.toLocaleString('id-ID')} (${tech})` }
+        });
         closeModal('modalActionService');
-        executeDataFilters();
-        alert('Log pemeliharaan berhasil dicatat.');
+        alert('Log pemeliharaan berhasil dicatat ke Google Sheets!');
       }
     }
 
@@ -1382,16 +1434,24 @@
       document.getElementById('modalActionMutasi').classList.remove('hidden');
     }
 
-    function submitMutasiLog() {
+    async function submitMutasiLog() {
       const r = document.getElementById('inputMutasiTargetRoom').value;
       const p = document.getElementById('inputMutasiNewPIC').value.trim();
       const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
       if (a) {
+        const oldRoom = a.lokasi;
         a.lokasi = r;
         if (p) a.pic = p;
+        
+        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        await sendPostToCloud({
+          action: "logAction",
+          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "MUTASI", keterangan: `Pindah dari [${oldRoom}] ke [${r}]`, picOrBiaya: p || a.pic }
+        });
+        
         closeModal('modalActionMutasi');
         executeDataFilters();
-        alert(`Aset berhasil dimutasikan ke ${r}.`);
+        alert(`Aset berhasil dimutasikan ke ${r} & tercatat di Cloud!`);
       }
     }
 
@@ -1401,15 +1461,21 @@
       document.getElementById('modalActionDisposal').classList.remove('hidden');
     }
 
-    function submitDisposalLog() {
+    async function submitDisposalLog() {
       const doc = document.getElementById('inputDisposalDocNo').value.trim();
+      const method = document.getElementById('inputDisposalMethod').value;
       if (!doc) return alert('Nomor BAST wajib diisi.');
       const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
       if (a) {
         a.status = 'Disposed';
+        const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
+        await sendPostToCloud({
+          action: "logAction",
+          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: "Admin" }
+        });
         closeModal('modalActionDisposal');
         executeDataFilters();
-        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
+        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan di Cloud.`);
       }
     }
 
