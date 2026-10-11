@@ -11,7 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <!-- Library QR Code Generator Resmi & Cepat -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
   <script>
@@ -36,25 +37,80 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: #090d16; }
 
+    /* PENGATURAN CETAK KHUSUS LABEL TOM & JERRY */
     @media print {
-      body * { visibility: hidden; }
-      #printableReportArea, #printableReportArea * { visibility: visible; }
-      #printableReportArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; }
+      body * { visibility: hidden !important; }
+      @page { size: auto; margin: 0mm !important; }
+      #printableReportArea, #printableReportArea * { visibility: visible !important; }
+      #printableReportArea {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        padding: 4mm !important;
+        background: #ffffff !important;
+        z-index: 999999 !important;
+      }
     }
-    .barcode-sticker {
-      width: 50mm; height: 25mm; border: 1.5px dashed #000; padding: 2mm;
-      display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
-      background: #fff; color: #000; page-break-inside: avoid;
+
+    /* KARTU STIKER TOM & JERRY (Ukuran Presisi Standar Label Aset 50mm x 32mm) */
+    .tj-asset-label {
+      width: 50mm !important;
+      height: 32mm !important;
+      border: 1px dashed #cbd5e1;
+      padding: 1.5mm 2mm !important;
+      background: #ffffff !important;
+      color: #000000 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      box-sizing: border-box !important;
+      page-break-inside: avoid !important;
+      font-family: 'Plus Jakarta Sans', Arial, sans-serif !important;
+      overflow: hidden !important;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans antialiased text-slate-100 bg-slate-950">
 
+  <!-- ================= LAYAR LOGIN ================= -->
+  <div id="loginScreenOverlay" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+      <div class="h-14 w-auto bg-white p-1.5 rounded-2xl shadow-md border border-slate-200 inline-flex items-center justify-center">
+        <img src="icon.svg" alt="Logo" class="h-full w-auto object-contain">
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-white tracking-tight">ASSET LIFECYCLE MANAGEMENT</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Silakan login untuk mengakses sistem</p>
+      </div>
+
+      <form onsubmit="handleLoginSubmit(event)" class="space-y-3 text-left text-xs">
+        <div>
+          <label class="block text-slate-400 font-bold mb-1">Username</label>
+          <input type="text" id="loginUsername" required placeholder="Masukkan username" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 font-bold mb-1">Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <p id="loginErrMsg" class="text-[11px] text-rose-400 font-semibold hidden"></p>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition shadow-lg shadow-sky-600/30">
+          Masuk ke Sistem
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- ================= TOP HEADER (FREEZE NAVIGATION) ================= -->
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
     <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- LOGO GABUNGAN PHS & RPI -->
+      <!-- LOGO RESMI GABUNGAN PHS & RPI -->
       <div class="flex items-center gap-3">
         <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
           <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
@@ -75,22 +131,25 @@
         <button onclick="fetchCloudData()" title="Sinkronkan dengan Google Sheets" class="bg-slate-800 hover:bg-slate-700 text-sky-400 p-2 rounded-xl text-xs font-bold border border-slate-700 transition">
           <i id="btnRefreshIcon" class="fa-solid fa-arrows-rotate"></i>
         </button>
-        <button onclick="openScannerModal()" class="bg-gradient-to-r from-sky-500 to-brand-600 hover:from-sky-600 hover:to-brand-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition active:scale-95">
+        <button id="btnHeaderScan" onclick="openScannerModal()" class="bg-gradient-to-r from-sky-500 to-brand-600 hover:from-sky-600 hover:to-brand-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-qrcode text-sm"></i>
           <span>Scan Audit (HP)</span>
         </button>
-        <button onclick="openModalAddAsset()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
+        <button id="btnHeaderAdd" onclick="openModalAddAsset()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-plus text-sm"></i>
           <span class="hidden sm:inline">Pengadaan Baru</span>
         </button>
-        <button onclick="openReportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition">
+        <button id="btnHeaderReport" onclick="openReportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i>
           <span class="hidden sm:inline">Laporan & BAST</span>
+        </button>
+        <button onclick="handleLogout()" title="Keluar / Ganti Akun" class="bg-rose-950/60 hover:bg-rose-900 text-rose-300 p-2 rounded-xl text-xs font-bold border border-rose-800/80 transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     </div>
 
-    <!-- ROW SELECTION CONTROLS BAR (FREEZE ACTION) -->
+    <!-- ROW SELECTION CONTROLS BAR -->
     <div class="bg-slate-900 px-4 py-2 border-t border-slate-800 flex items-center gap-2 overflow-x-auto text-xs custom-scroll">
       <span class="text-slate-400 font-semibold mr-1 whitespace-nowrap flex items-center gap-1.5">
         <i class="fa-solid fa-sliders text-sky-400"></i> Aksi Baris Terpilih:
@@ -108,7 +167,7 @@
         <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Verifikasi Opname
       </button>
       <button id="btnActionPrint" disabled onclick="actionPrintBarcode()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
-        <i class="fa-solid fa-barcode text-indigo-400"></i> Cetak Label Stiker
+        <i class="fa-solid fa-qrcode text-indigo-400"></i> Cetak Label Stiker
       </button>
       <button id="btnActionDisposal" disabled onclick="actionOpenDisposal()" class="bg-rose-950/60 hover:bg-rose-900 disabled:opacity-30 disabled:pointer-events-none text-rose-200 px-3 py-1.5 rounded-lg font-medium border border-rose-800/80 flex items-center gap-1.5 whitespace-nowrap transition">
         <i class="fa-solid fa-trash-can text-rose-400"></i> Disposal
@@ -131,6 +190,9 @@
       </button>
       <button onclick="switchMainTab('tab-rooms', this)" class="main-tab-btn px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap">
         <i class="fa-solid fa-building-circle-check mr-1.5"></i> Master Lokasi & Unit
+      </button>
+      <button id="tabNavUsers" onclick="switchMainTab('tab-users', this)" class="main-tab-btn hidden px-4 py-2.5 font-semibold text-amber-400 hover:text-amber-300 whitespace-nowrap">
+        <i class="fa-solid fa-user-shield mr-1.5"></i> Otoritas & Hak Akses User
       </button>
     </div>
   </header>
@@ -179,7 +241,7 @@
             <tr>
               <th class="py-3 px-3 w-10 text-center">Pilih</th>
               <th class="py-3 px-3">Foto</th>
-              <th class="py-3 px-3">Kode Barcode</th>
+              <th class="py-3 px-3">Kode Aset</th>
               <th class="py-3 px-3">Nama Aset</th>
               <th class="py-3 px-3">Kelompok & Tarif</th>
               <th class="py-3 px-3">Lokasi Ruangan</th>
@@ -355,7 +417,7 @@
           <h3 class="text-sm font-bold text-white">Master Kategori & Mapping Kelompok Penyusutan</h3>
           <p class="text-xs text-slate-400">Setiap kategori otomatis mengunci masa manfaat dan tarif penyusutan resmi</p>
         </div>
-        <button onclick="openModalAddKategori()" class="bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button id="btnTambahKategori" onclick="openModalAddKategori()" class="bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Kategori
         </button>
       </div>
@@ -369,18 +431,83 @@
           <h3 class="text-sm font-bold text-white">Master Lokasi, Ruangan & Unit Kerja</h3>
           <p class="text-xs text-slate-400">Daftar penempatan aset resmi sebagai acuan mutasi dan stock opname fisik</p>
         </div>
-        <button onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button id="btnTambahLokasi" onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Unit Ruangan
         </button>
       </div>
       <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
+    <!-- TAB 6: KHUSUS ADMIN - KELOLA USER & OTORITAS -->
+    <section id="tab-users" class="hidden space-y-4">
+      <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+        <div>
+          <h3 class="text-sm font-bold text-white">Kelola Pengguna & Hak Akses Fitur</h3>
+          <p class="text-xs text-slate-400">Tentukan wewenang per user (Admin tidak ditampilkan di daftar publik ini)</p>
+        </div>
+        <button onclick="openModalAddUser()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-user-plus"></i> Tambah Pengguna Baru
+        </button>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
+            <tr>
+              <th class="p-3">Username</th>
+              <th class="p-3">Nama Lengkap</th>
+              <th class="p-3">Izin Tindakan</th>
+              <th class="p-3 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="userListTableBody" class="divide-y divide-slate-800 text-slate-300">
+            <!-- Render User Staf -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
   </main>
 
-  <!-- ================= MODALS DIALOG ================= -->
+  <!-- ================= MODAL TAMBAH USER ================= -->
+  <div id="modalUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Tambah Pengguna Baru</h3>
+        <button onclick="closeModal('modalUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Username Login *</label>
+        <input type="text" id="newUsername" placeholder="contoh: staf_medis" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Password *</label>
+        <input type="password" id="newPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
+        <input type="text" id="newNamaLengkap" placeholder="contoh: Budi Santoso" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1.5">Centang Hak Akses / Otorisasi:</label>
+        <div class="space-y-1.5 text-slate-300">
+          <label class="flex items-center gap-2"><input type="checkbox" id="permAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan & Verifikasi Opname</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal Aset</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
+        </div>
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button onclick="closeModal('modalUserForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button onclick="submitSaveNewUser()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold">Simpan User</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- 1. MODAL REGISTRASI / EDIT ASET DENGAN UPLOAD FOTO DRIVE -->
+  <!-- MODAL PENDAFTARAN / EDIT ASET -->
   <div id="modalAssetForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 border border-slate-800 max-h-[92vh] overflow-y-auto custom-scroll shadow-2xl">
       <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
@@ -405,7 +532,7 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-300 mb-1">Kode Barcode (Auto-Generated) *</label>
+            <label class="block font-bold text-slate-300 mb-1">Kode Aset (Auto-Generated) *</label>
             <input type="text" id="inputFormKode" required class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded-xl font-mono font-bold text-sky-400">
           </div>
           <div>
@@ -424,7 +551,6 @@
           <input type="text" id="inputFormNama" required placeholder="Contoh: Mesin USG Mindray Resona 7" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-slate-100">
         </div>
 
-        <!-- Unggah Foto Fisik Aset (Kamera / File) -->
         <div>
           <label class="block font-bold text-slate-300 mb-1">Foto Fisik Aset (Otomatis Masuk Google Drive)</label>
           <div class="flex items-center gap-3">
@@ -445,7 +571,6 @@
           </div>
         </div>
 
-        <!-- Smart Autocomplete Unit Ruangan -->
         <div class="relative">
           <label class="block font-bold text-slate-300 mb-1">Lokasi Ruangan / Unit Penempatan *</label>
           <input type="text" id="inputFormLokasi" required autocomplete="off" oninput="handleAutocompleteLokasi(this.value)" placeholder="Ketik minimal 2 huruf untuk rekomendasi ruangan..." class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
@@ -479,7 +604,7 @@
     </div>
   </div>
 
-  <!-- 2. MODAL DETAIL RIWAYAT -->
+  <!-- MODAL DETAIL -->
   <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-800 pb-3">
@@ -512,30 +637,10 @@
           <strong id="histSummaryAuditDate" class="text-sky-400">-</strong>
         </div>
       </div>
-
-      <div class="border border-slate-800 rounded-2xl overflow-hidden">
-        <button onclick="toggleAccordion('bodyAccServiceLogs')" class="w-full bg-slate-950 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 hover:bg-slate-800/50 transition">
-          <span><i class="fa-solid fa-wrench text-amber-400 mr-2"></i>Log Pemeliharaan, Kalibrasi & Servis</span>
-          <i class="fa-solid fa-chevron-down text-slate-500"></i>
-        </button>
-        <div id="bodyAccServiceLogs" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60">
-          <div id="boxHistoryServiceList" class="space-y-2"></div>
-        </div>
-      </div>
-
-      <div class="border border-slate-800 rounded-2xl overflow-hidden">
-        <button onclick="toggleAccordion('bodyAccMutasiLogs')" class="w-full bg-slate-950 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 hover:bg-slate-800/50 transition">
-          <span><i class="fa-solid fa-arrows-turn-to-dots text-teal-400 mr-2"></i>Log Mutasi Ruangan & PIC</span>
-          <i class="fa-solid fa-chevron-down text-slate-500"></i>
-        </button>
-        <div id="bodyAccMutasiLogs" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60">
-          <div id="boxHistoryMutasiList" class="space-y-2"></div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- 3. MODAL MAINTENANCE / SERVIS -->
+  <!-- MODAL SERVIS -->
   <div id="modalActionService" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
       <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-wrench text-sky-400"></i> Catat Servis / Kalibrasi</h3>
@@ -558,7 +663,7 @@
     </div>
   </div>
 
-  <!-- 4. MODAL MUTASI RUANGAN -->
+  <!-- MODAL MUTASI -->
   <div id="modalActionMutasi" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
       <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Mutasi Ruangan & Lokasi</h3>
@@ -577,7 +682,7 @@
     </div>
   </div>
 
-  <!-- 5. MODAL DISPOSAL -->
+  <!-- MODAL DISPOSAL -->
   <div id="modalActionDisposal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-rose-900/50 space-y-3.5 text-xs shadow-2xl">
       <div class="flex items-center gap-2 text-rose-400">
@@ -604,7 +709,7 @@
     </div>
   </div>
 
-  <!-- 6. MODAL LAPORAN & AUDIT BAST -->
+  <!-- MODAL LAPORAN -->
   <div id="modalReportCenter" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -614,49 +719,42 @@
         </div>
         <button onclick="closeModal('modalReportCenter')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-
-      <div class="space-y-3">
-        <div>
-          <label class="block text-slate-300 font-bold mb-1">Filter Kelompok Masa Manfaat</label>
-          <select id="reportSelectKelompok" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-            <option value="ALL">Semua Kelompok (Kelompok 1 s/d 4)</option>
-            <option value="Kelompok 1">Kelompok 1 (4 Tahun / 25%)</option>
-            <option value="Kelompok 2">Kelompok 2 (8 Tahun / 12.5%)</option>
-            <option value="Kelompok 3">Kelompok 3 (16 Tahun / 6.25%)</option>
-            <option value="Kelompok 4">Kelompok 4 (20 Tahun / 5%)</option>
-          </select>
-        </div>
-      </div>
-
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
         <button onclick="exportDataToCSV()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5">
           <i class="fa-solid fa-file-excel text-emerald-400"></i> Unduh Excel (.CSV)
-        </button>
-        <button onclick="generatePrintableFormalReport()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold flex items-center gap-1.5">
-          <i class="fa-solid fa-print"></i> Cetak Berita Acara Resmi
         </button>
       </div>
     </div>
   </div>
 
-  <!-- 7. MODAL SCANNER HP -->
+  <!-- MODAL SCANNER HP -->
   <div id="modalCameraScanner" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 text-center relative shadow-2xl">
       <button onclick="closeScannerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       <div class="w-12 h-12 rounded-2xl bg-sky-950 text-sky-400 flex items-center justify-center mx-auto mb-2 text-xl border border-sky-800/60"><i class="fa-solid fa-camera"></i></div>
-      <h3 class="text-base font-bold text-white">Scan Barcode / QR Aset</h3>
-      <p class="text-xs text-slate-400 mb-4">Arahkan kamera ponsel tepat ke stiker kode batang</p>
+      <h3 class="text-base font-bold text-white">Scan QR / Barcode Aset</h3>
+      <p class="text-xs text-slate-400 mb-4">Arahkan kamera ponsel tepat ke stiker QR Code</p>
       <div id="cameraPreviewBox" class="overflow-hidden rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950 min-h-[220px]"></div>
       <div id="cameraStatusMsg" class="text-xs font-bold text-sky-400 mt-3">Mempersiapkan kamera...</div>
     </div>
   </div>
 
+  <!-- AREA CETAK TERSEMBUNYI -->
   <div id="printableReportArea" class="hidden"></div>
 
-  <!-- ================= JAVASCRIPT LOGIKA LENGKAP ================= -->
+  <!-- ================= JAVASCRIPT ================= -->
   <script>
-    // URL WEB APP RESMI ANDA
     const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwFZ1vwCz215Gi75ts9A0ymWXdgffrgvxGDJPmU-0VWvA_jKz1UXy_QUkwrFcGnNXc3lg/exec";
+
+    const SUPER_ADMIN = {
+      username: "admin",
+      password: "admin123",
+      nama: "Administrator Utama",
+      role: "SUPER_ADMIN"
+    };
+
+    let STORED_USERS = JSON.parse(localStorage.getItem("APP_STAFF_USERS")) || [];
+    let CURRENT_LOGGED_USER = null;
 
     const KELOMPOK_PENYUSUTAN_CONFIG = {
       'Kelompok 1': { tahun: 4, tarifTahunan: 0.25, label: 'Kelompok 1 (4 Thn / 25%)' },
@@ -682,6 +780,7 @@
       'Radiologi & CT-Scan',
       'Rawat Inap Dahlia Lantai 2',
       'Gudang Farmasi Sentral',
+      'Logistik PHS',
       'Ruang Server IT & SIMRS'
     ];
 
@@ -692,15 +791,152 @@
     let selectedBase64Image = null;
 
     window.addEventListener('DOMContentLoaded', () => {
+      const activeSession = sessionStorage.getItem("ACTIVE_USER_SESSION");
+      if (activeSession) {
+        CURRENT_LOGGED_USER = JSON.parse(activeSession);
+        document.getElementById('loginScreenOverlay').classList.add('hidden');
+        applyUserPermissions();
+      }
+
       populateKategoriDropdowns();
       populateLokasiDropdowns();
       renderGridKategoriCards();
       renderGridLokasiCards();
       initChartInstances();
       fetchCloudData();
+      renderStaffUsersList();
     });
 
-    // ================= CLOUD DATA SYNC (GOOGLE SHEETS) =================
+    // ================= LOGIN & OTORISASI =================
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+      const err = document.getElementById('loginErrMsg');
+
+      if (u === SUPER_ADMIN.username && p === SUPER_ADMIN.password) {
+        CURRENT_LOGGED_USER = SUPER_ADMIN;
+        sessionStorage.setItem("ACTIVE_USER_SESSION", JSON.stringify(CURRENT_LOGGED_USER));
+        document.getElementById('loginScreenOverlay').classList.add('hidden');
+        applyUserPermissions();
+        return;
+      }
+
+      const found = STORED_USERS.find(usr => usr.username === u && usr.password === p);
+      if (found) {
+        CURRENT_LOGGED_USER = found;
+        sessionStorage.setItem("ACTIVE_USER_SESSION", JSON.stringify(CURRENT_LOGGED_USER));
+        document.getElementById('loginScreenOverlay').classList.add('hidden');
+        applyUserPermissions();
+        return;
+      }
+
+      err.innerText = "Username atau password salah!";
+      err.classList.remove('hidden');
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem("ACTIVE_USER_SESSION");
+      location.reload();
+    }
+
+    function applyUserPermissions() {
+      if (!CURRENT_LOGGED_USER) return;
+      const isSuperAdmin = CURRENT_LOGGED_USER.role === "SUPER_ADMIN";
+      const p = CURRENT_LOGGED_USER.permissions || {};
+
+      const tabNavUsers = document.getElementById('tabNavUsers');
+      if (isSuperAdmin) {
+        tabNavUsers.classList.remove('hidden');
+      } else {
+        tabNavUsers.classList.add('hidden');
+      }
+
+      document.getElementById('btnHeaderAdd').style.display = (isSuperAdmin || p.add) ? '' : 'none';
+      document.getElementById('btnHeaderScan').style.display = (isSuperAdmin || p.audit) ? '' : 'none';
+      document.getElementById('btnHeaderReport').style.display = (isSuperAdmin || p.report) ? '' : 'none';
+    }
+
+    function renderStaffUsersList() {
+      const tbody = document.getElementById('userListTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (STORED_USERS.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">Belum ada user staf yang dibuat.</td></tr>`;
+        return;
+      }
+
+      STORED_USERS.forEach((u, idx) => {
+        const perms = [];
+        if (u.permissions.add) perms.push("Tambah Aset");
+        if (u.permissions.edit) perms.push("Edit");
+        if (u.permissions.service) perms.push("Servis");
+        if (u.permissions.mutasi) perms.push("Mutasi");
+        if (u.permissions.audit) perms.push("Opname");
+        if (u.permissions.disposal) perms.push("Disposal");
+        if (u.permissions.report) perms.push("Laporan");
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-800/40">
+            <td class="p-3 font-mono font-bold text-sky-400">${u.username}</td>
+            <td class="p-3 font-semibold text-white">${u.nama || '-'}</td>
+            <td class="p-3 text-[11px] text-slate-400">${perms.join(", ") || "Hanya Lihat"}</td>
+            <td class="p-3 text-center">
+              <button onclick="deleteStaffUser(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openModalAddUser() {
+      document.getElementById('newUsername').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('newNamaLengkap').value = '';
+      ['permAdd', 'permEdit', 'permService', 'permMutasi', 'permAudit', 'permDisposal', 'permReport'].forEach(id => {
+        document.getElementById(id).checked = false;
+      });
+      document.getElementById('modalUserForm').classList.remove('hidden');
+    }
+
+    function submitSaveNewUser() {
+      const u = document.getElementById('newUsername').value.trim();
+      const p = document.getElementById('newPassword').value.trim();
+      const n = document.getElementById('newNamaLengkap').value.trim();
+
+      if (!u || !p) return alert("Username dan Password wajib diisi!");
+      if (u === SUPER_ADMIN.username) return alert("Tidak boleh menggunakan username admin!");
+
+      const newUser = {
+        username: u, password: p, nama: n, role: "STAFF",
+        permissions: {
+          add: document.getElementById('permAdd').checked,
+          edit: document.getElementById('permEdit').checked,
+          service: document.getElementById('permService').checked,
+          mutasi: document.getElementById('permMutasi').checked,
+          audit: document.getElementById('permAudit').checked,
+          disposal: document.getElementById('permDisposal').checked,
+          report: document.getElementById('permReport').checked
+        }
+      };
+
+      STORED_USERS.push(newUser);
+      localStorage.setItem("APP_STAFF_USERS", JSON.stringify(STORED_USERS));
+      renderStaffUsersList();
+      closeModal('modalUserForm');
+      alert(`User "${u}" berhasil dibuat!`);
+    }
+
+    function deleteStaffUser(idx) {
+      if (confirm("Hapus pengguna ini?")) {
+        STORED_USERS.splice(idx, 1);
+        localStorage.setItem("APP_STAFF_USERS", JSON.stringify(STORED_USERS));
+        renderStaffUsersList();
+      }
+    }
+
+    // ================= SYNC CLOUD GOOGLE SHEETS =================
     async function fetchCloudData() {
       const badge = document.getElementById('cloudStatusBadge');
       const icon = document.getElementById('btnRefreshIcon');
@@ -712,19 +948,19 @@
         
         if (result.success && result.data) {
           DATA_INVENTARIS = result.data.map(item => ({
-            kode: item.Kode || item.kode,
-            nama: item.Nama || item.nama,
-            kategori: item.Kategori || item.kategori,
-            kelompok: item.Kelompok || item.kelompok,
-            lokasi: item.Lokasi || item.lokasi,
-            status: item.Status || item.status,
-            tglBeli: item.TglBeli || item.tglBeli,
+            kode: String(item.Kode || item.kode || ''),
+            nama: String(item.Nama || item.nama || ''),
+            kategori: String(item.Kategori || item.kategori || ''),
+            kelompok: String(item.Kelompok || item.kelompok || ''),
+            lokasi: String(item.Lokasi || item.lokasi || ''),
+            status: String(item.Status || item.status || 'Operasional'),
+            tglBeli: String(item.TglBeli || item.tglBeli || ''),
             hargaBeli: Number(item.HargaBeli || item.hargaBeli) || 0,
-            pic: item.PIC || item.pic,
-            tglKalibrasi: item.Kalibrasi || item.tglKalibrasi,
-            keterangan: item.Ket || item.keterangan,
-            fotoUrl: item.FotoUrl || item.fotoUrl || '',
-            terakhirAudit: item.TerakhirAudit || item.terakhirAudit || '-'
+            pic: String(item.PIC || item.pic || '-'),
+            tglKalibrasi: String(item.Kalibrasi || item.tglKalibrasi || '-'),
+            keterangan: String(item.Ket || item.keterangan || '-'),
+            fotoUrl: String(item.FotoUrl || item.fotoUrl || ''),
+            terakhirAudit: String(item.TerakhirAudit || item.terakhirAudit || '-')
           }));
           
           badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
@@ -732,8 +968,6 @@
         }
       } catch (err) {
         console.warn("Gagal terhubung ke Cloud, menggunakan cache:", err);
-        badge.className = "text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Offline Cache`;
       } finally {
         if (icon) icon.classList.remove('fa-spin');
         executeDataFilters();
@@ -755,7 +989,6 @@
       }
     }
 
-    // ================= TAB NAVIGATION =================
     function switchMainTab(targetTabId, btnEl) {
       document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
       document.querySelectorAll('.main-tab-btn').forEach(btn => {
@@ -886,11 +1119,13 @@
           : `<div class="h-8 w-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 text-xs mx-auto"><i class="fa-solid fa-image"></i></div>`;
 
         const tr = document.createElement('tr');
-        tr.className = `hover:bg-slate-800/60 transition cursor-pointer border-b border-slate-800/60 ${isSelected ? 'bg-sky-950/40 font-semibold' : ''}`;
+        tr.className = `hover:bg-slate-800/60 transition cursor-pointer border-b border-slate-800/60 ${isSelected ? 'bg-sky-950/60 font-semibold text-white' : ''}`;
         tr.onclick = () => selectTableRow(item.kode);
 
         tr.innerHTML = `
-          <td class="py-3 px-3 text-center"><input type="radio" name="rowSelector" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); selectTableRow('${item.kode}')"></td>
+          <td class="py-3 px-3 text-center">
+            <input type="radio" name="rowSelector" value="${item.kode}" ${isSelected ? 'checked' : ''} onchange="selectTableRow('${item.kode}')">
+          </td>
           <td class="py-3 px-2 text-center">${fotoImg}</td>
           <td class="py-3 px-3 font-mono font-bold text-sky-400">${item.kode}</td>
           <td class="py-3 px-3">
@@ -925,9 +1160,16 @@
     function selectTableRow(kode) {
       SELECTED_ROW_KODE = kode;
       executeDataFilters();
-      ['btnActionEdit', 'btnActionService', 'btnActionMutasi', 'btnActionAudit', 'btnActionPrint', 'btnActionDisposal'].forEach(btnId => {
-        document.getElementById(btnId).disabled = false;
-      });
+
+      const isSuperAdmin = CURRENT_LOGGED_USER && CURRENT_LOGGED_USER.role === "SUPER_ADMIN";
+      const p = (CURRENT_LOGGED_USER && CURRENT_LOGGED_USER.permissions) || {};
+
+      document.getElementById('btnActionEdit').disabled = !(isSuperAdmin || p.edit);
+      document.getElementById('btnActionService').disabled = !(isSuperAdmin || p.service);
+      document.getElementById('btnActionMutasi').disabled = !(isSuperAdmin || p.mutasi);
+      document.getElementById('btnActionAudit').disabled = !(isSuperAdmin || p.audit);
+      document.getElementById('btnActionPrint').disabled = false;
+      document.getElementById('btnActionDisposal').disabled = !(isSuperAdmin || p.disposal);
     }
 
     function updateKelompokCardsSummary() {
@@ -1028,7 +1270,7 @@
       e.preventDefault();
       const btnSubmit = document.getElementById('btnSubmitFormAset');
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...`;
+      btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
 
       const kode = document.getElementById('inputFormKode').value.trim();
       const nama = document.getElementById('inputFormNama').value.trim();
@@ -1063,7 +1305,6 @@
         assetObj.fotoUrl = cloudRes.photoUrl;
       }
 
-      // Update state lokal
       const existingIndex = DATA_INVENTARIS.findIndex(a => a.kode === kode);
       if (existingIndex !== -1) {
         DATA_INVENTARIS[existingIndex] = assetObj;
@@ -1082,7 +1323,7 @@
       closeModal('modalAssetForm');
       executeDataFilters();
       updateExecutiveKPIs();
-      alert(`Aset "${nama}" (${kode}) berhasil disimpan ke Google Sheets & Drive!`);
+      alert(`Aset "${nama}" (${kode}) berhasil disimpan!`);
     }
 
     function handleAutocompleteLokasi(queryVal) {
@@ -1213,7 +1454,7 @@
             selectTableRow(matchAsset.kode);
             openHistoryDetailModal(matchAsset.kode);
           } else {
-            if (confirm(`Barcode "${decodedText}" belum terdaftar. Daftarkan baru?`)) {
+            if (confirm(`Kode "${decodedText}" belum terdaftar. Daftarkan baru?`)) {
               openModalAddAsset(decodedText);
             }
           }
@@ -1240,14 +1481,8 @@
     }
 
     function exportDataToCSV() {
-      const kelompok = document.getElementById('reportSelectKelompok').value;
-      let dataset = DATA_INVENTARIS;
-      if (kelompok !== 'ALL') {
-        dataset = dataset.filter(a => getAssetKelompokConfig(a).namaKelompok === kelompok);
-      }
-
-      let csv = "Kode Barcode,Nama Aset,Kategori,Kelompok,Lokasi,Tgl Beli,Harga Perolehan,Nilai Buku,Foto Drive\n";
-      dataset.forEach(a => {
+      let csv = "Kode Aset,Nama Aset,Kategori,Kelompok,Lokasi,Tgl Beli,Harga Perolehan,Nilai Buku,Foto Drive\n";
+      DATA_INVENTARIS.forEach(a => {
         const dep = calculateDepreciationValues(a);
         csv += `"${a.kode}","${a.nama}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${a.fotoUrl}"\n`;
       });
@@ -1258,74 +1493,6 @@
       link.download = `Laporan_Aset_${new Date().toISOString().split('T')[0]}.csv`;
       link.click();
       closeModal('modalReportCenter');
-    }
-
-    function generatePrintableFormalReport() {
-      const kelompok = document.getElementById('reportSelectKelompok').value;
-      let dataset = DATA_INVENTARIS;
-      if (kelompok !== 'ALL') {
-        dataset = dataset.filter(a => getAssetKelompokConfig(a).namaKelompok === kelompok);
-      }
-
-      let rowsHtml = '';
-      let totalBeli = 0, totalBuku = 0;
-
-      dataset.forEach((a, idx) => {
-        const dep = calculateDepreciationValues(a);
-        totalBeli += Number(a.hargaBeli || 0);
-        totalBuku += dep.nilaiBuku;
-        rowsHtml += `
-          <tr style="border-bottom: 1px solid #ddd; font-size: 10px;">
-            <td style="padding: 6px; text-align: center;">${idx + 1}</td>
-            <td style="padding: 6px; font-family: monospace; font-weight: bold;">${a.kode}</td>
-            <td style="padding: 6px;"><b>${a.nama}</b></td>
-            <td style="padding: 6px;">${dep.kelompokStr}</td>
-            <td style="padding: 6px;">${a.lokasi}</td>
-            <td style="padding: 6px; text-align: right;">Rp ${Number(a.hargaBeli || 0).toLocaleString('id-ID')}</td>
-            <td style="padding: 6px; text-align: right; font-weight: bold;">Rp ${Number(dep.nilaiBuku).toLocaleString('id-ID')}</td>
-            <td style="padding: 6px; text-align: center;">${dep.sisaTahunStr}</td>
-          </tr>
-        `;
-      });
-
-      const printArea = document.getElementById('printableReportArea');
-      printArea.innerHTML = `
-        <div style="font-family: Arial, sans-serif; color: #000; padding: 10px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
-            <div style="width: 280px;"><img src="icon.svg" style="max-height: 48px; object-fit: contain;"></div>
-            <div style="text-align: right;">
-              <h2 style="margin: 0; font-size: 14px; font-weight: bold;">BERITA ACARA AUDIT & REKAPITULASI PENYUSUTAN ASET</h2>
-              <p style="margin: 2px 0 0 0; font-size: 10px; color: #444;">PT Permata Husada Sakti &bull; RS Grha Permata Ibu</p>
-            </div>
-          </div>
-
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-            <thead>
-              <tr style="background: #f0f0f0; border-top: 1px solid #000; border-bottom: 1px solid #000; font-size: 10px; font-weight: bold;">
-                <th style="padding: 6px; width: 30px;">No</th>
-                <th style="padding: 6px; text-align: left;">Kode</th>
-                <th style="padding: 6px; text-align: left;">Nama Aset</th>
-                <th style="padding: 6px; text-align: left;">Kelompok</th>
-                <th style="padding: 6px; text-align: left;">Lokasi</th>
-                <th style="padding: 6px; text-align: right;">Harga Perolehan</th>
-                <th style="padding: 6px; text-align: right;">Nilai Buku</th>
-                <th style="padding: 6px; text-align: center;">Sisa Usia</th>
-              </tr>
-            </thead>
-            <tbody>${rowsHtml}</tbody>
-            <tfoot>
-              <tr style="border-top: 2px solid #000; font-size: 11px; font-weight: bold; background: #fafafa;">
-                <td colspan="5" style="padding: 8px; text-align: right;">TOTAL:</td>
-                <td style="padding: 8px; text-align: right;">Rp ${totalBeli.toLocaleString('id-ID')}</td>
-                <td style="padding: 8px; text-align: right;">Rp ${totalBuku.toLocaleString('id-ID')}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      `;
-      closeModal('modalReportCenter');
-      window.print();
     }
 
     function populateKategoriDropdowns() {
@@ -1391,11 +1558,11 @@
         
         await sendPostToCloud({
           action: "logAction",
-          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi", picOrBiaya: "Admin" }
+          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi", picOrBiaya: CURRENT_LOGGED_USER.nama || "Admin" }
         });
         
         executeDataFilters();
-        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan & dicatat ke Google Sheets.`);
+        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan.`);
       }
     }
 
@@ -1421,7 +1588,7 @@
           log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "SERVIS", keterangan: act, picOrBiaya: `Rp ${cost.toLocaleString('id-ID')} (${tech})` }
         });
         closeModal('modalActionService');
-        alert('Log pemeliharaan berhasil dicatat ke Google Sheets!');
+        alert('Log pemeliharaan berhasil dicatat!');
       }
     }
 
@@ -1451,7 +1618,7 @@
         
         closeModal('modalActionMutasi');
         executeDataFilters();
-        alert(`Aset berhasil dimutasikan ke ${r} & tercatat di Cloud!`);
+        alert(`Aset berhasil dimutasikan ke ${r}!`);
       }
     }
 
@@ -1471,37 +1638,88 @@
         const stamp = `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()} 12:00`;
         await sendPostToCloud({
           action: "logAction",
-          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: "Admin" }
+          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER.nama || "Admin" }
         });
         closeModal('modalActionDisposal');
         executeDataFilters();
-        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan di Cloud.`);
+        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
       }
     }
 
+    // ================= FUNGSI CETAK LABEL STIKER QR CODE =================
     function actionPrintBarcode() {
-      if (!SELECTED_ROW_KODE) return;
+      if (!SELECTED_ROW_KODE) {
+        alert("Pilih salah satu baris aset terlebih dahulu!");
+        return;
+      }
+      
       const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
+      if (!a) return;
+
       const printBox = document.getElementById('printableReportArea');
+      printBox.classList.remove('hidden');
+
+      // Tata Letak Stiker Tom & Jerry 50x32 mm (Header Logo + Isi QR Code + Detail Aset)
       printBox.innerHTML = `
-        <div class="barcode-sticker">
-          <p style="font-size: 8px; font-weight: 800; margin: 0; text-align: center;">PT PERMATA HUSADA SAKTI</p>
-          <svg id="canvasPrintSticker"></svg>
-          <p style="font-size: 8px; font-family: monospace; font-weight: bold; margin: 1px 0 0 0;">${a.kode}</p>
-          <p style="font-size: 7px; margin: 0; text-align: center; max-width: 44mm; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${a.nama}</p>
+        <div class="tj-asset-label">
+          <!-- 1. Header: Logo Resmi & Teks Identitas -->
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.8px solid #000000; padding-bottom: 1.5px;">
+            <img src="icon.svg" style="height: 11px; max-width: 75px; object-fit: contain;">
+            <span style="font-size: 6.5px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;">
+              LABEL ASET TETAP
+            </span>
+          </div>
+
+          <!-- 2. Konten Utama: QR Code (Kiri) & Keterangan Identitas Aset (Kanan) -->
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; margin: 1.5px 0;">
+            <!-- Box QR Code Presisi 19mm x 19mm -->
+            <div id="qrcodeStickerContainer" style="width: 19mm; height: 19mm; display: flex; align-items: center; justify-content: center; background: #fff;"></div>
+
+            <!-- Box Teks Kanan -->
+            <div style="flex: 1; padding-left: 2.5mm; text-align: left; overflow: hidden;">
+              <p style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 900; margin: 0; color: #0284c7; line-height: 1;">
+                ${a.kode}
+              </p>
+              <p style="font-size: 7px; font-weight: 800; margin: 2px 0 0 0; line-height: 1.1; max-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${a.nama}
+              </p>
+              <p style="font-size: 6px; color: #334155; margin: 2px 0 0 0; line-height: 1;">
+                Lokasi: <b>${a.lokasi || '-'}</b>
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. Footer: SN Pabrik & Tanggal Audit Terakhir -->
+          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 0.6px dotted #64748b; padding-top: 1px;">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 6px; color: #475569;">
+              SN: ${a.serialNumber || '-'}
+            </span>
+            <span style="font-size: 5.5px; color: #64748b; font-weight: bold;">
+              PT PHS &bull; RS GPI
+            </span>
+          </div>
         </div>
       `;
-      JsBarcode("#canvasPrintSticker", a.kode, { format: "CODE128", width: 1.2, height: 26, displayValue: false, margin: 0 });
-      window.print();
+
+      // Render Gambar QR Code Tajam & Presisi
+      new QRCode(document.getElementById("qrcodeStickerContainer"), {
+        text: a.kode,
+        width: 72,
+        height: 72,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      // Tunggu render selesai lalu buka pratinjau cetak browser
+      setTimeout(() => {
+        window.print();
+      }, 250);
     }
 
     function formatInputRupiahRealtime(el) {
       let num = el.value.replace(/[^0-9]/g, '');
       el.value = num ? 'Rp ' + Number(num).toLocaleString('id-ID') : '';
-    }
-
-    function toggleAccordion(id) {
-      document.getElementById(id).classList.toggle('hidden');
     }
 
     function closeModal(id) {
