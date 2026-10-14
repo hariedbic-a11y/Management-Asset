@@ -12,6 +12,8 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Library Pembaca File Excel (.xlsx / .csv) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
   <script>
@@ -36,7 +38,6 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: #090d16; }
 
-    /* Pengaturan Cetak Stiker Tom & Jerry 50x32 mm */
     @media print {
       body * { visibility: hidden !important; }
       @page { size: auto; margin: 0mm !important; }
@@ -108,7 +109,7 @@
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
     <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- LOGO GABUNGAN PHS & RS GPI -->
+      <!-- LOGO GABUNGAN -->
       <div class="flex items-center gap-3">
         <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
           <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
@@ -133,6 +134,13 @@
           <i class="fa-solid fa-qrcode text-sm"></i>
           <span>Scan Audit (HP)</span>
         </button>
+        
+        <!-- Tombol Import Excel Baru -->
+        <button id="btnHeaderImport" onclick="openModalImportExcel()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-file-excel"></i>
+          <span class="hidden sm:inline">Import Excel</span>
+        </button>
+
         <button id="btnHeaderAdd" onclick="openModalAddAsset()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-plus text-sm"></i>
           <span class="hidden sm:inline">Pengadaan Baru</span>
@@ -466,40 +474,62 @@
 
   </main>
 
-  <!-- ================= MODAL TAMBAH USER ================= -->
-  <div id="modalUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <h3 class="text-sm font-bold text-white">Tambah Pengguna Baru</h3>
-        <button onclick="closeModal('modalUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+  <!-- ================= MODAL IMPORT DARI EXCEL / CSV ================= -->
+  <div id="modalImportExcel" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-file-excel text-emerald-400"></i> Import Data Aset dari Excel / CSV
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Kode Barcode & Masa Manfaat akan digenerate otomatis</p>
+        </div>
+        <button onclick="closeModal('modalImportExcel')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <div>
-        <label class="block text-slate-400 font-bold mb-1">Username Login *</label>
-        <input type="text" id="newUsername" placeholder="contoh: staf_medis" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+
+      <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-slate-200">1. Unduh Template Format Excel:</span>
+          <button onclick="downloadExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-download"></i> Unduh File Template
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">Gunakan file template ini agar nama kolom dan urutan data sesuai dengan database.</p>
       </div>
+
       <div>
-        <label class="block text-slate-400 font-bold mb-1">Password *</label>
-        <input type="password" id="newPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+        <label class="block font-bold text-slate-300 mb-1.5">2. Pilih File Excel / CSV yang sudah diisi:</label>
+        <input type="file" id="inputExcelFile" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelected(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-950 border border-slate-700 rounded-xl p-1.5">
       </div>
-      <div>
-        <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
-        <input type="text" id="newNamaLengkap" placeholder="contoh: Budi Santoso" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-      </div>
-      <div>
-        <label class="block text-slate-400 font-bold mb-1.5">Centang Hak Akses / Otorisasi:</label>
-        <div class="space-y-1.5 text-slate-300">
-          <label class="flex items-center gap-2"><input type="checkbox" id="permAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan & Verifikasi Opname</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal Aset</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
+
+      <!-- Pratinjau Hasil Pembacaan Excel -->
+      <div id="boxImportPreview" class="hidden space-y-2">
+        <div class="flex justify-between items-center text-slate-300 font-bold">
+          <span>Pratinjau Data (<span id="countImportPreview">0</span> Baris Terbaca):</span>
+          <span class="text-[10px] text-sky-400 font-mono">*Kode Barcode Otomatis Diberikan</span>
+        </div>
+        <div class="max-h-52 overflow-y-auto custom-scroll border border-slate-800 rounded-xl bg-slate-950">
+          <table class="w-full text-left text-[11px] border-collapse">
+            <thead class="bg-slate-900 text-slate-400 sticky top-0 border-b border-slate-800">
+              <tr>
+                <th class="p-2">Kode Auto</th>
+                <th class="p-2">Nama Barang</th>
+                <th class="p-2">Kategori</th>
+                <th class="p-2">Ruangan</th>
+                <th class="p-2">Tgl Beli</th>
+                <th class="p-2">Harga</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyImportPreview" class="divide-y divide-slate-800/80 text-slate-300"></tbody>
+          </table>
         </div>
       </div>
+
       <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
-        <button onclick="closeModal('modalUserForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button onclick="submitSaveNewUser()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold">Simpan User</button>
+        <button type="button" onclick="closeModal('modalImportExcel')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button id="btnSubmitImportBatch" disabled onclick="submitBatchImportToCloud()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30">
+          <span>Simpan Seluruh Aset ke Cloud</span>
+        </button>
       </div>
     </div>
   </div>
@@ -641,7 +671,7 @@
         </div>
       </div>
 
-      <!-- KOTAK LOG 1: RIWAYAT PEMELIHARAAN, KALIBRASI & SERVIS (ACCORDION BUKA-TUTUP) -->
+      <!-- KOTAK LOG 1: RIWAYAT PEMELIHARAAN (ACCORDION) -->
       <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
         <button type="button" onclick="toggleAccordion('boxHistoryServiceContent', 'iconChevronService')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
           <span class="flex items-center gap-2">
@@ -658,7 +688,7 @@
         </div>
       </div>
 
-      <!-- KOTAK LOG 2: RIWAYAT MUTASI RUANGAN & PIC (ACCORDION BUKA-TUTUP) -->
+      <!-- KOTAK LOG 2: RIWAYAT MUTASI (ACCORDION) -->
       <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
         <button type="button" onclick="toggleAccordion('boxHistoryMutasiContent', 'iconChevronMutasi')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
           <span class="flex items-center gap-2">
@@ -827,6 +857,7 @@
     let cameraHtml5Scanner = null;
     let chartStatusInstance = null, chartKategoriInstance = null;
     let selectedBase64Image = null;
+    let BATCH_IMPORTED_ITEMS = [];
 
     window.addEventListener('DOMContentLoaded', () => {
       const activeSession = sessionStorage.getItem("ACTIVE_USER_SESSION");
@@ -907,6 +938,7 @@
       }
 
       document.getElementById('btnHeaderAdd').style.display = (isSuperAdmin || p.add) ? '' : 'none';
+      document.getElementById('btnHeaderImport').style.display = (isSuperAdmin || p.add) ? '' : 'none';
       document.getElementById('btnHeaderScan').style.display = (isSuperAdmin || p.audit) ? '' : 'none';
       document.getElementById('btnHeaderReport').style.display = (isSuperAdmin || p.report) ? '' : 'none';
     }
@@ -988,6 +1020,172 @@
         localStorage.setItem("APP_STAFF_USERS", JSON.stringify(STORED_USERS));
         renderStaffUsersList();
       }
+    }
+
+    // ================= FITUR IMPORT EXCEL / CSV =================
+    function openModalImportExcel() {
+      document.getElementById('inputExcelFile').value = '';
+      document.getElementById('boxImportPreview').classList.add('hidden');
+      document.getElementById('btnSubmitImportBatch').disabled = true;
+      BATCH_IMPORTED_ITEMS = [];
+      document.getElementById('modalImportExcel').classList.remove('hidden');
+    }
+
+    function downloadExcelTemplate() {
+      const headers = [
+        ["Nama", "Kategori", "Lokasi", "Status", "TglBeli", "HargaBeli", "PIC", "Ket"]
+      ];
+      const sampleRows = [
+        ["Monitor 24 Inci", "Perangkat IT & Jaringan", "Poliklinik Umum", "Operasional", "14/10/2026", 2500000, "Budi", "Pengadaan Unit Baru"],
+        ["AC Split 2 PK", "Elektronik & Utility", "Rawat Inap Dahlia Lantai 2", "Operasional", "14/10/2026", 6000000, "Siti", "Pengadaan Unit Baru"],
+        ["Kursi Roda Standar", "Furniture & Mebeler", "Instalasi Gawat Darurat (IGD)", "Operasional", "14/10/2026", 1800000, "Joko", "Unit UGD"]
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet([...headers, ...sampleRows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template_Import");
+      XLSX.writeFile(wb, "Template_Import_Aset.xlsx");
+    }
+
+    function handleExcelFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+          if (jsonData.length === 0) {
+            alert("File Excel kosong atau format tidak sesuai!");
+            return;
+          }
+
+          // Hitung prefix nomor barcode terakhir dari database yang sudah ada
+          const prefixCounters = {};
+          DATA_INVENTARIS.forEach(a => {
+            MASTER_KATEGORI.forEach(k => {
+              if (a.kode.startsWith(k.prefix)) {
+                const num = parseInt(a.kode.replace(k.prefix, ''), 10);
+                if (!isNaN(num)) {
+                  prefixCounters[k.prefix] = Math.max(prefixCounters[k.prefix] || 0, num);
+                }
+              }
+            });
+          });
+
+          BATCH_IMPORTED_ITEMS = [];
+          const previewBody = document.getElementById('tableBodyImportPreview');
+          previewBody.innerHTML = '';
+
+          jsonData.forEach((row, idx) => {
+            const nama = String(row.Nama || row.nama || '').trim();
+            if (!nama) return;
+
+            const kategori = String(row.Kategori || row.kategori || 'Perangkat IT & Jaringan').trim();
+            const katObj = MASTER_KATEGORI.find(k => k.nama.toLowerCase() === kategori.toLowerCase()) || MASTER_KATEGORI[0];
+            const prefix = katObj.prefix;
+
+            // Generate Barcode Baru Berurutan
+            prefixCounters[prefix] = (prefixCounters[prefix] || 0) + 1;
+            const newBarcode = prefix + String(prefixCounters[prefix]).padStart(3, '0');
+
+            const lokasi = String(row.Lokasi || row.lokasi || 'Logistik PHS').trim();
+            const status = String(row.Status || row.status || 'Operasional').trim();
+            const rawTgl = String(row.TglBeli || row.tglBeli || '').trim();
+            const tglBeli = cleanDateFormat(rawTgl) !== '-' ? cleanDateFormat(rawTgl) : cleanDateFormat(new Date());
+            const harga = Number(String(row.HargaBeli || row.hargaBeli || 0).replace(/[^0-9]/g, '')) || 0;
+            const pic = String(row.PIC || row.pic || '-').trim();
+            const ket = String(row.Ket || row.ket || '-').trim();
+
+            const assetItem = {
+              kode: newBarcode,
+              nama: nama,
+              kategori: katObj.nama,
+              kelompok: katObj.kelompok,
+              lokasi: lokasi,
+              status: status,
+              tglBeli: tglBeli,
+              hargaBeli: harga,
+              nilaiBuku: harga,
+              pic: pic,
+              tglKalibrasi: '-',
+              keterangan: ket,
+              fotoUrl: '',
+              terakhirAudit: tglBeli
+            };
+
+            BATCH_IMPORTED_ITEMS.push(assetItem);
+
+            // Render ke tabel pratinjau
+            previewBody.innerHTML += `
+              <tr class="hover:bg-slate-900">
+                <td class="p-2 font-mono font-bold text-sky-400">${assetItem.kode}</td>
+                <td class="p-2 font-bold text-white">${assetItem.nama}</td>
+                <td class="p-2 text-slate-300">${assetItem.kategori}</td>
+                <td class="p-2 text-slate-300">${assetItem.lokasi}</td>
+                <td class="p-2 font-mono text-slate-400">${assetItem.tglBeli}</td>
+                <td class="p-2 font-mono text-emerald-400">Rp ${assetItem.hargaBeli.toLocaleString('id-ID')}</td>
+              </tr>
+            `;
+          });
+
+          if (BATCH_IMPORTED_ITEMS.length > 0) {
+            document.getElementById('countImportPreview').innerText = BATCH_IMPORTED_ITEMS.length;
+            document.getElementById('boxImportPreview').classList.remove('hidden');
+            document.getElementById('btnSubmitImportBatch').disabled = false;
+          } else {
+            alert("Tidak ditemukan baris barang yang valid di file Excel!");
+          }
+
+        } catch (err) {
+          console.error(err);
+          alert("Gagal membaca file Excel. Pastikan menggunakan format template yang benar!");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    async function submitBatchImportToCloud() {
+      if (BATCH_IMPORTED_ITEMS.length === 0) return;
+
+      const btn = document.getElementById('btnSubmitImportBatch');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ${BATCH_IMPORTED_ITEMS.length} Aset...`;
+
+      // Masukkan ke memori lokal
+      DATA_INVENTARIS.unshift(...BATCH_IMPORTED_ITEMS);
+      localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+
+      // Update daftar lokasi jika ada lokasi baru
+      BATCH_IMPORTED_ITEMS.forEach(it => {
+        if (!MASTER_LOKASI.includes(it.lokasi)) {
+          MASTER_LOKASI.push(it.lokasi);
+        }
+      });
+      populateLokasiDropdowns();
+      renderGridLokasiCards();
+
+      executeDataFilters();
+      updateExecutiveKPIs();
+      updateKelompokCardsSummary();
+
+      // Kirim Batch ke Google Sheets di background
+      const payload = {
+        action: "importBatchAssets",
+        assetList: BATCH_IMPORTED_ITEMS,
+        user: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
+      };
+
+      await sendPostToCloud(payload);
+
+      btn.disabled = false;
+      btn.innerHTML = `<span>Simpan Seluruh Aset ke Cloud</span>`;
+      closeModal('modalImportExcel');
+      alert(`Berhasil mengimpor ${BATCH_IMPORTED_ITEMS.length} aset dan seluruh kode barcode telah aktif!`);
     }
 
     // ================= SYNC CLOUD & FORMAT TANGGAL BERSIH =================
@@ -1159,868 +1357,10 @@
       };
     }
 
-    // ================= KALKULASI SELISIH HARI AUDIT =================
     function calculateDaysFromAudit(auditStamp) {
       if (!auditStamp || auditStamp === '-' || auditStamp === 'null') return 0;
       
       let auditDate;
       if (typeof auditStamp === 'string' && auditStamp.includes('/')) {
         const parts = auditStamp.split(' ')[0].split('/');
-        if (parts.length === 3) {
-          auditDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-        }
-      } else {
-        auditDate = new Date(auditStamp);
-      }
-
-      if (!auditDate || isNaN(auditDate.getTime())) return 0;
-      
-      const sekarang = new Date();
-      auditDate.setHours(0, 0, 0, 0);
-      sekarang.setHours(0, 0, 0, 0);
-
-      const diffTime = sekarang.getTime() - auditDate.getTime();
-      return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
-    }
-
-    function executeDataFilters() {
-      const q = document.getElementById('filterKeyword').value.toLowerCase().trim();
-      const fKelompok = document.getElementById('filterKelompokDepresiasi').value;
-      const fLok = document.getElementById('filterLokasi').value;
-      const fStatus = document.getElementById('filterStatus').value;
-      const fAudit = document.getElementById('filterAuditFlag').value;
-
-      const results = DATA_INVENTARIS.filter(item => {
-        const { namaKelompok } = getAssetKelompokConfig(item);
-        const matchKeyword = !q || item.kode.toLowerCase().includes(q) || item.nama.toLowerCase().includes(q) || (item.pic && item.pic.toLowerCase().includes(q));
-        const matchKelompok = !fKelompok || namaKelompok === fKelompok;
-        const matchLok = !fLok || item.lokasi === fLok;
-        const matchStatus = !fStatus || item.status === fStatus;
-
-        let matchAudit = true;
-        if (fAudit) {
-          const days = calculateDaysFromAudit(item.terakhirAudit);
-          if (fAudit === 'overdue') matchAudit = days > 30;
-          if (fAudit === 'valid') matchAudit = days <= 30;
-        }
-
-        return matchKeyword && matchKelompok && matchLok && matchStatus && matchAudit;
-      });
-
-      renderInventoryTable(results);
-    }
-
-    // ================= RENDER TABEL =================
-    function renderInventoryTable(items) {
-      const tbody = document.getElementById('inventoryTableBody');
-      tbody.innerHTML = '';
-
-      if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" class="py-10 text-center text-slate-500 font-semibold">Tidak ditemukan data aset.</td></tr>`;
-        document.getElementById('labelInventoryCount').innerText = `Menampilkan 0 aset terdaftar`;
-        return;
-      }
-
-      items.forEach(item => {
-        const isSelected = SELECTED_ROW_KODE === item.kode;
-        const daysAgo = calculateDaysFromAudit(item.terakhirAudit);
-        const isOverdue = daysAgo > 30;
-        const depInfo = calculateDepreciationValues(item);
-
-        let statusClass = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
-        if (item.status === 'Dalam Perbaikan') statusClass = 'bg-amber-500/10 text-amber-400 border border-amber-500/30';
-        if (item.status === 'Disposed') statusClass = 'bg-rose-500/10 text-rose-400 border border-rose-500/30 line-through';
-
-        let auditTag = isOverdue
-          ? `<span class="text-rose-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation animate-pulse"></i>${item.terakhirAudit} (${daysAgo} hr lalu)</span>`
-          : `<span class="text-slate-300 font-medium">${item.terakhirAudit}</span>`;
-
-        let fotoImg = item.fotoUrl 
-          ? `<img src="${item.fotoUrl}" class="h-8 w-8 object-cover rounded-lg border border-slate-700 mx-auto">` 
-          : `<div class="h-8 w-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 text-xs mx-auto"><i class="fa-solid fa-image"></i></div>`;
-
-        const tr = document.createElement('tr');
-        tr.className = `hover:bg-slate-800/60 transition cursor-pointer border-b border-slate-800/60 ${isSelected ? 'bg-sky-950/60 font-semibold text-white' : ''}`;
-        tr.onclick = () => selectTableRow(item.kode);
-
-        tr.innerHTML = `
-          <td class="py-3 px-3 text-center">
-            <input type="radio" name="rowSelector" value="${item.kode}" ${isSelected ? 'checked' : ''} onchange="selectTableRow('${item.kode}')">
-          </td>
-          <td class="py-3 px-2 text-center">${fotoImg}</td>
-          <td class="py-3 px-3 font-mono font-bold text-sky-400">${item.kode}</td>
-          <td class="py-3 px-3">
-            <span class="font-bold text-white block">${item.nama}</span>
-            <span class="text-[10px] text-slate-400 font-mono">PIC: ${item.pic || '-'}</span>
-          </td>
-          <td class="py-3 px-3 font-medium text-amber-400">${depInfo.kelompokStr}</td>
-          <td class="py-3 px-3 text-slate-200">${item.lokasi}</td>
-          <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusClass}">${item.status}</span></td>
-          <td class="py-3 px-3 text-slate-300 font-mono">${item.tglBeli || '-'}</td>
-          <td class="py-3 px-3 font-mono font-semibold text-slate-200">Rp ${Number(item.hargaBeli || 0).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-3 font-mono font-bold text-emerald-400">Rp ${Number(depInfo.nilaiBuku).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-3">
-            <span class="font-semibold block ${depInfo.sisaBulan === 0 ? 'text-rose-400' : 'text-slate-200'}">${depInfo.sisaTahunStr}</span>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-1">
-              <div class="bg-sky-500 h-1.5 rounded-full" style="width: ${depInfo.persenDepresiasi}%"></div>
-            </div>
-          </td>
-          <td class="py-3 px-3">${auditTag}</td>
-          <td class="py-3 px-3 text-center" onclick="event.stopPropagation()">
-            <button onclick="openHistoryDetailModal('${item.kode}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-bold border border-slate-700 transition">
-              <i class="fa-solid fa-clock-rotate-left mr-1"></i>Detail
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('labelInventoryCount').innerText = `Menampilkan ${items.length} dari ${DATA_INVENTARIS.length} total aset`;
-    }
-
-    function selectTableRow(kode) {
-      SELECTED_ROW_KODE = kode;
-      executeDataFilters();
-
-      const isSuperAdmin = CURRENT_LOGGED_USER && CURRENT_LOGGED_USER.role === "SUPER_ADMIN";
-      const p = (CURRENT_LOGGED_USER && CURRENT_LOGGED_USER.permissions) || {};
-
-      document.getElementById('btnActionEdit').disabled = !(isSuperAdmin || p.edit);
-      document.getElementById('btnActionService').disabled = !(isSuperAdmin || p.service);
-      document.getElementById('btnActionMutasi').disabled = !(isSuperAdmin || p.mutasi);
-      document.getElementById('btnActionAudit').disabled = !(isSuperAdmin || p.audit);
-      document.getElementById('btnActionPrint').disabled = false;
-      document.getElementById('btnActionDisposal').disabled = !(isSuperAdmin || p.disposal);
-      document.getElementById('btnActionDeletePermanent').disabled = !(isSuperAdmin);
-    }
-
-    function updateKelompokCardsSummary() {
-      let c1 = 0, c2 = 0, c3 = 0, c4 = 0;
-      DATA_INVENTARIS.forEach(a => {
-        const { namaKelompok } = getAssetKelompokConfig(a);
-        if (namaKelompok === 'Kelompok 1') c1++;
-        if (namaKelompok === 'Kelompok 2') c2++;
-        if (namaKelompok === 'Kelompok 3') c3++;
-        if (namaKelompok === 'Kelompok 4') c4++;
-      });
-      document.getElementById('countKelompok1').innerText = `${c1} Unit`;
-      document.getElementById('countKelompok2').innerText = `${c2} Unit`;
-      document.getElementById('countKelompok3').innerText = `${c3} Unit`;
-      document.getElementById('countKelompok4').innerText = `${c4} Unit`;
-    }
-
-    function previewSelectedImage(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const maxDim = 800;
-          let w = img.width, h = img.height;
-          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
-          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
-
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          selectedBase64Image = canvas.toDataURL('image/jpeg', 0.6);
-
-          const thumb = document.getElementById('imgPreviewThumb');
-          thumb.src = selectedBase64Image;
-          thumb.classList.remove('hidden');
-        };
-        img.src = evt.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function onFormKategoriChanged() {
-      const katName = document.getElementById('inputFormKategori').value;
-      const katObj = MASTER_KATEGORI.find(k => k.nama === katName);
-      if (katObj) {
-        document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tahun} Tahun - ${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tarifTahunan * 100}%/Thn)`;
-        
-        const prefix = katObj.prefix;
-        let maxIndex = 0;
-        DATA_INVENTARIS.forEach(a => {
-          if (a.kode.startsWith(prefix)) {
-            const num = parseInt(a.kode.replace(prefix, ''), 10);
-            if (!isNaN(num) && num > maxIndex) maxIndex = num;
-          }
-        });
-        document.getElementById('inputFormKode').value = prefix + String(maxIndex + 1).padStart(3, '0');
-      }
-    }
-
-    function openModalAddAsset(prefillBarcode = '') {
-      document.getElementById('modalAssetHeading').innerText = 'Registrasi Pengadaan Aset Baru';
-      document.getElementById('inputFormKode').value = prefillBarcode;
-      document.getElementById('inputFormNama').value = '';
-      document.getElementById('inputFormSerial').value = '';
-      document.getElementById('inputFormLokasi').value = '';
-      document.getElementById('inputFormHarga').value = '';
-      
-      const todayISO = new Date().toISOString().split('T')[0];
-      document.getElementById('inputFormTglBeli').value = todayISO;
-      document.getElementById('inputFormAuditDate').value = todayISO;
-      
-      document.getElementById('inputFormPIC').value = '';
-      document.getElementById('inputFormKet').value = '';
-      document.getElementById('inputFormFotoUrlExisting').value = '';
-      document.getElementById('inputFormFotoFile').value = '';
-      document.getElementById('imgPreviewThumb').classList.add('hidden');
-      selectedBase64Image = null;
-      document.getElementById('modalAssetForm').classList.remove('hidden');
-
-      if (!prefillBarcode) onFormKategoriChanged();
-    }
-
-    function actionEditAsset() {
-      if (!SELECTED_ROW_KODE) return;
-      const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
-      if (!asset) return;
-
-      document.getElementById('modalAssetHeading').innerText = 'Edit Spesifikasi & Riwayat Audit Aset';
-      document.getElementById('inputFormKode').value = asset.kode;
-      document.getElementById('inputFormKategori').value = asset.kategori;
-      document.getElementById('inputFormNama').value = asset.nama;
-      document.getElementById('inputFormStatus').value = asset.status;
-      document.getElementById('inputFormLokasi').value = asset.lokasi;
-      document.getElementById('inputFormHarga').value = 'Rp ' + Number(asset.hargaBeli || 0).toLocaleString('id-ID');
-      
-      document.getElementById('inputFormTglBeli').value = toInputDateFormat(asset.tglBeli);
-      document.getElementById('inputFormAuditDate').value = toInputDateFormat(asset.terakhirAudit);
-
-      document.getElementById('inputFormPIC').value = asset.pic || '';
-      document.getElementById('inputFormKet').value = asset.keterangan || '';
-      document.getElementById('inputFormFotoUrlExisting').value = asset.fotoUrl || '';
-      
-      const thumb = document.getElementById('imgPreviewThumb');
-      if (asset.fotoUrl) {
-        thumb.src = asset.fotoUrl;
-        thumb.classList.remove('hidden');
-      } else {
-        thumb.classList.add('hidden');
-      }
-      
-      selectedBase64Image = null;
-      document.getElementById('modalAssetForm').classList.remove('hidden');
-    }
-
-    async function handleFormAssetSubmit(e) {
-      e.preventDefault();
-      const btnSubmit = document.getElementById('btnSubmitFormAset');
-      btnSubmit.disabled = true;
-      btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
-
-      const kode = document.getElementById('inputFormKode').value.trim();
-      const nama = document.getElementById('inputFormNama').value.trim();
-      const kategori = document.getElementById('inputFormKategori').value;
-      const lokasi = document.getElementById('inputFormLokasi').value.trim();
-      const status = document.getElementById('inputFormStatus').value;
-      const harga = Number(document.getElementById('inputFormHarga').value.replace(/[^0-9]/g, '')) || 0;
-      
-      const rawTglBeli = document.getElementById('inputFormTglBeli').value;
-      const cleanTglBeli = cleanDateFormat(rawTglBeli);
-      
-      const rawAuditInput = document.getElementById('inputFormAuditDate').value;
-      const cleanAudit = rawAuditInput ? cleanDateFormat(rawAuditInput) : cleanTglBeli;
-
-      const pic = document.getElementById('inputFormPIC').value.trim();
-      const ket = document.getElementById('inputFormKet').value.trim();
-      const existingFoto = document.getElementById('inputFormFotoUrlExisting').value;
-
-      const katObj = MASTER_KATEGORI.find(k => k.nama === kategori);
-      const kelompok = katObj ? katObj.kelompok : 'Kelompok 1';
-
-      const assetObj = {
-        kode, nama, kategori, kelompok, lokasi, status,
-        tglBeli: cleanTglBeli, 
-        hargaBeli: harga, 
-        nilaiBuku: harga,
-        pic, tglKalibrasi: '-', keterangan: ket,
-        fotoUrl: existingFoto, 
-        terakhirAudit: cleanAudit
-      };
-
-      const existingIndex = DATA_INVENTARIS.findIndex(a => a.kode === kode);
-      if (existingIndex !== -1) {
-        DATA_INVENTARIS[existingIndex] = assetObj;
-      } else {
-        DATA_INVENTARIS.unshift(assetObj);
-      }
-      localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-
-      if (!MASTER_LOKASI.includes(lokasi)) {
-        MASTER_LOKASI.push(lokasi);
-        populateLokasiDropdowns();
-        renderGridLokasiCards();
-      }
-
-      executeDataFilters();
-      updateExecutiveKPIs();
-      closeModal('modalAssetForm');
-
-      const payload = {
-        action: "saveAsset",
-        asset: assetObj,
-        imageFile: selectedBase64Image ? { base64: selectedBase64Image, mimeType: "image/jpeg" } : null
-      };
-
-      sendPostToCloud(payload).then(res => {
-        if (res && res.photoUrl) {
-          assetObj.fotoUrl = res.photoUrl;
-          localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-          executeDataFilters();
-        }
-      });
-
-      btnSubmit.disabled = false;
-      btnSubmit.innerHTML = `<span>Simpan ke Cloud</span>`;
-      alert(`Aset "${nama}" (${kode}) berhasil disimpan.`);
-    }
-
-    async function actionDeleteAssetPermanently() {
-      if (!SELECTED_ROW_KODE) return;
-      const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
-      if (!asset) return;
-
-      if (!confirm(`Yakin ingin MENGHAPUS PERMANEN aset "${asset.nama}" (${asset.kode})?`)) {
-        return;
-      }
-
-      DATA_INVENTARIS = DATA_INVENTARIS.filter(a => a.kode !== SELECTED_ROW_KODE);
-      localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-      SELECTED_ROW_KODE = null;
-
-      executeDataFilters();
-      updateExecutiveKPIs();
-      updateKelompokCardsSummary();
-
-      sendPostToCloud({
-        action: "logAction",
-        log: { 
-          timestamp: `${cleanDateFormat(new Date())} ${new Date().toLocaleTimeString('id-ID')}`, 
-          kodeAset: asset.kode, 
-          tipeLog: "HAPUS PERMANEN", 
-          keterangan: `Aset ${asset.nama} dihapus permanen oleh ${CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : 'Admin'}`, 
-          picOrBiaya: "-" 
-        }
-      });
-
-      alert(`Aset ${asset.kode} berhasil dihapus permanen.`);
-    }
-
-    function handleAutocompleteLokasi(queryVal) {
-      const drop = document.getElementById('autocompleteDropdownLokasi');
-      const typoNotice = document.getElementById('typoNoticeLokasi');
-      const clean = queryVal.trim().toLowerCase();
-
-      if (clean.length < 2) {
-        drop.classList.add('hidden');
-        typoNotice.classList.add('hidden');
-        return;
-      }
-
-      const matches = MASTER_LOKASI.filter(l => l.toLowerCase().includes(clean));
-      drop.innerHTML = '';
-
-      if (matches.length > 0) {
-        drop.classList.remove('hidden');
-        matches.forEach(roomName => {
-          const opt = document.createElement('div');
-          opt.className = 'px-3 py-2 cursor-pointer hover:bg-slate-800 border-b border-slate-800/80 font-medium text-slate-200 flex justify-between items-center';
-          opt.innerHTML = `<span>📌 ${roomName}</span><span class="text-[10px] text-sky-400 font-bold">Pilih</span>`;
-          opt.onclick = () => {
-            document.getElementById('inputFormLokasi').value = roomName;
-            drop.classList.add('hidden');
-            typoNotice.classList.add('hidden');
-          };
-          drop.appendChild(opt);
-        });
-
-        const exactMatch = MASTER_LOKASI.find(r => r.toLowerCase() === clean);
-        if (exactMatch && document.getElementById('inputFormLokasi').value !== exactMatch) {
-          typoNotice.innerText = `⚠️ Ruangan "${exactMatch}" sudah ada. Disarankan memilih opsi resmi di atas.`;
-          typoNotice.classList.remove('hidden');
-        } else typoNotice.classList.add('hidden');
-      } else {
-        drop.classList.remove('hidden');
-        drop.innerHTML = `<div class="p-2.5 text-sky-400 bg-slate-950 text-[11px] font-semibold">➕ "${queryVal.trim()}" akan didaftarkan sebagai ruangan baru.</div>`;
-        typoNotice.classList.add('hidden');
-      }
-    }
-
-    // ================= MENAMPILKAN DETAIL ASET BESERTA ACCORDION LOG =================
-    function openHistoryDetailModal(kode) {
-      const asset = DATA_INVENTARIS.find(a => a.kode === kode);
-      if (!asset) return;
-
-      const depInfo = calculateDepreciationValues(asset);
-      document.getElementById('histDetailNamaAset').innerText = asset.nama;
-      document.getElementById('histDetailKodeAset').innerText = `${asset.kode} • PIC: ${asset.pic || '-'}`;
-      document.getElementById('histDetailStatusBadge').innerText = asset.status;
-      document.getElementById('histSummaryHargaAwal').innerText = `Rp ${Number(asset.hargaBeli || 0).toLocaleString('id-ID')}`;
-      document.getElementById('histSummaryKelompok').innerText = depInfo.kelompokStr;
-      document.getElementById('histSummaryNilaiBuku').innerText = `Rp ${Number(depInfo.nilaiBuku).toLocaleString('id-ID')}`;
-      document.getElementById('histSummaryAuditDate').innerText = asset.terakhirAudit;
-
-      const fotoEl = document.getElementById('histDetailFoto');
-      if (asset.fotoUrl) {
-        fotoEl.src = asset.fotoUrl;
-        fotoEl.classList.remove('hidden');
-      } else {
-        fotoEl.classList.add('hidden');
-      }
-
-      // Reset state accordion ke tertutup saat awal modal dibuka
-      const contentSvc = document.getElementById('boxHistoryServiceContent');
-      const iconSvc = document.getElementById('iconChevronService');
-      const contentMut = document.getElementById('boxHistoryMutasiContent');
-      const iconMut = document.getElementById('iconChevronMutasi');
-      
-      contentSvc.classList.add('hidden');
-      if (iconSvc) iconSvc.classList.remove('rotate-180');
-      contentMut.classList.add('hidden');
-      if (iconMut) iconMut.classList.remove('rotate-180');
-
-      const svcBox = document.getElementById('boxHistoryServiceList');
-      const mutBox = document.getElementById('boxHistoryMutasiList');
-      svcBox.innerHTML = '';
-      mutBox.innerHTML = '';
-
-      const relatedLogs = GLOBAL_LOGS.filter(l => l.kodeAset === asset.kode);
-      const svcLogs = relatedLogs.filter(l => l.tipeLog === 'SERVIS');
-      const mutLogs = relatedLogs.filter(l => l.tipeLog === 'MUTASI');
-
-      // Tampilkan jumlah log di badge
-      document.getElementById('badgeServiceCount').innerText = `${svcLogs.length} Log`;
-      document.getElementById('badgeMutasiCount').innerText = `${mutLogs.length} Log`;
-
-      if (svcLogs.length > 0) {
-        svcLogs.forEach(l => {
-          svcBox.innerHTML += `
-            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-              <div>
-                <strong class="text-white">${l.keterangan}</strong>
-                <span class="text-[10px] text-slate-400 block">${l.timestamp}</span>
-              </div>
-              <span class="font-semibold text-emerald-400">${l.picOrBiaya}</span>
-            </div>
-          `;
-        });
-      } else {
-        svcBox.innerHTML = `<p class="text-slate-500 italic">Belum ada riwayat perbaikan/servis.</p>`;
-      }
-
-      if (mutLogs.length > 0) {
-        mutLogs.forEach(l => {
-          mutBox.innerHTML += `
-            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-              <div>
-                <strong class="text-white">${l.keterangan}</strong>
-                <span class="text-[10px] text-slate-400 block">${l.timestamp}</span>
-              </div>
-              <span class="font-semibold text-sky-400">PIC: ${l.picOrBiaya}</span>
-            </div>
-          `;
-        });
-      } else {
-        mutBox.innerHTML = `<p class="text-slate-500 italic">Belum ada riwayat mutasi.</p>`;
-      }
-
-      document.getElementById('modalHistoryDetail').classList.remove('hidden');
-    }
-
-    function updateExecutiveKPIs() {
-      let totalHarga = 0, totalBuku = 0, overdueCount = 0;
-      const kelompokCounter = { 'Kelompok 1': 0, 'Kelompok 2': 0, 'Kelompok 3': 0, 'Kelompok 4': 0 };
-
-      DATA_INVENTARIS.forEach(a => {
-        totalHarga += Number(a.hargaBeli || 0);
-        const dep = calculateDepreciationValues(a);
-        totalBuku += dep.nilaiBuku;
-        if (calculateDaysFromAudit(a.terakhirAudit) > 30) overdueCount++;
-
-        const { namaKelompok } = getAssetKelompokConfig(a);
-        if (kelompokCounter[namaKelompok] !== undefined) kelompokCounter[namaKelompok]++;
-      });
-
-      document.getElementById('dashTotalAset').innerText = DATA_INVENTARIS.length;
-      document.getElementById('dashTotalHarga').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
-      document.getElementById('dashTotalNilaiBuku').innerText = 'Rp ' + totalBuku.toLocaleString('id-ID');
-      document.getElementById('dashTotalDepresiasi').innerText = 'Rp ' + Math.max(0, totalHarga - totalBuku).toLocaleString('id-ID');
-      document.getElementById('dashTotalOverdue').innerText = overdueCount;
-
-      if (chartStatusInstance) {
-        chartStatusInstance.data.labels = ['Nilai Buku Berjalan', 'Akumulasi Depresiasi'];
-        chartStatusInstance.data.datasets[0].data = [totalBuku, Math.max(0, totalHarga - totalBuku)];
-        chartStatusInstance.update();
-      }
-
-      if (chartKategoriInstance) {
-        chartKategoriInstance.data.labels = Object.keys(kelompokCounter);
-        chartKategoriInstance.data.datasets[0].data = Object.values(kelompokCounter);
-        chartKategoriInstance.update();
-      }
-    }
-
-    function initChartInstances() {
-      const ctx1 = document.getElementById('canvasChartStatus').getContext('2d');
-      chartStatusInstance = new Chart(ctx1, {
-        type: 'doughnut',
-        data: { labels: [], datasets: [{ data: [], backgroundColor: ['#0284c7', '#f59e0b'], borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
-      });
-
-      const ctx2 = document.getElementById('canvasChartKategori').getContext('2d');
-      chartKategoriInstance = new Chart(ctx2, {
-        type: 'bar',
-        data: { labels: [], datasets: [{ label: 'Jumlah Unit', data: [], backgroundColor: '#10b981', borderRadius: 6 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } } }
-      });
-    }
-
-    function openScannerModal() {
-      document.getElementById('modalCameraScanner').classList.remove('hidden');
-      document.getElementById('cameraStatusMsg').innerText = 'Mengakses kamera ponsel...';
-
-      cameraHtml5Scanner = new Html5Qrcode("cameraPreviewBox");
-      cameraHtml5Scanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        (decodedText) => {
-          closeScannerModal();
-          const matchAsset = DATA_INVENTARIS.find(a => a.kode.toUpperCase() === decodedText.toUpperCase());
-          if (matchAsset) {
-            selectTableRow(matchAsset.kode);
-            openHistoryDetailModal(matchAsset.kode);
-          } else {
-            if (confirm(`Kode "${decodedText}" belum terdaftar. Daftarkan baru?`)) {
-              openModalAddAsset(decodedText);
-            }
-          }
-        },
-        () => {}
-      ).catch(() => {
-        document.getElementById('cameraStatusMsg').innerText = 'Kamera tidak dapat diakses atau izin ditolak.';
-      });
-    }
-
-    function closeScannerModal() {
-      if (cameraHtml5Scanner) {
-        cameraHtml5Scanner.stop().then(() => {
-          cameraHtml5Scanner.clear();
-          document.getElementById('modalCameraScanner').classList.add('hidden');
-        }).catch(() => document.getElementById('modalCameraScanner').classList.add('hidden'));
-      } else {
-        document.getElementById('modalCameraScanner').classList.add('hidden');
-      }
-    }
-
-    function openReportModal() {
-      document.getElementById('modalReportCenter').classList.remove('hidden');
-    }
-
-    function exportDataToCSV() {
-      let csv = "Kode Aset,Nama Aset,Kategori,Kelompok,Lokasi,Tgl Beli,Harga Perolehan,Nilai Buku,Foto Drive\n";
-      DATA_INVENTARIS.forEach(a => {
-        const dep = calculateDepreciationValues(a);
-        csv += `"${a.kode}","${a.nama}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${a.fotoUrl}"\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `Laporan_Aset_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      closeModal('modalReportCenter');
-    }
-
-    function populateKategoriDropdowns() {
-      const inKat = document.getElementById('inputFormKategori');
-      inKat.innerHTML = '';
-      MASTER_KATEGORI.forEach(k => {
-        inKat.innerHTML += `<option value="${k.nama}">${k.nama}</option>`;
-      });
-    }
-
-    function populateLokasiDropdowns() {
-      const fLok = document.getElementById('filterLokasi');
-      fLok.innerHTML = '<option value="">Semua Ruangan</option>';
-      MASTER_LOKASI.forEach(l => {
-        fLok.innerHTML += `<option value="${l}">${l}</option>`;
-      });
-    }
-
-    function renderGridKategoriCards() {
-      const c = document.getElementById('gridContainerKategori');
-      c.innerHTML = '';
-      MASTER_KATEGORI.forEach(k => {
-        const count = DATA_INVENTARIS.filter(a => a.kategori === k.nama).length;
-        c.innerHTML += `
-          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between border-l-4 border-l-sky-500 shadow-md text-xs">
-            <div>
-              <div class="flex justify-between items-start">
-                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-sky-950 text-sky-400 border border-sky-800">${k.prefix}</span>
-                <span class="text-[10px] font-bold text-amber-400">${k.kelompok}</span>
-              </div>
-              <h4 class="font-bold text-white text-xs mt-2">${k.nama}</h4>
-              <p class="text-[11px] text-slate-400 mt-1">${k.desc}</p>
-            </div>
-            <p class="text-[11px] font-bold text-sky-400 mt-3 pt-2 border-t border-slate-800/80">Populasi: ${count} Unit</p>
-          </div>
-        `;
-      });
-    }
-
-    function renderGridLokasiCards() {
-      const c = document.getElementById('gridContainerLokasi');
-      c.innerHTML = '';
-      MASTER_LOKASI.forEach(l => {
-        const count = DATA_INVENTARIS.filter(a => a.lokasi === l).length;
-        c.innerHTML += `
-          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between border-l-4 border-l-emerald-500 shadow-md text-xs">
-            <div>
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">UNIT RUANGAN</span>
-              <h4 class="font-bold text-white text-xs mt-2">${l}</h4>
-            </div>
-            <p class="text-[11px] font-bold text-emerald-400 mt-3 pt-2 border-t border-slate-800/80">Terisi: ${count} Unit Aset</p>
-          </div>
-        `;
-      });
-    }
-
-    // ================= AKSI STOCK OPNAME / VERIFIKASI FISIK =================
-    async function actionVerifyAuditToday() {
-      if (!SELECTED_ROW_KODE) return;
-      const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
-      if (asset) {
-        const stamp = cleanDateFormat(new Date());
-        asset.terakhirAudit = stamp;
-        
-        GLOBAL_LOGS.unshift({
-          timestamp: stamp,
-          kodeAset: asset.kode,
-          tipeLog: "OPNAME",
-          keterangan: "Fisik Terverifikasi Nyata (Opname)",
-          picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
-        });
-        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
-        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-
-        await sendPostToCloud({
-          action: "logAction",
-          log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi Nyata", picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
-        });
-
-        await sendPostToCloud({
-          action: "saveAsset",
-          asset: asset
-        });
-        
-        executeDataFilters();
-        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal ${stamp}.`);
-      }
-    }
-
-    function actionOpenService() {
-      if (!SELECTED_ROW_KODE) return;
-      document.getElementById('inputSvcTindakan').value = '';
-      document.getElementById('inputSvcBiaya').value = '';
-      document.getElementById('inputSvcTeknisi').value = '';
-      document.getElementById('modalActionService').classList.remove('hidden');
-    }
-
-    async function submitServiceLog() {
-      const act = document.getElementById('inputSvcTindakan').value.trim();
-      const cost = Number(document.getElementById('inputSvcBiaya').value.replace(/[^0-9]/g, '')) || 0;
-      const tech = document.getElementById('inputSvcTeknisi').value.trim();
-      if (!act) return alert('Tindakan wajib diisi.');
-
-      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
-      if (a) {
-        const stamp = cleanDateFormat(new Date());
-        const costStr = `Rp ${cost.toLocaleString('id-ID')} (${tech || 'Teknisi RS'})`;
-
-        GLOBAL_LOGS.unshift({
-          timestamp: stamp,
-          kodeAset: a.kode,
-          tipeLog: "SERVIS",
-          keterangan: act,
-          picOrBiaya: costStr
-        });
-        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
-
-        await sendPostToCloud({
-          action: "logAction",
-          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "SERVIS", keterangan: act, picOrBiaya: costStr }
-        });
-        closeModal('modalActionService');
-        alert('Log pemeliharaan berhasil dicatat!');
-      }
-    }
-
-    function actionOpenMutasi() {
-      if (!SELECTED_ROW_KODE) return;
-      const sel = document.getElementById('inputMutasiTargetRoom');
-      sel.innerHTML = '';
-      MASTER_LOKASI.forEach(r => sel.innerHTML += `<option value="${r}">${r}</option>`);
-      document.getElementById('inputMutasiNewPIC').value = '';
-      document.getElementById('modalActionMutasi').classList.remove('hidden');
-    }
-
-    async function submitMutasiLog() {
-      const r = document.getElementById('inputMutasiTargetRoom').value;
-      const p = document.getElementById('inputMutasiNewPIC').value.trim();
-      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
-      if (a) {
-        const oldRoom = a.lokasi;
-        a.lokasi = r;
-        if (p) a.pic = p;
-        
-        const stamp = cleanDateFormat(new Date());
-        GLOBAL_LOGS.unshift({
-          timestamp: stamp,
-          kodeAset: a.kode,
-          tipeLog: "MUTASI",
-          keterangan: `Pindah dari [${oldRoom}] ke [${r}]`,
-          picOrBiaya: p || a.pic
-        });
-        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
-        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-
-        await sendPostToCloud({
-          action: "logAction",
-          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "MUTASI", keterangan: `Pindah dari [${oldRoom}] ke [${r}]`, picOrBiaya: p || a.pic }
-        });
-
-        await sendPostToCloud({
-          action: "saveAsset",
-          asset: a
-        });
-        
-        closeModal('modalActionMutasi');
-        executeDataFilters();
-        alert(`Aset berhasil dimutasikan ke ${r}!`);
-      }
-    }
-
-    function actionOpenDisposal() {
-      if (!SELECTED_ROW_KODE) return;
-      document.getElementById('inputDisposalDocNo').value = '';
-      document.getElementById('modalActionDisposal').classList.remove('hidden');
-    }
-
-    async function submitDisposalLog() {
-      const doc = document.getElementById('inputDisposalDocNo').value.trim();
-      const method = document.getElementById('inputDisposalMethod').value;
-      if (!doc) return alert('Nomor BAST wajib diisi.');
-      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
-      if (a) {
-        a.status = 'Disposed';
-        const stamp = cleanDateFormat(new Date());
-        
-        GLOBAL_LOGS.unshift({
-          timestamp: stamp,
-          kodeAset: a.kode,
-          tipeLog: "DISPOSAL",
-          keterangan: `Metode: ${method} (BAST: ${doc})`,
-          picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
-        });
-        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
-        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-
-        await sendPostToCloud({
-          action: "logAction",
-          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
-        });
-
-        await sendPostToCloud({
-          action: "saveAsset",
-          asset: a
-        });
-
-        closeModal('modalActionDisposal');
-        executeDataFilters();
-        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
-      }
-    }
-
-    // ================= CETAK STIKER QR CODE =================
-    function actionPrintBarcode() {
-      if (!SELECTED_ROW_KODE) {
-        alert("Pilih salah satu baris aset terlebih dahulu!");
-        return;
-      }
-      
-      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
-      if (!a) return;
-
-      const printBox = document.getElementById('printableReportArea');
-      printBox.classList.remove('hidden');
-
-      printBox.innerHTML = `
-        <div class="tj-asset-label">
-          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.8px solid #000000; padding-bottom: 1.5px;">
-            <img src="icon.svg" style="height: 11px; max-width: 75px; object-fit: contain;">
-            <span style="font-size: 6.5px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;">
-              LABEL ASET TETAP
-            </span>
-          </div>
-
-          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; margin: 1.5px 0;">
-            <div id="qrcodeStickerContainer" style="width: 19mm; height: 19mm; display: flex; align-items: center; justify-content: center; background: #fff;"></div>
-
-            <div style="flex: 1; padding-left: 2.5mm; text-align: left; overflow: hidden;">
-              <p style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 900; margin: 0; color: #0284c7; line-height: 1;">
-                ${a.kode}
-              </p>
-              <p style="font-size: 7px; font-weight: 800; margin: 2px 0 0 0; line-height: 1.1; max-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                ${a.nama}
-              </p>
-              <p style="font-size: 6px; color: #334155; margin: 2px 0 0 0; line-height: 1;">
-                Lokasi: <b>${a.lokasi || '-'}</b>
-              </p>
-            </div>
-          </div>
-
-          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 0.6px dotted #64748b; padding-top: 1px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 6px; color: #475569;">
-              SN: ${a.serialNumber || '-'}
-            </span>
-            <span style="font-size: 5.5px; color: #64748b; font-weight: bold;">
-              PT PHS &bull; RS GPI
-            </span>
-          </div>
-        </div>
-      `;
-
-      new QRCode(document.getElementById("qrcodeStickerContainer"), {
-        text: a.kode,
-        width: 72,
-        height: 72,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-
-      setTimeout(() => {
-        window.print();
-      }, 250);
-    }
-
-    function formatInputRupiahRealtime(el) {
-      let num = el.value.replace(/[^0-9]/g, '');
-      el.value = num ? 'Rp ' + Number(num).toLocaleString('id-ID') : '';
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-  </script>
-</body>
-</html>
+        if
