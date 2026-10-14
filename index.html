@@ -492,275 +492,225 @@
     </section>
 
   </main>
-  <!-- ================= MODAL PENDAFTARAN / EDIT ASET ================= -->
-  <div id="modalAssetForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 border border-slate-800 max-h-[92vh] overflow-y-auto custom-scroll shadow-2xl">
-      <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-        <div>
-          <h3 id="modalAssetHeading" class="text-base font-bold text-white">Registrasi Pengadaan Aset Baru</h3>
-          <p class="text-xs text-slate-400">Tersinkronisasi ke Google Sheets & Foto Google Drive</p>
-        </div>
-        <button type="button" onclick="closeModal('modalAssetForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+
+  <!-- ================= MODAL TAMBAH USER ================= -->
+  <div id="modalUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Tambah Pengguna Baru</h3>
+        <button type="button" onclick="closeModal('modalUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <form onsubmit="handleFormAssetSubmit(event)" class="space-y-3.5 text-xs">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Kategori Utama *</label>
-            <select id="inputFormKategori" required onchange="onFormKategoriChanged()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500"></select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Kelompok Depresiasi (Terkunci Otomatis)</label>
-            <input type="text" id="inputFormKelompokPenyusutan" readonly class="w-full bg-slate-800/80 border border-slate-700 p-2.5 rounded-xl font-semibold text-amber-400 cursor-not-allowed">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Kode Aset (Auto-Generated) *</label>
-            <input type="text" id="inputFormKode" required class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded-xl font-mono font-bold text-sky-400">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Status Siklus Hidup *</label>
-            <select id="inputFormStatus" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-              <option value="Operasional">Operasional (Normal)</option>
-              <option value="Dalam Perbaikan">Dalam Perbaikan</option>
-              <option value="Perlu Kalibrasi">Perlu Kalibrasi</option>
-              <option value="Disposed">Disposed / Dihapuskan</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">Nama Barang & Spesifikasi Lengkap *</label>
-          <input type="text" id="inputFormNama" required placeholder="Contoh: Mesin USG Mindray Resona 7" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-slate-100">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">Foto Fisik Aset (Otomatis Kompresi Ringan)</label>
-          <div class="flex items-center gap-3">
-            <input type="file" id="inputFormFotoFile" accept="image/*" capture="environment" onchange="previewSelectedImage(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer">
-            <img id="imgPreviewThumb" class="hidden h-10 w-10 object-cover rounded-lg border border-slate-700">
-          </div>
-          <input type="hidden" id="inputFormFotoUrlExisting">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Nomor Seri Pabrik (SN) / No PO</label>
-            <input type="text" id="inputFormSerial" placeholder="Contoh: SN-8829102-MND" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Tanggal Perolehan (Tgl Beli) *</label>
-            <input type="date" id="inputFormTglBeli" required class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3" id="boxFormAuditContainer">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Tanggal Verifikasi Opname / Audit Terakhir</label>
-            <input type="date" id="inputFormAuditDate" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-sky-400">
-            <p class="text-[9px] text-slate-500 mt-0.5">*Otomatis diselaraskan dengan Tgl Beli jika baru dibuat</p>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">Penanggung Jawab (PIC Unit)</label>
-            <input type="text" id="inputFormPIC" placeholder="Nama Kepala Unit / Teknisi" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-          </div>
-        </div>
-
-        <div class="relative">
-          <label class="block font-bold text-slate-300 mb-1">Lokasi Ruangan / Unit Penempatan *</label>
-          <input type="text" id="inputFormLokasi" required autocomplete="off" oninput="handleAutocompleteLokasi(this.value)" placeholder="Ketik minimal 2 huruf untuk rekomendasi ruangan..." class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-          <div id="autocompleteDropdownLokasi" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 max-h-40 overflow-y-auto custom-scroll"></div>
-          <p id="typoNoticeLokasi" class="text-[10px] text-amber-400 font-bold mt-1 hidden"></p>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">Harga Beli / Perolehan (Rp) *</label>
-          <input type="text" id="inputFormHarga" required oninput="formatInputRupiahRealtime(this)" placeholder="Rp 0" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-emerald-400">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">Keterangan Tambahan / Vendor</label>
-          <textarea id="inputFormKet" rows="2" placeholder="Nama vendor, garansi, dsb." class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-slate-200"></textarea>
-        </div>
-
-        <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
-          <button type="button" onclick="closeModal('modalAssetForm')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">Batal</button>
-          <button id="btnSubmitFormAset" type="submit" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold shadow-lg shadow-sky-600/30 flex items-center gap-2">
-            <span>Simpan ke Cloud</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ================= MODAL DETAIL RIWAYAT (DENGAN ACCORDION) ================= -->
-  <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
-      <div class="flex justify-between items-start border-b border-slate-800 pb-3">
-        <div class="flex gap-3 items-center">
-          <img id="histDetailFoto" src="" class="hidden h-14 w-14 object-cover rounded-xl border border-slate-700 shadow-md">
-          <div>
-            <span id="histDetailStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Operasional</span>
-            <h3 id="histDetailNamaAset" class="text-base font-bold text-white mt-1">Nama Aset</h3>
-            <p id="histDetailKodeAset" class="text-xs font-mono font-bold text-sky-400">AST-000</p>
-          </div>
-        </div>
-        <button type="button" onclick="closeModal('modalHistoryDetail')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Username Login *</label>
+        <input type="text" id="newUsername" placeholder="contoh: staf_medis" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
-
-      <div class="grid grid-cols-4 gap-2 p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-center">
-        <div>
-          <span class="text-slate-400 text-[10px] block">Harga Perolehan</span>
-          <strong id="histSummaryHargaAwal" class="text-slate-200">Rp 0</strong>
-        </div>
-        <div>
-          <span class="text-slate-400 text-[10px] block">Masa Manfaat</span>
-          <strong id="histSummaryKelompok" class="text-amber-400">4 Thn (25%)</strong>
-        </div>
-        <div>
-          <span class="text-slate-400 text-[10px] block">Nilai Buku Saat Ini</span>
-          <strong id="histSummaryNilaiBuku" class="text-emerald-400">Rp 0</strong>
-        </div>
-        <div>
-          <span class="text-slate-400 text-[10px] block">Audit Terakhir</span>
-          <strong id="histSummaryAuditDate" class="text-sky-400">-</strong>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Password *</label>
+        <input type="password" id="newPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
+        <input type="text" id="newNamaLengkap" placeholder="contoh: Budi Santoso" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Unit Kerja / Ruangan</label>
+        <select id="newUnitKerja" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200"></select>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1.5">Centang Hak Akses / Otorisasi:</label>
+        <div class="space-y-1.5 text-slate-300">
+          <label class="flex items-center gap-2"><input type="checkbox" id="permAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan & Verifikasi Opname</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal Aset</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
         </div>
       </div>
-
-      <!-- KOTAK LOG 1: SERVIS (ACCORDION) -->
-      <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
-        <button type="button" onclick="toggleAccordion('boxHistoryServiceContent', 'iconChevronService')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
-          <span class="flex items-center gap-2">
-            <i class="fa-solid fa-wrench text-sky-400"></i>
-            <span>Log Pemeliharaan, Kalibrasi & Servis</span>
-            <span id="badgeServiceCount" class="text-[10px] bg-sky-950 text-sky-400 border border-sky-800/80 px-2 py-0.5 rounded-full font-mono">0</span>
-          </span>
-          <i id="iconChevronService" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"></i>
-        </button>
-        <div id="boxHistoryServiceContent" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60 max-h-60 overflow-y-auto custom-scroll">
-          <div id="boxHistoryServiceList" class="space-y-2">
-            <p class="text-slate-500 italic">Belum ada riwayat perbaikan/servis.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- KOTAK LOG 2: MUTASI (ACCORDION) -->
-      <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
-        <button type="button" onclick="toggleAccordion('boxHistoryMutasiContent', 'iconChevronMutasi')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
-          <span class="flex items-center gap-2">
-            <i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i>
-            <span>Log Mutasi Ruangan & PIC</span>
-            <span id="badgeMutasiCount" class="text-[10px] bg-teal-950 text-teal-400 border border-teal-800/80 px-2 py-0.5 rounded-full font-mono">0</span>
-          </span>
-          <i id="iconChevronMutasi" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"></i>
-        </button>
-        <div id="boxHistoryMutasiContent" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60 max-h-60 overflow-y-auto custom-scroll">
-          <div id="boxHistoryMutasiList" class="space-y-2">
-            <p class="text-slate-500 italic">Belum ada riwayat mutasi.</p>
-          </div>
-        </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalUserForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitSaveNewUser()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold">Simpan User</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL SERVIS -->
-  <div id="modalActionService" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
-      <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-wrench text-sky-400"></i> Catat Servis / Kalibrasi</h3>
+  <!-- ================= MODAL EDIT USER (KHUSUS ADMIN) ================= -->
+  <div id="modalEditUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Edit Pengguna & Password</h3>
+        <button type="button" onclick="closeModal('modalEditUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <input type="hidden" id="editUserIndex">
       <div>
-        <label class="block text-slate-400 font-bold mb-1">Tindakan Perbaikan / Kalibrasi *</label>
-        <input type="text" id="inputSvcTindakan" placeholder="Contoh: Kalibrasi Tahunan, Ganti Sensor" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+        <label class="block text-slate-400 font-bold mb-1">Username (Terkunci)</label>
+        <input type="text" id="editUsername" readonly class="w-full bg-slate-800/80 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-400 cursor-not-allowed">
       </div>
       <div>
-        <label class="block text-slate-400 font-bold mb-1">Biaya Perbaikan (Rp)</label>
-        <input type="text" id="inputSvcBiaya" oninput="formatInputRupiahRealtime(this)" placeholder="Rp 0" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-emerald-400">
+        <label class="block text-slate-400 font-bold mb-1">Password Akun *</label>
+        <input type="text" id="editPassword" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-amber-400 font-mono">
       </div>
       <div>
-        <label class="block text-slate-400 font-bold mb-1">Nama Teknisi / Rekanan</label>
-        <input type="text" id="inputSvcTeknisi" placeholder="Teknisi RS / PT Vendor" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+        <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
+        <input type="text" id="editNamaLengkap" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
-      <div class="pt-2 flex justify-end gap-2">
-        <button type="button" onclick="closeModal('modalActionService')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button type="button" onclick="submitServiceLog()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan ke Cloud</button>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Unit Kerja / Ruangan</label>
+        <select id="editUnitKerja" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200"></select>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1.5">Centang Hak Akses:</label>
+        <div class="space-y-1.5 text-slate-300">
+          <label class="flex items-center gap-2"><input type="checkbox" id="editPermAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="editPermEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="editPermService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="editPermMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="editPermAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan Opname Fisik</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="editPermDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="editPermReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
+        </div>
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalEditUserForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitUpdateUser()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold">Simpan Perubahan</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL MUTASI -->
-  <div id="modalActionMutasi" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
-      <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Mutasi Ruangan & Lokasi</h3>
-      <div>
-        <label class="block text-slate-400 font-bold mb-1">Pindah ke Ruangan Baru *</label>
-        <select id="inputMutasiTargetRoom" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200"></select>
+  <!-- ================= MODAL GANTI PASSWORD MANDIRI ================= -->
+  <div id="modalChangePassword" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-key text-amber-400"></i> Ubah Password Akun
+        </h3>
+        <button type="button" onclick="closeModal('modalChangePassword')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div>
-        <label class="block text-slate-400 font-bold mb-1">Penanggung Jawab Penerima (PIC Baru) *</label>
-        <input type="text" id="inputMutasiNewPIC" placeholder="Nama Staf / Kepala Ruangan Baru" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+        <label class="block text-slate-400 font-bold mb-1">Password Baru *</label>
+        <input type="password" id="inputNewSelfPassword" placeholder="Masukkan password baru" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
-      <div class="pt-2 flex justify-end gap-2">
-        <button type="button" onclick="closeModal('modalActionMutasi')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button type="button" onclick="submitMutasiLog()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold">Sahkan Mutasi</button>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Konfirmasi Password Baru *</label>
+        <input type="password" id="inputConfirmSelfPassword" placeholder="Ulangi password baru" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalChangePassword')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitChangeSelfPassword()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan Password</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DISPOSAL -->
-  <div id="modalActionDisposal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-rose-900/50 space-y-3.5 text-xs shadow-2xl">
-      <div class="flex items-center gap-2 text-rose-400">
-        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-        <h3 class="text-sm font-bold text-white">Penghapusan Aset (Disposal)</h3>
+  <!-- ================= MODAL TAMBAH KATEGORI ================= -->
+  <div id="modalKategoriForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Tambah Kategori Baru</h3>
+        <button type="button" onclick="closeModal('modalKategoriForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div>
-        <label class="block text-slate-300 font-bold mb-1">Metode Penghapusan *</label>
-        <select id="inputDisposalMethod" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
-          <option value="Afkir / Rusak Total">Afkir / Rusak Total (Scrap)</option>
-          <option value="Dijual / Lelang">Dijual / Lelang Aset Bekas</option>
-          <option value="Dihibahkan">Dihibahkan</option>
-          <option value="Hilang">Hilang</option>
+        <label class="block text-slate-400 font-bold mb-1">Kode Prefix (2 Huruf Kapital) *</label>
+        <input type="text" id="newKatPrefix" maxlength="3" placeholder="contoh: LB" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono uppercase font-bold text-sky-400">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Kategori *</label>
+        <input type="text" id="newKatNama" placeholder="contoh: Alat Laboratorium Klinis" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Kelompok Masa Manfaat *</label>
+        <select id="newKatKelompok" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          <option value="Kelompok 1">Kelompok 1 (4 Tahun / 25%)</option>
+          <option value="Kelompok 2">Kelompok 2 (8 Tahun / 12.5%)</option>
+          <option value="Kelompok 3">Kelompok 3 (16 Tahun / 6.25%)</option>
+          <option value="Kelompok 4">Kelompok 4 (20 Tahun / 5%)</option>
         </select>
       </div>
       <div>
-        <label class="block text-slate-300 font-bold mb-1">Nomor Berita Acara (BAST Penghapusan) *</label>
-        <input type="text" id="inputDisposalDocNo" placeholder="Contoh: BA-DISP/PHS/2026/045" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
+        <label class="block text-slate-400 font-bold mb-1">Deskripsi Singkat</label>
+        <input type="text" id="newKatDesc" placeholder="contoh: Mikroskop, Centrifuge, Tabung Reaksi" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
       <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
-        <button type="button" onclick="closeModal('modalActionDisposal')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button type="button" onclick="submitDisposalLog()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold">Sahkan Penghapusan</button>
+        <button type="button" onclick="closeModal('modalKategoriForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitSaveNewKategori()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan Kategori</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL LAPORAN -->
-  <div id="modalReportCenter" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
+  <!-- ================= MODAL TAMBAH LOKASI ================= -->
+  <div id="modalLokasiForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Tambah Unit Ruangan Baru</h3>
+        <button type="button" onclick="closeModal('modalLokasiForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Unit / Ruangan *</label>
+        <input type="text" id="newLokasiNama" placeholder="contoh: Ruang Fisioterapi Lt. 1" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalLokasiForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitSaveNewLokasi()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Simpan Ruangan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL IMPORT DARI EXCEL / CSV ================= -->
+  <div id="modalImportExcel" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <div>
-          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Laporan Rekapitulasi & Depresiasi Aset</h3>
-          <p class="text-xs text-slate-400">Ekspor rekapitulasi nilai buku sesuai 4 Kelompok Masa Manfaat</p>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-file-excel text-emerald-400"></i> Import Data Aset dari Excel / CSV
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Kode Barcode & Masa Manfaat akan digenerate otomatis</p>
         </div>
-        <button type="button" onclick="closeModal('modalReportCenter')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button type="button" onclick="closeModal('modalImportExcel')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
-        <button type="button" onclick="exportDataToCSV()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5">
-          <i class="fa-solid fa-file-excel text-emerald-400"></i> Unduh Excel (.CSV)
+
+      <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-slate-200">1. Unduh Template Format Excel:</span>
+          <button type="button" onclick="downloadExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-download"></i> Unduh File Template
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">Gunakan file template ini agar nama kolom dan urutan data sesuai dengan database.</p>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-300 mb-1.5">2. Pilih File Excel / CSV yang sudah diisi:</label>
+        <input type="file" id="inputExcelFile" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelected(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-950 border border-slate-700 rounded-xl p-1.5">
+      </div>
+
+      <div id="boxImportPreview" class="hidden space-y-2">
+        <div class="flex justify-between items-center text-slate-300 font-bold">
+          <span>Pratinjau Data (<span id="countImportPreview">0</span> Baris Terbaca):</span>
+          <span class="text-[10px] text-sky-400 font-mono">*Kode Barcode Otomatis Diberikan</span>
+        </div>
+        <div class="max-h-52 overflow-y-auto custom-scroll border border-slate-800 rounded-xl bg-slate-950">
+          <table class="w-full text-left text-[11px] border-collapse">
+            <thead class="bg-slate-900 text-slate-400 sticky top-0 border-b border-slate-800">
+              <tr>
+                <th class="p-2">Kode Auto</th>
+                <th class="p-2">Nama Barang</th>
+                <th class="p-2">Kategori</th>
+                <th class="p-2">Ruangan</th>
+                <th class="p-2">Tgl Beli</th>
+                <th class="p-2">Harga</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyImportPreview" class="divide-y divide-slate-800/80 text-slate-300"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalImportExcel')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" id="btnSubmitImportBatch" disabled onclick="submitBatchImportToCloud()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30">
+          <span>Simpan Seluruh Aset ke Cloud</span>
         </button>
       </div>
-    </div>
-  </div>
-
-  <!-- MODAL SCANNER HP -->
-  <div id="modalCameraScanner" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 text-center relative shadow-2xl">
-      <button type="button" onclick="closeScannerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-      <div class="w-12 h-12 rounded-2xl bg-sky-950 text-sky-400 flex items-center justify-center mx-auto mb-2 text-xl border border-sky-800/60"><i class="fa-solid fa-camera"></i></div>
-      <h3 class="text-base font-bold text-white">Scan QR / Barcode Aset</h3>
-      <p class="text-xs text-slate-400 mb-4">Arahkan kamera ponsel tepat ke stiker QR Code</p>
-      <div id="cameraPreviewBox" class="overflow-hidden rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950 min-h-[220px]"></div>
-      <div id="cameraStatusMsg" class="text-xs font-bold text-sky-400 mt-3">Mempersiapkan kamera...</div>
     </div>
   </div>
 
@@ -994,14 +944,15 @@
       }
 
       STORED_USERS.forEach((u, idx) => {
+        const permsObj = u.permissions || {};
         const perms = [];
-        if (u.permissions.add) perms.push("Tambah");
-        if (u.permissions.edit) perms.push("Edit");
-        if (u.permissions.service) perms.push("Servis");
-        if (u.permissions.mutasi) perms.push("Mutasi");
-        if (u.permissions.audit) perms.push("Opname");
-        if (u.permissions.disposal) perms.push("Disposal");
-        if (u.permissions.report) perms.push("Laporan");
+        if (permsObj.add) perms.push("Tambah");
+        if (permsObj.edit) perms.push("Edit");
+        if (permsObj.service) perms.push("Servis");
+        if (permsObj.mutasi) perms.push("Mutasi");
+        if (permsObj.audit) perms.push("Opname");
+        if (permsObj.disposal) perms.push("Disposal");
+        if (permsObj.report) perms.push("Laporan");
 
         tbody.innerHTML += `
           <tr class="hover:bg-slate-800/40">
@@ -1027,6 +978,7 @@
       document.getElementById('newUsername').value = '';
       document.getElementById('newPassword').value = '';
       document.getElementById('newNamaLengkap').value = '';
+      populateUnitKerjaDropdowns();
       document.getElementById('newUnitKerja').value = '';
       ['permAdd', 'permEdit', 'permService', 'permMutasi', 'permAudit', 'permDisposal', 'permReport'].forEach(id => {
         const el = document.getElementById(id);
@@ -1069,6 +1021,8 @@
       const user = STORED_USERS[idx];
       if (!user) return;
 
+      populateUnitKerjaDropdowns();
+
       document.getElementById('editUserIndex').value = idx;
       document.getElementById('editUsername').value = user.username;
       document.getElementById('editPassword').value = user.password;
@@ -1076,13 +1030,13 @@
       document.getElementById('editUnitKerja').value = user.unit || '';
 
       const p = user.permissions || {};
-      document.getElementById('editPermAdd').checked = !!p.add;
-      document.getElementById('editPermEdit').checked = !!p.edit;
-      document.getElementById('editPermService').checked = !!p.service;
-      document.getElementById('editPermMutasi').checked = !!p.mutasi;
-      document.getElementById('editPermAudit').checked = !!p.audit;
-      document.getElementById('editPermDisposal').checked = !!p.disposal;
-      document.getElementById('editPermReport').checked = !!p.report;
+      document.getElementById('editPermAdd').checked = Boolean(p.add);
+      document.getElementById('editPermEdit').checked = Boolean(p.edit);
+      document.getElementById('editPermService').checked = Boolean(p.service);
+      document.getElementById('editPermMutasi').checked = Boolean(p.mutasi);
+      document.getElementById('editPermAudit').checked = Boolean(p.audit);
+      document.getElementById('editPermDisposal').checked = Boolean(p.disposal);
+      document.getElementById('editPermReport').checked = Boolean(p.report);
 
       document.getElementById('modalEditUserForm').classList.remove('hidden');
     }
