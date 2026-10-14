@@ -37,6 +37,7 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: #090d16; }
 
+    /* Pengaturan Cetak Stiker Tom & Jerry 50x32 mm */
     @media print {
       body * { visibility: hidden !important; }
       @page { size: auto; margin: 0mm !important; }
@@ -76,7 +77,7 @@
 </head>
 <body class="min-h-screen flex flex-col font-sans antialiased text-slate-100 bg-slate-950">
 
-  <!-- ================= LAYAR LOGIN (BEBAS RELOAD LIAR) ================= -->
+  <!-- ================= LAYAR LOGIN ================= -->
   <div id="loginScreenOverlay" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
       <div class="h-14 w-auto bg-white p-1.5 rounded-2xl shadow-md border border-slate-200 inline-flex items-center justify-center">
@@ -468,6 +469,97 @@
 
   </main>
 
+  <!-- ================= MODAL TAMBAH USER ================= -->
+  <div id="modalUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Tambah Pengguna Baru</h3>
+        <button type="button" onclick="closeModal('modalUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Username Login *</label>
+        <input type="text" id="newUsername" placeholder="contoh: staf_medis" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Password *</label>
+        <input type="password" id="newPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
+        <input type="text" id="newNamaLengkap" placeholder="contoh: Budi Santoso" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1.5">Centang Hak Akses / Otorisasi:</label>
+        <div class="space-y-1.5 text-slate-300">
+          <label class="flex items-center gap-2"><input type="checkbox" id="permAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan & Verifikasi Opname</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal Aset</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="permReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
+        </div>
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalUserForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitSaveNewUser()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold">Simpan User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH KATEGORI ================= -->
+  <div id="modalKategoriForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Tambah Kategori Baru</h3>
+        <button type="button" onclick="closeModal('modalKategoriForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Kode Prefix (2 Huruf Kapital) *</label>
+        <input type="text" id="newKatPrefix" maxlength="3" placeholder="contoh: LB" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono uppercase font-bold text-sky-400">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Kategori *</label>
+        <input type="text" id="newKatNama" placeholder="contoh: Alat Laboratorium Klinis" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Kelompok Masa Manfaat *</label>
+        <select id="newKatKelompok" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          <option value="Kelompok 1">Kelompok 1 (4 Tahun / 25%)</option>
+          <option value="Kelompok 2">Kelompok 2 (8 Tahun / 12.5%)</option>
+          <option value="Kelompok 3">Kelompok 3 (16 Tahun / 6.25%)</option>
+          <option value="Kelompok 4">Kelompok 4 (20 Tahun / 5%)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Deskripsi Singkat</label>
+        <input type="text" id="newKatDesc" placeholder="contoh: Mikroskop, Centrifuge, Tabung Reaksi" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalKategoriForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitSaveNewKategori()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan Kategori</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH LOKASI ================= -->
+  <div id="modalLokasiForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white">Tambah Unit Ruangan Baru</h3>
+        <button type="button" onclick="closeModal('modalLokasiForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Unit / Ruangan *</label>
+        <input type="text" id="newLokasiNama" placeholder="contoh: Ruang Fisioterapi Lt. 1" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalLokasiForm')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitSaveNewLokasi()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Simpan Ruangan</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MODAL IMPORT DARI EXCEL / CSV ================= -->
   <div id="modalImportExcel" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
@@ -478,13 +570,13 @@
           </h3>
           <p class="text-xs text-slate-400 mt-0.5">Kode Barcode & Masa Manfaat akan digenerate otomatis</p>
         </div>
-        <button onclick="closeModal('modalImportExcel')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button type="button" onclick="closeModal('modalImportExcel')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
         <div class="flex justify-between items-center">
           <span class="font-bold text-slate-200">1. Unduh Template Format Excel:</span>
-          <button onclick="downloadExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
+          <button type="button" onclick="downloadExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
             <i class="fa-solid fa-download"></i> Unduh File Template
           </button>
         </div>
@@ -520,7 +612,7 @@
 
       <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
         <button type="button" onclick="closeModal('modalImportExcel')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button id="btnSubmitImportBatch" disabled onclick="submitBatchImportToCloud()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30">
+        <button type="button" id="btnSubmitImportBatch" disabled onclick="submitBatchImportToCloud()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30">
           <span>Simpan Seluruh Aset ke Cloud</span>
         </button>
       </div>
@@ -535,7 +627,7 @@
           <h3 id="modalAssetHeading" class="text-base font-bold text-white">Registrasi Pengadaan Aset Baru</h3>
           <p class="text-xs text-slate-400">Tersinkronisasi ke Google Sheets & Foto Google Drive</p>
         </div>
-        <button onclick="closeModal('modalAssetForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button type="button" onclick="closeModal('modalAssetForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <form onsubmit="handleFormAssetSubmit(event)" class="space-y-3.5 text-xs">
@@ -630,7 +722,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL DETAIL RIWAYAT (DENGAN ACCORDION EXPAND-COLLAPSE) ================= -->
+  <!-- ================= MODAL DETAIL RIWAYAT ================= -->
   <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-800 pb-3">
@@ -642,7 +734,7 @@
             <p id="histDetailKodeAset" class="text-xs font-mono font-bold text-sky-400">AST-000</p>
           </div>
         </div>
-        <button onclick="closeModal('modalHistoryDetail')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button type="button" onclick="closeModal('modalHistoryDetail')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <div class="grid grid-cols-4 gap-2 p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-center">
@@ -664,7 +756,7 @@
         </div>
       </div>
 
-      <!-- KOTAK LOG 1: RIWAYAT PEMELIHARAAN (ACCORDION) -->
+      <!-- KOTAK LOG 1: SERVIS (ACCORDION) -->
       <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
         <button type="button" onclick="toggleAccordion('boxHistoryServiceContent', 'iconChevronService')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
           <span class="flex items-center gap-2">
@@ -681,7 +773,7 @@
         </div>
       </div>
 
-      <!-- KOTAK LOG 2: RIWAYAT MUTASI (ACCORDION) -->
+      <!-- KOTAK LOG 2: MUTASI (ACCORDION) -->
       <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
         <button type="button" onclick="toggleAccordion('boxHistoryMutasiContent', 'iconChevronMutasi')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
           <span class="flex items-center gap-2">
@@ -717,8 +809,8 @@
         <input type="text" id="inputSvcTeknisi" placeholder="Teknisi RS / PT Vendor" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
       <div class="pt-2 flex justify-end gap-2">
-        <button onclick="closeModal('modalActionService')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button onclick="submitServiceLog()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan ke Cloud</button>
+        <button type="button" onclick="closeModal('modalActionService')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitServiceLog()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan ke Cloud</button>
       </div>
     </div>
   </div>
@@ -736,8 +828,8 @@
         <input type="text" id="inputMutasiNewPIC" placeholder="Nama Staf / Kepala Ruangan Baru" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
       <div class="pt-2 flex justify-end gap-2">
-        <button onclick="closeModal('modalActionMutasi')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button onclick="submitMutasiLog()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold">Sahkan Mutasi</button>
+        <button type="button" onclick="closeModal('modalActionMutasi')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitMutasiLog()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold">Sahkan Mutasi</button>
       </div>
     </div>
   </div>
@@ -763,8 +855,8 @@
         <input type="text" id="inputDisposalDocNo" placeholder="Contoh: BA-DISP/PHS/2026/045" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
       </div>
       <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
-        <button onclick="closeModal('modalActionDisposal')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
-        <button onclick="submitDisposalLog()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold">Sahkan Penghapusan</button>
+        <button type="button" onclick="closeModal('modalActionDisposal')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitDisposalLog()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold">Sahkan Penghapusan</button>
       </div>
     </div>
   </div>
@@ -777,10 +869,10 @@
           <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Laporan Rekapitulasi & Depresiasi Aset</h3>
           <p class="text-xs text-slate-400">Ekspor rekapitulasi nilai buku sesuai 4 Kelompok Masa Manfaat</p>
         </div>
-        <button onclick="closeModal('modalReportCenter')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button type="button" onclick="closeModal('modalReportCenter')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
-        <button onclick="exportDataToCSV()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5">
+        <button type="button" onclick="exportDataToCSV()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5">
           <i class="fa-solid fa-file-excel text-emerald-400"></i> Unduh Excel (.CSV)
         </button>
       </div>
@@ -790,7 +882,7 @@
   <!-- MODAL SCANNER HP -->
   <div id="modalCameraScanner" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 text-center relative shadow-2xl">
-      <button onclick="closeScannerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <button type="button" onclick="closeScannerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       <div class="w-12 h-12 rounded-2xl bg-sky-950 text-sky-400 flex items-center justify-center mx-auto mb-2 text-xl border border-sky-800/60"><i class="fa-solid fa-camera"></i></div>
       <h3 class="text-base font-bold text-white">Scan QR / Barcode Aset</h3>
       <p class="text-xs text-slate-400 mb-4">Arahkan kamera ponsel tepat ke stiker QR Code</p>
@@ -822,7 +914,7 @@
       'Kelompok 4': { tahun: 20, tarifTahunan: 0.05, label: 'Kelompok 4 (20 Thn / 5%)' }
     };
 
-    let MASTER_KATEGORI = [
+    let MASTER_KATEGORI = JSON.parse(localStorage.getItem("APP_MASTER_KATEGORI")) || [
       { prefix: 'IT', nama: 'Perangkat IT & Jaringan', kelompok: 'Kelompok 1', desc: 'Komputer, Laptop, Printer, Scanner, HT' },
       { prefix: 'EU', nama: 'Elektronik & Utility', kelompok: 'Kelompok 2', desc: 'AC Split/Central, Genset, Panel Listrik, Pompa Air' },
       { prefix: 'KO', nama: 'Kendaraan Operasional', kelompok: 'Kelompok 2', desc: 'Ambulans, Mobil Dinas Operasional' },
@@ -831,7 +923,7 @@
       { prefix: 'TK', nama: 'Tangki & Infrastruktur Berat', kelompok: 'Kelompok 4', desc: 'Tangki Oksigen Cair Cryogenic 5000L, Perpipaan Sentral' }
     ];
 
-    let MASTER_LOKASI = [
+    let MASTER_LOKASI = JSON.parse(localStorage.getItem("APP_MASTER_LOKASI")) || [
       'Instalasi Gawat Darurat (IGD)',
       'Intensive Care Unit (ICU)',
       'Ruang Operasi (OK) Bedah Sentral',
@@ -871,11 +963,26 @@
         executeDataFilters();
         fetchCloudData();
       } catch (err) {
-        console.error("Inisialisasi DOM terlindungi:", err);
+        console.error("Inisialisasi aplikasi aman:", err);
       }
     });
 
-    // ================= FUNGSI LOGIN AMAN =================
+    // ================= FUNGSI BUKA-TUTUP ACCORDION =================
+    function toggleAccordion(contentId, iconId) {
+      const content = document.getElementById(contentId);
+      const icon = document.getElementById(iconId);
+      if (!content) return;
+
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+      }
+    }
+
+    // ================= AUTENTIKASI LOGIN =================
     function handleLoginSubmit() {
       const uEl = document.getElementById('loginUsername');
       const pEl = document.getElementById('loginPassword');
@@ -891,7 +998,6 @@
         return;
       }
 
-      // Verifikasi Super Admin
       if (u === SUPER_ADMIN.username && p === SUPER_ADMIN.password) {
         CURRENT_LOGGED_USER = SUPER_ADMIN;
         sessionStorage.setItem("ACTIVE_USER_SESSION", JSON.stringify(CURRENT_LOGGED_USER));
@@ -900,7 +1006,6 @@
         return;
       }
 
-      // Verifikasi Staff
       const found = STORED_USERS.find(usr => usr.username === u && usr.password === p);
       if (found) {
         CURRENT_LOGGED_USER = found;
@@ -937,6 +1042,7 @@
       document.getElementById('btnHeaderReport').style.display = (isSuperAdmin || p.report) ? '' : 'none';
     }
 
+    // ================= PENGELOLAAN USER =================
     function renderStaffUsersList() {
       const tbody = document.getElementById('userListTableBody');
       if (!tbody) return;
@@ -963,7 +1069,7 @@
             <td class="p-3 font-semibold text-white">${u.nama || '-'}</td>
             <td class="p-3 text-[11px] text-slate-400">${perms.join(", ") || "Hanya Lihat"}</td>
             <td class="p-3 text-center">
-              <button onclick="deleteStaffUser(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+              <button type="button" onclick="deleteStaffUser(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
@@ -971,13 +1077,16 @@
     }
 
     function openModalAddUser() {
+      const modal = document.getElementById('modalUserForm');
+      if (!modal) return;
       document.getElementById('newUsername').value = '';
       document.getElementById('newPassword').value = '';
       document.getElementById('newNamaLengkap').value = '';
       ['permAdd', 'permEdit', 'permService', 'permMutasi', 'permAudit', 'permDisposal', 'permReport'].forEach(id => {
-        document.getElementById(id).checked = false;
+        const el = document.getElementById(id);
+        if (el) el.checked = false;
       });
-      document.getElementById('modalUserForm').classList.remove('hidden');
+      modal.classList.remove('hidden');
     }
 
     function submitSaveNewUser() {
@@ -1014,6 +1123,49 @@
         localStorage.setItem("APP_STAFF_USERS", JSON.stringify(STORED_USERS));
         renderStaffUsersList();
       }
+    }
+
+    // ================= PENGELOLAAN KATEGORI & LOKASI =================
+    function openModalAddKategori() {
+      document.getElementById('newKatPrefix').value = '';
+      document.getElementById('newKatNama').value = '';
+      document.getElementById('newKatDesc').value = '';
+      document.getElementById('modalKategoriForm').classList.remove('hidden');
+    }
+
+    function submitSaveNewKategori() {
+      const prefix = document.getElementById('newKatPrefix').value.trim().toUpperCase();
+      const nama = document.getElementById('newKatNama').value.trim();
+      const kelompok = document.getElementById('newKatKelompok').value;
+      const desc = document.getElementById('newKatDesc').value.trim();
+
+      if (!prefix || !nama) return alert("Prefix dan Nama Kategori wajib diisi!");
+      if (MASTER_KATEGORI.some(k => k.prefix === prefix)) return alert(`Prefix ${prefix} sudah terdaftar!`);
+
+      MASTER_KATEGORI.push({ prefix, nama, kelompok, desc });
+      localStorage.setItem("APP_MASTER_KATEGORI", JSON.stringify(MASTER_KATEGORI));
+      populateKategoriDropdowns();
+      renderGridKategoriCards();
+      closeModal('modalKategoriForm');
+      alert(`Kategori "${nama}" (${prefix}) berhasil ditambahkan!`);
+    }
+
+    function openModalAddLokasi() {
+      document.getElementById('newLokasiNama').value = '';
+      document.getElementById('modalLokasiForm').classList.remove('hidden');
+    }
+
+    function submitSaveNewLokasi() {
+      const nama = document.getElementById('newLokasiNama').value.trim();
+      if (!nama) return alert("Nama unit ruangan wajib diisi!");
+      if (MASTER_LOKASI.includes(nama)) return alert("Ruangan ini sudah terdaftar!");
+
+      MASTER_LOKASI.push(nama);
+      localStorage.setItem("APP_MASTER_LOKASI", JSON.stringify(MASTER_LOKASI));
+      populateLokasiDropdowns();
+      renderGridLokasiCards();
+      closeModal('modalLokasiForm');
+      alert(`Unit ruangan "${nama}" berhasil didaftarkan!`);
     }
 
     // ================= FITUR IMPORT EXCEL / CSV =================
@@ -1176,7 +1328,7 @@
       alert(`Berhasil mengimpor ${BATCH_IMPORTED_ITEMS.length} aset dan seluruh kode barcode telah aktif!`);
     }
 
-    // ================= SYNC CLOUD & FORMAT TANGGAL =================
+    // ================= PENANGANAN FORMAT TANGGAL =================
     function getProp(obj, keyName) {
       const lower = keyName.toLowerCase();
       for (let k in obj) {
@@ -1211,6 +1363,7 @@
       return '';
     }
 
+    // ================= SYNC CLOUD GOOGLE SHEETS =================
     async function fetchCloudData() {
       const badge = document.getElementById('cloudStatusBadge');
       const icon = document.getElementById('btnRefreshIcon');
@@ -1339,7 +1492,7 @@
       return {
         nilaiBuku: nilaiBuku,
         sisaBulan: sisaBulan,
-        sisaTahunStr: `${sisaThn} Thn ${sisaBln} Bln`,
+        sisaTahunStr: `${sisaThn} Thn${sisaBln} Bln`,
         persenDepresiasi: persen,
         kelompokStr: `${namaKelompok} (${masaManfaatTahun} Thn)`
       };
@@ -1451,7 +1604,7 @@
           </td>
           <td class="py-3 px-3">${auditTag}</td>
           <td class="py-3 px-3 text-center" onclick="event.stopPropagation()">
-            <button onclick="openHistoryDetailModal('${item.kode}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-bold border border-slate-700 transition">
+            <button type="button" onclick="openHistoryDetailModal('${item.kode}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-bold border border-slate-700 transition">
               <i class="fa-solid fa-clock-rotate-left mr-1"></i>Detail
             </button>
           </td>
@@ -1459,7 +1612,7 @@
         tbody.appendChild(tr);
       });
 
-      document.getElementById('labelInventoryCount').innerText = `Menampilkan ${items.length} dari ${DATA_INVENTARIS.length} total aset`;
+      document.getElementById('labelInventoryCount').innerText = `Menampilkan ${items.length} dari${DATA_INVENTARIS.length} total aset`;
     }
 
     function selectTableRow(kode) {
@@ -1525,7 +1678,7 @@
       const katName = document.getElementById('inputFormKategori').value;
       const katObj = MASTER_KATEGORI.find(k => k.nama === katName);
       if (katObj) {
-        document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tahun} Tahun - ${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tarifTahunan * 100}%/Thn)`;
+        document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tahun} Tahun -${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tarifTahunan * 100}%/Thn)`;
         
         const prefix = katObj.prefix;
         let maxIndex = 0;
@@ -1640,6 +1793,7 @@
 
       if (!MASTER_LOKASI.includes(lokasi)) {
         MASTER_LOKASI.push(lokasi);
+        localStorage.setItem("APP_MASTER_LOKASI", JSON.stringify(MASTER_LOKASI));
         populateLokasiDropdowns();
         renderGridLokasiCards();
       }
@@ -1687,10 +1841,10 @@
       sendPostToCloud({
         action: "logAction",
         log: { 
-          timestamp: `${cleanDateFormat(new Date())} ${new Date().toLocaleTimeString('id-ID')}`, 
+          timestamp: `${cleanDateFormat(new Date())}${new Date().toLocaleTimeString('id-ID')}`, 
           kodeAset: asset.kode, 
           tipeLog: "HAPUS PERMANEN", 
-          keterangan: `Aset ${asset.nama} dihapus permanen oleh ${CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : 'Admin'}`, 
+          keterangan: `Aset ${asset.nama} dihapus permanen oleh${CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : 'Admin'}`, 
           picOrBiaya: "-" 
         }
       });
@@ -1849,7 +2003,7 @@
           chartKategoriInstance.update();
         }
       } catch (e) {
-        // Abaikan rendering chart jika elemen belum siap di layar
+        // Safe guard
       }
     }
 
@@ -1935,6 +2089,7 @@
 
     function populateKategoriDropdowns() {
       const inKat = document.getElementById('inputFormKategori');
+      if (!inKat) return;
       inKat.innerHTML = '';
       MASTER_KATEGORI.forEach(k => {
         inKat.innerHTML += `<option value="${k.nama}">${k.nama}</option>`;
@@ -1943,6 +2098,7 @@
 
     function populateLokasiDropdowns() {
       const fLok = document.getElementById('filterLokasi');
+      if (!fLok) return;
       fLok.innerHTML = '<option value="">Semua Ruangan</option>';
       MASTER_LOKASI.forEach(l => {
         fLok.innerHTML += `<option value="${l}">${l}</option>`;
@@ -1951,6 +2107,7 @@
 
     function renderGridKategoriCards() {
       const c = document.getElementById('gridContainerKategori');
+      if (!c) return;
       c.innerHTML = '';
       MASTER_KATEGORI.forEach(k => {
         const count = DATA_INVENTARIS.filter(a => a.kategori === k.nama).length;
@@ -1972,6 +2129,7 @@
 
     function renderGridLokasiCards() {
       const c = document.getElementById('gridContainerLokasi');
+      if (!c) return;
       c.innerHTML = '';
       MASTER_LOKASI.forEach(l => {
         const count = DATA_INVENTARIS.filter(a => a.lokasi === l).length;
@@ -2016,7 +2174,7 @@
         });
         
         executeDataFilters();
-        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal ${stamp}.`);
+        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal${stamp}.`);
       }
     }
 
@@ -2121,99 +2279,4 @@
           timestamp: stamp,
           kodeAset: a.kode,
           tipeLog: "DISPOSAL",
-          keterangan: `Metode: ${method} (BAST: ${doc})`,
-          picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
-        });
-        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
-        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-
-        await sendPostToCloud({
-          action: "logAction",
-          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
-        });
-
-        await sendPostToCloud({
-          action: "saveAsset",
-          asset: a
-        });
-
-        closeModal('modalActionDisposal');
-        executeDataFilters();
-        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
-      }
-    }
-
-    // ================= CETAK STIKER QR CODE =================
-    function actionPrintBarcode() {
-      if (!SELECTED_ROW_KODE) {
-        alert("Pilih salah satu baris aset terlebih dahulu!");
-        return;
-      }
-      
-      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
-      if (!a) return;
-
-      const printBox = document.getElementById('printableReportArea');
-      printBox.classList.remove('hidden');
-
-      printBox.innerHTML = `
-        <div class="tj-asset-label">
-          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.8px solid #000000; padding-bottom: 1.5px;">
-            <img src="icon.svg" style="height: 11px; max-width: 75px; object-fit: contain;">
-            <span style="font-size: 6.5px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;">
-              LABEL ASET TETAP
-            </span>
-          </div>
-
-          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; margin: 1.5px 0;">
-            <div id="qrcodeStickerContainer" style="width: 19mm; height: 19mm; display: flex; align-items: center; justify-content: center; background: #fff;"></div>
-
-            <div style="flex: 1; padding-left: 2.5mm; text-align: left; overflow: hidden;">
-              <p style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 900; margin: 0; color: #0284c7; line-height: 1;">
-                ${a.kode}
-              </p>
-              <p style="font-size: 7px; font-weight: 800; margin: 2px 0 0 0; line-height: 1.1; max-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                ${a.nama}
-              </p>
-              <p style="font-size: 6px; color: #334155; margin: 2px 0 0 0; line-height: 1;">
-                Lokasi: <b>${a.lokasi || '-'}</b>
-              </p>
-            </div>
-          </div>
-
-          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 0.6px dotted #64748b; padding-top: 1px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 6px; color: #475569;">
-              SN: ${a.serialNumber || '-'}
-            </span>
-            <span style="font-size: 5.5px; color: #64748b; font-weight: bold;">
-              PT PHS &bull; RS GPI
-            </span>
-          </div>
-        </div>
-      `;
-
-      new QRCode(document.getElementById("qrcodeStickerContainer"), {
-        text: a.kode,
-        width: 72,
-        height: 72,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-
-      setTimeout(() => {
-        window.print();
-      }, 250);
-    }
-
-    function formatInputRupiahRealtime(el) {
-      let num = el.value.replace(/[^0-9]/g, '');
-      el.value = num ? 'Rp ' + Number(num).toLocaleString('id-ID') : '';
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-  </script>
-</body>
-</html>
+          keterangan: `Metode: ${method
