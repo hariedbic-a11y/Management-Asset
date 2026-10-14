@@ -419,7 +419,7 @@
           <h3 class="text-sm font-bold text-white">Master Kategori & Mapping Kelompok Penyusutan</h3>
           <p class="text-xs text-slate-400">Setiap kategori otomatis mengunci masa manfaat dan tarif penyusutan resmi</p>
         </div>
-        <button id="btnTambahKategori" onclick="openModalAddKategori()" class="bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button type="button" onclick="openModalAddKategori()" class="bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Kategori
         </button>
       </div>
@@ -433,7 +433,7 @@
           <h3 class="text-sm font-bold text-white">Master Lokasi, Ruangan & Unit Kerja</h3>
           <p class="text-xs text-slate-400">Daftar penempatan aset resmi sebagai acuan mutasi dan stock opname fisik</p>
         </div>
-        <button id="btnTambahLokasi" onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button type="button" onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Unit Ruangan
         </button>
       </div>
@@ -447,7 +447,7 @@
           <h3 class="text-sm font-bold text-white">Kelola Pengguna & Hak Akses Fitur</h3>
           <p class="text-xs text-slate-400">Tentukan wewenang per user</p>
         </div>
-        <button onclick="openModalAddUser()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button type="button" onclick="openModalAddUser()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-user-plus"></i> Tambah Pengguna Baru
         </button>
       </div>
@@ -1492,7 +1492,7 @@
       return {
         nilaiBuku: nilaiBuku,
         sisaBulan: sisaBulan,
-        sisaTahunStr: `${sisaThn} Thn${sisaBln} Bln`,
+        sisaTahunStr: `${sisaThn} Thn ${sisaBln} Bln`,
         persenDepresiasi: persen,
         kelompokStr: `${namaKelompok} (${masaManfaatTahun} Thn)`
       };
@@ -1612,7 +1612,7 @@
         tbody.appendChild(tr);
       });
 
-      document.getElementById('labelInventoryCount').innerText = `Menampilkan ${items.length} dari${DATA_INVENTARIS.length} total aset`;
+      document.getElementById('labelInventoryCount').innerText = `Menampilkan ${items.length} dari ${DATA_INVENTARIS.length} total aset`;
     }
 
     function selectTableRow(kode) {
@@ -1678,7 +1678,7 @@
       const katName = document.getElementById('inputFormKategori').value;
       const katObj = MASTER_KATEGORI.find(k => k.nama === katName);
       if (katObj) {
-        document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tahun} Tahun -${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tarifTahunan * 100}%/Thn)`;
+        document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tahun} Tahun - ${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tarifTahunan * 100}%/Thn)`;
         
         const prefix = katObj.prefix;
         let maxIndex = 0;
@@ -1841,10 +1841,10 @@
       sendPostToCloud({
         action: "logAction",
         log: { 
-          timestamp: `${cleanDateFormat(new Date())}${new Date().toLocaleTimeString('id-ID')}`, 
+          timestamp: `${cleanDateFormat(new Date())} ${new Date().toLocaleTimeString('id-ID')}`, 
           kodeAset: asset.kode, 
           tipeLog: "HAPUS PERMANEN", 
-          keterangan: `Aset ${asset.nama} dihapus permanen oleh${CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : 'Admin'}`, 
+          keterangan: `Aset ${asset.nama} dihapus permanen oleh ${CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : 'Admin'}`, 
           picOrBiaya: "-" 
         }
       });
@@ -2174,7 +2174,7 @@
         });
         
         executeDataFilters();
-        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal${stamp}.`);
+        alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal ${stamp}.`);
       }
     }
 
@@ -2279,4 +2279,100 @@
           timestamp: stamp,
           kodeAset: a.kode,
           tipeLog: "DISPOSAL",
-          keterangan: `Metode: ${method
+          keterangan: `Metode: ${method} (BAST: ${doc})`,
+          picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
+        });
+        localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
+        localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+
+        await sendPostToCloud({
+          action: "logAction",
+          log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
+        });
+
+        await sendPostToCloud({
+          action: "saveAsset",
+          asset: a
+        });
+
+        closeModal('modalActionDisposal');
+        executeDataFilters();
+        alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
+      }
+    }
+
+    // ================= CETAK STIKER QR CODE =================
+    function actionPrintBarcode() {
+      if (!SELECTED_ROW_KODE) {
+        alert("Pilih salah satu baris aset terlebih dahulu!");
+        return;
+      }
+      
+      const a = DATA_INVENTARIS.find(x => x.kode === SELECTED_ROW_KODE);
+      if (!a) return;
+
+      const printBox = document.getElementById('printableReportArea');
+      printBox.classList.remove('hidden');
+
+      printBox.innerHTML = `
+        <div class="tj-asset-label">
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.8px solid #000000; padding-bottom: 1.5px;">
+            <img src="icon.svg" style="height: 11px; max-width: 75px; object-fit: contain;">
+            <span style="font-size: 6.5px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;">
+              LABEL ASET TETAP
+            </span>
+          </div>
+
+          <div style="width: 100%; display: flex; align-items: center; justify-content: space-between; margin: 1.5px 0;">
+            <div id="qrcodeStickerContainer" style="width: 19mm; height: 19mm; display: flex; align-items: center; justify-content: center; background: #fff;"></div>
+
+            <div style="flex: 1; padding-left: 2.5mm; text-align: left; overflow: hidden;">
+              <p style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 900; margin: 0; color: #0284c7; line-height: 1;">
+                ${a.kode}
+              </p>
+              <p style="font-size: 7px; font-weight: 800; margin: 2px 0 0 0; line-height: 1.1; max-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${a.nama}
+              </p>
+              <p style="font-size: 6px; color: #334155; margin: 2px 0 0 0; line-height: 1;">
+                Lokasi: <b>${a.lokasi || '-'}</b>
+              </p>
+            </div>
+          </div>
+
+          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 0.6px dotted #64748b; padding-top: 1px;">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 6px; color: #475569;">
+              SN: ${a.serialNumber || '-'}
+            </span>
+            <span style="font-size: 5.5px; color: #64748b; font-weight: bold;">
+              PT PHS &bull; RS GPI
+            </span>
+          </div>
+        </div>
+      `;
+
+      new QRCode(document.getElementById("qrcodeStickerContainer"), {
+        text: a.kode,
+        width: 72,
+        height: 72,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      setTimeout(() => {
+        window.print();
+      }, 250);
+    }
+
+    function formatInputRupiahRealtime(el) {
+      let num = el.value.replace(/[^0-9]/g, '');
+      el.value = num ? 'Rp ' + Number(num).toLocaleString('id-ID') : '';
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
