@@ -32,10 +32,11 @@
   </script>
 
   <style>
-    body { background-color: #090d16; color: #f8fafc; }
-    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    .custom-scroll::-webkit-scrollbar-track { background: #090d16; }
+    body { background-color: #090d16; color: #f8fafc; overflow-x: hidden; }
+    .custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
 
     /* Pengaturan Cetak Stiker Tom & Jerry 50x32 mm */
     @media print {
@@ -77,7 +78,7 @@
 </head>
 <body class="min-h-screen flex flex-col font-sans antialiased text-slate-100 bg-slate-950">
 
-  <!-- ================= LAYAR LOGIN ================= -->
+  <!-- ================= 1. LAYAR LOGIN ================= -->
   <div id="loginScreenOverlay" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
       <div class="h-14 w-auto bg-white p-1.5 rounded-2xl shadow-md border border-slate-200 inline-flex items-center justify-center">
@@ -91,81 +92,82 @@
       <div class="space-y-3 text-left text-xs">
         <div>
           <label class="block text-slate-400 font-bold mb-1">Username</label>
-          <input type="text" id="loginUsername" placeholder="Masukkan username" onkeydown="if(event.key==='Enter') handleLoginSubmit()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500">
+          <input type="text" id="loginUsername" placeholder="Masukkan username" onkeydown="if(event.key==='Enter') handleLoginSubmit()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500 outline-none">
         </div>
         <div>
           <label class="block text-slate-400 font-bold mb-1">Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLoginSubmit()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500">
+          <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLoginSubmit()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500 outline-none">
         </div>
         <p id="loginErrMsg" class="text-[11px] text-rose-400 font-semibold hidden"></p>
-        <button type="button" onclick="handleLoginSubmit()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition shadow-lg shadow-sky-600/30">
+        <button type="button" onclick="handleLoginSubmit()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-98 text-white font-bold transition shadow-lg shadow-sky-600/30">
           Masuk ke Sistem
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ================= TOP HEADER ================= -->
+  <!-- ================= TOP HEADER (RESPONSIF LAPTOP & HP) ================= -->
   <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
-    <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+    <div class="px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2.5">
       
-      <div class="flex items-center gap-3">
-        <div class="h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
+      <div class="flex items-center gap-2.5">
+        <div class="h-10 sm:h-12 w-auto bg-white p-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center shrink-0">
           <img src="icon.svg" alt="Logo PT PHS & RS Grha Permata Ibu" class="h-full w-auto object-contain">
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-sm font-extrabold tracking-tight text-white uppercase">Asset Lifecycle Pro</h1>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <h1 class="text-xs sm:text-sm font-extrabold tracking-tight text-white uppercase">Asset Lifecycle Pro</h1>
             <span id="cloudStatusBadge" class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Connected
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 font-medium">PT Permata Husada Sakti &bull; RS Grha Permata Ibu</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate max-w-[200px] sm:max-w-none">PT Permata Husada Sakti &bull; RS Grha Permata Ibu</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button onclick="fetchCloudData()" title="Sinkronkan dengan Google Sheets" class="bg-slate-800 hover:bg-slate-700 text-sky-400 p-2 rounded-xl text-xs font-bold border border-slate-700 transition">
+      <!-- Tombol Menu Utama Header -->
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+        <button type="button" onclick="fetchCloudData()" title="Sinkronkan dengan Google Sheets" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-sky-400 p-2 rounded-xl text-xs font-bold border border-slate-700 transition">
           <i id="btnRefreshIcon" class="fa-solid fa-arrows-rotate"></i>
         </button>
-        <button id="btnHeaderScan" onclick="openScannerModal()" class="bg-gradient-to-r from-sky-500 to-brand-600 hover:from-sky-600 hover:to-brand-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition active:scale-95">
+        <button type="button" id="btnHeaderScan" onclick="openScannerModal()" class="bg-gradient-to-r from-sky-500 to-brand-600 hover:from-sky-600 hover:to-brand-700 text-white px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-qrcode text-sm"></i>
-          <span>Scan Audit (HP)</span>
+          <span class="hidden md:inline">Scan Audit (HP)</span>
         </button>
-        <button id="btnHeaderImport" onclick="openModalImportExcel()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button type="button" id="btnHeaderImport" onclick="openModalImportExcel()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-400 border border-slate-700 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-file-excel"></i>
-          <span class="hidden sm:inline">Import Excel</span>
+          <span class="hidden md:inline">Import Excel</span>
         </button>
-        <button id="btnHeaderAdd" onclick="openModalAddAsset()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
+        <button type="button" id="btnHeaderAdd" onclick="openModalAddAsset()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-plus text-sm"></i>
           <span class="hidden sm:inline">Pengadaan Baru</span>
         </button>
-        <button id="btnHeaderReport" onclick="openReportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition">
+        <button type="button" id="btnHeaderReport" onclick="openReportModal()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i>
-          <span class="hidden sm:inline">Laporan & BAST</span>
+          <span class="hidden lg:inline">Laporan & BAST</span>
         </button>
 
         <!-- DROPDOWN USER PROFILE DI KANAN ATAS -->
-        <div class="relative">
-          <button type="button" onclick="toggleUserDropdown()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 text-xs font-semibold transition">
-            <div class="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-[11px]">
+        <div class="relative" id="userDropdownContainer">
+          <button type="button" onclick="toggleUserDropdown(event)" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-700 text-xs font-semibold transition">
+            <div class="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-[11px] shrink-0">
               <i class="fa-solid fa-user"></i>
             </div>
-            <span id="headerUserNameDisplay">Admin</span>
+            <span id="headerUserNameDisplay" class="max-w-[90px] sm:max-w-[140px] truncate">Admin</span>
             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
           </button>
 
           <!-- Menu Expand / Collapse -->
-          <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-1 z-50 text-xs">
+          <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl py-1.5 z-50 text-xs">
             <div class="px-4 py-2 border-b border-slate-800">
               <p class="text-[10px] text-slate-400 uppercase font-bold">Masuk Sebagai</p>
-              <p id="dropdownUserRoleDisplay" class="font-bold text-sky-400 truncate">Administrator Utama</p>
+              <p id="dropdownUserRoleDisplay" class="font-bold text-sky-400 truncate mt-0.5">Administrator Utama</p>
             </div>
-            <button type="button" onclick="openChangePasswordModal()" class="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-200 flex items-center gap-2 transition">
-              <i class="fa-solid fa-key text-amber-400"></i> Ubah Password
+            <button type="button" onclick="openChangePasswordModal()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 text-slate-200 flex items-center gap-2.5 transition">
+              <i class="fa-solid fa-key text-amber-400 w-4"></i> Ubah Password
             </button>
-            <button type="button" onclick="handleLogout()" class="w-full text-left px-4 py-2 hover:bg-rose-950/40 text-rose-400 flex items-center gap-2 transition">
-              <i class="fa-solid fa-right-from-bracket"></i> Keluar (Logout)
+            <button type="button" onclick="handleLogout()" class="w-full text-left px-4 py-2.5 hover:bg-rose-950/40 text-rose-400 flex items-center gap-2.5 transition">
+              <i class="fa-solid fa-right-from-bracket w-4"></i> Keluar (Logout)
             </button>
           </div>
         </div>
@@ -173,86 +175,86 @@
     </div>
 
     <!-- ROW SELECTION CONTROLS BAR -->
-    <div class="bg-slate-900 px-4 py-2 border-t border-slate-800 flex items-center gap-2 overflow-x-auto text-xs custom-scroll">
+    <div class="bg-slate-900 px-3 sm:px-4 py-2 border-t border-slate-800 flex items-center gap-2 overflow-x-auto text-xs custom-scroll">
       <span class="text-slate-400 font-semibold mr-1 whitespace-nowrap flex items-center gap-1.5">
         <i class="fa-solid fa-sliders text-sky-400"></i> Aksi Baris Terpilih:
       </span>
-      <button id="btnActionEdit" disabled onclick="actionEditAsset()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button type="button" id="btnActionEdit" disabled onclick="actionEditAsset()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition active:scale-95">
         <i class="fa-solid fa-pen-to-square text-amber-400"></i> Edit Aset
       </button>
-      <button id="btnActionService" disabled onclick="actionOpenService()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button type="button" id="btnActionService" disabled onclick="actionOpenService()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition active:scale-95">
         <i class="fa-solid fa-wrench text-sky-400"></i> Servis / Kalibrasi
       </button>
-      <button id="btnActionMutasi" disabled onclick="actionOpenMutasi()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button type="button" id="btnActionMutasi" disabled onclick="actionOpenMutasi()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition active:scale-95">
         <i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Mutasi Ruangan
       </button>
-      <button id="btnActionAudit" disabled onclick="actionVerifyAuditToday()" title="Verifikasi Stock Opname Fisik Hari Ini" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button type="button" id="btnActionAudit" disabled onclick="actionVerifyAuditToday()" title="Verifikasi Stock Opname Fisik Hari Ini" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition active:scale-95">
         <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Verifikasi Opname
       </button>
-      <button id="btnActionPrint" disabled onclick="actionPrintBarcode()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button type="button" id="btnActionPrint" disabled onclick="actionPrintBarcode()" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 flex items-center gap-1.5 whitespace-nowrap transition active:scale-95">
         <i class="fa-solid fa-qrcode text-indigo-400"></i> Cetak Label Stiker
       </button>
-      <button id="btnActionDisposal" disabled onclick="actionOpenDisposal()" class="bg-amber-950/60 hover:bg-amber-900 disabled:opacity-30 disabled:pointer-events-none text-amber-200 px-3 py-1.5 rounded-lg font-medium border border-amber-800/80 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button type="button" id="btnActionDisposal" disabled onclick="actionOpenDisposal()" class="bg-amber-950/60 hover:bg-amber-900 disabled:opacity-30 disabled:pointer-events-none text-amber-200 px-3 py-1.5 rounded-lg font-medium border border-amber-800/80 flex items-center gap-1.5 whitespace-nowrap transition active:scale-95">
         <i class="fa-solid fa-trash-can text-amber-400"></i> Disposal
       </button>
-      <button id="btnActionDeletePermanent" disabled onclick="actionDeleteAssetPermanently()" class="bg-rose-950/80 hover:bg-rose-900 disabled:opacity-30 disabled:pointer-events-none text-rose-200 px-3 py-1.5 rounded-lg font-medium border border-rose-800 flex items-center gap-1.5 whitespace-nowrap transition">
+      <button type="button" id="btnActionDeletePermanent" disabled onclick="actionDeleteAssetPermanently()" class="bg-rose-950/80 hover:bg-rose-900 disabled:opacity-30 disabled:pointer-events-none text-rose-200 px-3 py-1.5 rounded-lg font-medium border border-rose-800 flex items-center gap-1.5 whitespace-nowrap transition active:scale-95">
         <i class="fa-solid fa-trash-arrow-up text-rose-400"></i> Hapus Permanen
       </button>
     </div>
 
     <!-- MAIN APP TABS -->
-    <div class="flex bg-slate-950 px-4 border-t border-slate-800 overflow-x-auto text-xs custom-scroll">
-      <button onclick="switchMainTab('tab-inventory', this)" class="main-tab-btn active px-4 py-2.5 font-bold text-sky-400 border-b-2 border-sky-400 whitespace-nowrap">
+    <div class="flex bg-slate-950 px-3 sm:px-4 border-t border-slate-800 overflow-x-auto text-xs custom-scroll">
+      <button type="button" onclick="switchMainTab('tab-inventory', this)" class="main-tab-btn active px-3.5 sm:px-4 py-2.5 font-bold text-sky-400 border-b-2 border-sky-400 whitespace-nowrap transition">
         <i class="fa-solid fa-boxes-stacked mr-1.5"></i> Master Inventaris Aset
       </button>
-      <button onclick="switchMainTab('tab-depreciation', this)" class="main-tab-btn px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap">
+      <button type="button" onclick="switchMainTab('tab-depreciation', this)" class="main-tab-btn px-3.5 sm:px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
         <i class="fa-solid fa-scale-balanced mr-1.5"></i> 4 Kelompok Masa Manfaat
       </button>
-      <button onclick="switchMainTab('tab-dashboard', this)" class="main-tab-btn px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap">
+      <button type="button" onclick="switchMainTab('tab-dashboard', this)" class="main-tab-btn px-3.5 sm:px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
         <i class="fa-solid fa-chart-line mr-1.5"></i> Executive Dashboard & KPI
       </button>
-      <button onclick="switchMainTab('tab-categories', this)" class="main-tab-btn px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap">
+      <button type="button" onclick="switchMainTab('tab-categories', this)" class="main-tab-btn px-3.5 sm:px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
         <i class="fa-solid fa-tags mr-1.5"></i> Master Kategori
       </button>
-      <button onclick="switchMainTab('tab-rooms', this)" class="main-tab-btn px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap">
+      <button type="button" onclick="switchMainTab('tab-rooms', this)" class="main-tab-btn px-3.5 sm:px-4 py-2.5 font-semibold text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
         <i class="fa-solid fa-building-circle-check mr-1.5"></i> Master Lokasi & Unit
       </button>
-      <button id="tabNavUsers" onclick="switchMainTab('tab-users', this)" class="main-tab-btn hidden px-4 py-2.5 font-semibold text-amber-400 hover:text-amber-300 whitespace-nowrap">
+      <button type="button" id="tabNavUsers" onclick="switchMainTab('tab-users', this)" class="main-tab-btn hidden px-3.5 sm:px-4 py-2.5 font-semibold text-amber-400 hover:text-amber-300 whitespace-nowrap transition">
         <i class="fa-solid fa-user-shield mr-1.5"></i> Otoritas & Hak Akses User
       </button>
     </div>
   </header>
 
   <!-- ================= MAIN BODY CONTENT ================= -->
-  <main class="flex-1 p-4 max-w-full overflow-hidden flex flex-col space-y-4">
+  <main class="flex-1 p-3 sm:p-4 max-w-full overflow-hidden flex flex-col space-y-4">
 
     <!-- TAB 1: MASTER INVENTARIS ASET -->
-    <section id="tab-inventory" class="space-y-3 flex-1 flex flex-col">
-      <div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 shadow-md flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 text-xs">
+    <section id="tab-inventory" class="space-y-3 flex-1 flex flex-col min-h-0">
+      <div class="bg-slate-900 p-3 sm:p-3.5 rounded-2xl border border-slate-800 shadow-md flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 text-xs">
         <div class="relative flex-1">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="text" id="filterKeyword" oninput="executeDataFilters()" placeholder="Cari Kode Barcode, Nama Barang, SN, PIC..." class="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl focus:ring-1 focus:ring-sky-500 font-medium text-slate-100">
+          <input type="text" id="filterKeyword" oninput="executeDataFilters()" placeholder="Cari Kode Barcode, Nama Barang, SN, PIC..." class="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl focus:ring-1 focus:ring-sky-500 font-medium text-slate-100 outline-none">
         </div>
         
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <select id="filterKelompokDepresiasi" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <select id="filterKelompokDepresiasi" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium outline-none">
             <option value="">Semua Kelompok Masa Manfaat</option>
             <option value="Kelompok 1">Kelompok 1 (4 Tahun / 25%)</option>
             <option value="Kelompok 2">Kelompok 2 (8 Tahun / 12.5%)</option>
             <option value="Kelompok 3">Kelompok 3 (16 Tahun / 6.25%)</option>
             <option value="Kelompok 4">Kelompok 4 (20 Tahun / 5%)</option>
           </select>
-          <select id="filterLokasi" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium">
+          <select id="filterLokasi" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium outline-none">
             <option value="">Semua Ruangan</option>
           </select>
-          <select id="filterStatus" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium">
+          <select id="filterStatus" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl text-slate-200 font-medium outline-none">
             <option value="">Semua Status Siklus</option>
             <option value="Operasional">Operasional</option>
             <option value="Dalam Perbaikan">Dalam Perbaikan</option>
             <option value="Perlu Kalibrasi">Perlu Kalibrasi</option>
             <option value="Disposed">Disposed (Dihapuskan)</option>
           </select>
-          <select id="filterAuditFlag" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl font-bold text-rose-400">
+          <select id="filterAuditFlag" onchange="executeDataFilters()" class="bg-slate-950 border border-slate-700/80 p-2 rounded-xl font-bold text-rose-400 outline-none">
             <option value="">Status Opname Fisik</option>
             <option value="overdue">⚠️ Terlewat Audit (>30 Hari)</option>
             <option value="valid">✅ Sesuai Jadwal</option>
@@ -260,13 +262,13 @@
         </div>
       </div>
 
-      <!-- Tabel Kontainer -->
+      <!-- Tabel Kontainer (Scroll Horizontal Halus untuk Laptop & HP) -->
       <div class="table-container bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-x-auto flex-1 custom-scroll">
-        <table class="w-full text-left text-xs border-collapse min-w-[1700px]">
+        <table class="w-full text-left text-xs border-collapse min-w-[1450px]">
           <thead class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[11px] sticky top-0 z-10 border-b border-slate-800">
             <tr>
               <th class="py-3 px-3 w-10 text-center">Pilih</th>
-              <th class="py-3 px-3">Foto</th>
+              <th class="py-3 px-3 text-center">Foto</th>
               <th class="py-3 px-3">Kode Aset</th>
               <th class="py-3 px-3">Nama Aset</th>
               <th class="py-3 px-3">Kelompok & Tarif</th>
@@ -277,16 +279,16 @@
               <th class="py-3 px-3">Nilai Buku Saat Ini</th>
               <th class="py-3 px-3">Sisa Usia Ekonomis</th>
               <th class="py-3 px-3">Audit Terakhir</th>
-              <th class="py-3 px-3 text-center">Riwayat</th>
+              <th class="py-3 px-3 text-center sticky right-0 bg-slate-950 shadow-lg">Riwayat</th>
             </tr>
           </thead>
           <tbody id="inventoryTableBody" class="divide-y divide-slate-800/80 font-medium text-slate-300"></tbody>
         </table>
       </div>
 
-      <div class="text-[11px] text-slate-400 flex flex-wrap justify-between items-center px-2 py-1">
+      <div class="text-[11px] text-slate-400 flex flex-wrap justify-between items-center px-2 py-1 gap-2">
         <span id="labelInventoryCount">Memuat data dari Google Sheets...</span>
-        <span class="text-slate-500 font-mono"><i class="fa-solid fa-cloud text-emerald-400 mr-1"></i> Data Tersimpan Aman di Google Drive & Spreadsheet Terpusat</span>
+        <span class="text-slate-500 font-mono text-[10px] sm:text-[11px]"><i class="fa-solid fa-arrows-left-right text-sky-400 mr-1 sm:hidden"></i><span class="sm:hidden mr-2">Geser tabel ke kanan/kiri</span><i class="fa-solid fa-cloud text-emerald-400 mr-1"></i> Data Tersimpan Aman di Google Drive & Spreadsheet</span>
       </div>
     </section>
 
@@ -366,7 +368,7 @@
 
     <!-- TAB 3: EXECUTIVE DASHBOARD & KPI -->
     <section id="tab-dashboard" class="hidden space-y-4">
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
             <p class="text-slate-400 font-bold uppercase text-[10px]">Total Aset</p>
@@ -436,12 +438,12 @@
 
     <!-- TAB 4: MASTER KATEGORI -->
     <section id="tab-categories" class="hidden space-y-4">
-      <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
           <h3 class="text-sm font-bold text-white">Master Kategori & Mapping Kelompok Penyusutan</h3>
           <p class="text-xs text-slate-400">Setiap kategori otomatis mengunci masa manfaat dan tarif penyusutan resmi</p>
         </div>
-        <button type="button" onclick="openModalAddKategori()" class="bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button type="button" onclick="openModalAddKategori()" class="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Kategori
         </button>
       </div>
@@ -450,12 +452,12 @@
 
     <!-- TAB 5: MASTER LOKASI -->
     <section id="tab-rooms" class="hidden space-y-4">
-      <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
           <h3 class="text-sm font-bold text-white">Master Lokasi, Ruangan & Unit Kerja</h3>
           <p class="text-xs text-slate-400">Daftar penempatan aset resmi sebagai acuan mutasi dan stock opname fisik</p>
         </div>
-        <button type="button" onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button type="button" onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-plus"></i> Tambah Unit Ruangan
         </button>
       </div>
@@ -464,18 +466,18 @@
 
     <!-- TAB 6: KHUSUS ADMIN - KELOLA PENGGUNA -->
     <section id="tab-users" class="hidden space-y-4">
-      <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
           <h3 class="text-sm font-bold text-white">Kelola Pengguna & Hak Akses Fitur</h3>
           <p class="text-xs text-slate-400">Admin Utama dapat memantau password, unit kerja, serta mengedit wewenang staf</p>
         </div>
-        <button type="button" onclick="openModalAddUser()" class="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+        <button type="button" onclick="openModalAddUser()" class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
           <i class="fa-solid fa-user-plus"></i> Tambah Pengguna Baru
         </button>
       </div>
 
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-        <table class="w-full text-left text-xs">
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto shadow-xl custom-scroll">
+        <table class="w-full text-left text-xs min-w-[700px]">
           <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
             <tr>
               <th class="p-3">Username</th>
@@ -493,12 +495,12 @@
 
   </main>
 
-  <!-- ================= MODAL TAMBAH USER ================= -->
+  <!-- ================= 2. MODAL TAMBAH USER ================= -->
   <div id="modalUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white">Tambah Pengguna Baru</h3>
-        <button type="button" onclick="closeModal('modalUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeModal('modalUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Username Login *</label>
@@ -506,7 +508,7 @@
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Password *</label>
-        <input type="password" id="newPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+        <input type="text" id="newPassword" placeholder="Masukkan password" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-amber-400 font-mono">
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
@@ -519,13 +521,13 @@
       <div>
         <label class="block text-slate-400 font-bold mb-1.5">Centang Hak Akses / Otorisasi:</label>
         <div class="space-y-1.5 text-slate-300">
-          <label class="flex items-center gap-2"><input type="checkbox" id="permAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan & Verifikasi Opname</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal Aset</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="permReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="permAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="permEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="permService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="permMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="permAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan & Verifikasi Opname</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="permDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal Aset</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="permReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
         </div>
       </div>
       <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
@@ -535,12 +537,12 @@
     </div>
   </div>
 
-  <!-- ================= MODAL EDIT USER (KHUSUS ADMIN) ================= -->
+  <!-- ================= 3. MODAL EDIT USER (KHUSUS ADMIN) ================= -->
   <div id="modalEditUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white">Edit Pengguna & Password</h3>
-        <button type="button" onclick="closeModal('modalEditUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeModal('modalEditUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
       </div>
       <input type="hidden" id="editUserIndex">
       <div>
@@ -562,13 +564,13 @@
       <div>
         <label class="block text-slate-400 font-bold mb-1.5">Centang Hak Akses:</label>
         <div class="space-y-1.5 text-slate-300">
-          <label class="flex items-center gap-2"><input type="checkbox" id="editPermAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="editPermEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="editPermService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="editPermMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="editPermAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan Opname Fisik</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="editPermDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal</label>
-          <label class="flex items-center gap-2"><input type="checkbox" id="editPermReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan Opname Fisik</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
         </div>
       </div>
       <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
@@ -578,14 +580,14 @@
     </div>
   </div>
 
-  <!-- ================= MODAL GANTI PASSWORD MANDIRI ================= -->
+  <!-- ================= 4. MODAL GANTI PASSWORD MANDIRI ================= -->
   <div id="modalChangePassword" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-key text-amber-400"></i> Ubah Password Akun
         </h3>
-        <button type="button" onclick="closeModal('modalChangePassword')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeModal('modalChangePassword')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Password Baru *</label>
@@ -602,12 +604,12 @@
     </div>
   </div>
 
-  <!-- ================= MODAL TAMBAH KATEGORI ================= -->
+  <!-- ================= 5. MODAL TAMBAH KATEGORI ================= -->
   <div id="modalKategoriForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white">Tambah Kategori Baru</h3>
-        <button type="button" onclick="closeModal('modalKategoriForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeModal('modalKategoriForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Kode Prefix (2 Huruf Kapital) *</label>
@@ -637,12 +639,12 @@
     </div>
   </div>
 
-  <!-- ================= MODAL TAMBAH LOKASI ================= -->
+  <!-- ================= 6. MODAL TAMBAH LOKASI ================= -->
   <div id="modalLokasiForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white">Tambah Unit Ruangan Baru</h3>
-        <button type="button" onclick="closeModal('modalLokasiForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeModal('modalLokasiForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Nama Unit / Ruangan *</label>
@@ -655,9 +657,9 @@
     </div>
   </div>
 
-  <!-- ================= MODAL IMPORT DARI EXCEL / CSV ================= -->
+  <!-- ================= 7. MODAL IMPORT DARI EXCEL / CSV ================= -->
   <div id="modalImportExcel" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
+    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <div>
           <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -669,7 +671,7 @@
       </div>
 
       <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-wrap justify-between items-center gap-2">
           <span class="font-bold text-slate-200">1. Unduh Template Format Excel:</span>
           <button type="button" onclick="downloadExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
             <i class="fa-solid fa-download"></i> Unduh File Template
@@ -680,7 +682,7 @@
 
       <div>
         <label class="block font-bold text-slate-300 mb-1.5">2. Pilih File Excel / CSV yang sudah diisi:</label>
-        <input type="file" id="inputExcelFile" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelected(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-950 border border-slate-700 rounded-xl p-1.5">
+        <input type="file" id="inputExcelFile" accept=".xlsx, .xls, .csv" onchange="handleExcelFileSelected(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-950 border border-slate-700 rounded-xl p-1.5">
       </div>
 
       <div id="boxImportPreview" class="hidden space-y-2">
@@ -714,9 +716,280 @@
     </div>
   </div>
 
-  <div id="printableReportArea" class="hidden"></div>
+  <!-- ================= 8. MODAL PENDAFTARAN / EDIT ASET ================= -->
+  <div id="modalAssetForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-xl w-full p-6 border border-slate-800 max-h-[92vh] overflow-y-auto custom-scroll shadow-2xl">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+        <div>
+          <h3 id="modalAssetHeading" class="text-base font-bold text-white">Registrasi Pengadaan Aset Baru</h3>
+          <p class="text-xs text-slate-400">Tersinkronisasi ke Google Sheets & Foto Google Drive</p>
+        </div>
+        <button type="button" onclick="closeModal('modalAssetForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
 
-  <!-- ================= JAVASCRIPT LOGIC LENGKAP ================= -->
+      <form onsubmit="handleFormAssetSubmit(event)" class="space-y-3.5 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Kategori Utama *</label>
+            <select id="inputFormKategori" required onchange="onFormKategoriChanged()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200 focus:ring-1 focus:ring-sky-500"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Kelompok Depresiasi (Otomatis)</label>
+            <input type="text" id="inputFormKelompokPenyusutan" readonly class="w-full bg-slate-800/80 border border-slate-700 p-2.5 rounded-xl font-semibold text-amber-400 cursor-not-allowed">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Kode Aset (Auto-Generated) *</label>
+            <input type="text" id="inputFormKode" required class="w-full bg-slate-800 border border-slate-700 p-2.5 rounded-xl font-mono font-bold text-sky-400">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Status Siklus Hidup *</label>
+            <select id="inputFormStatus" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+              <option value="Operasional">Operasional (Normal)</option>
+              <option value="Dalam Perbaikan">Dalam Perbaikan</option>
+              <option value="Perlu Kalibrasi">Perlu Kalibrasi</option>
+              <option value="Disposed">Disposed / Dihapuskan</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Nama Barang & Spesifikasi Lengkap *</label>
+          <input type="text" id="inputFormNama" required placeholder="Contoh: Mesin USG Mindray Resona 7" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-slate-100">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Foto Fisik Aset (Otomatis Kompresi Ringan)</label>
+          <div class="flex items-center gap-3">
+            <input type="file" id="inputFormFotoFile" accept="image/*" capture="environment" onchange="previewSelectedImage(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer">
+            <img id="imgPreviewThumb" class="hidden h-10 w-10 object-cover rounded-lg border border-slate-700">
+          </div>
+          <input type="hidden" id="inputFormFotoUrlExisting">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nomor Seri Pabrik (SN) / No PO</label>
+            <input type="text" id="inputFormSerial" placeholder="Contoh: SN-8829102-MND" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Tanggal Perolehan (Tgl Beli) *</label>
+            <input type="date" id="inputFormTglBeli" required class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="boxFormAuditContainer">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Tanggal Verifikasi Opname / Audit Terakhir</label>
+            <input type="date" id="inputFormAuditDate" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-sky-400">
+            <p class="text-[9px] text-slate-500 mt-0.5">*Otomatis diselaraskan dengan Tgl Beli jika baru dibuat</p>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Penanggung Jawab (PIC Unit)</label>
+            <input type="text" id="inputFormPIC" placeholder="Nama Kepala Unit / Teknisi" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          </div>
+        </div>
+
+        <div class="relative">
+          <label class="block font-bold text-slate-300 mb-1">Lokasi Ruangan / Unit Penempatan *</label>
+          <input type="text" id="inputFormLokasi" required autocomplete="off" oninput="handleAutocompleteLokasi(this.value)" placeholder="Ketik minimal 2 huruf untuk rekomendasi ruangan..." class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          <div id="autocompleteDropdownLokasi" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 max-h-40 overflow-y-auto custom-scroll"></div>
+          <p id="typoNoticeLokasi" class="text-[10px] text-amber-400 font-bold mt-1 hidden"></p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Harga Beli / Perolehan (Rp) *</label>
+          <input type="text" id="inputFormHarga" required oninput="formatInputRupiahRealtime(this)" placeholder="Rp 0" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-emerald-400">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Keterangan Tambahan / Vendor</label>
+          <textarea id="inputFormKet" rows="2" placeholder="Nama vendor, garansi, dsb." class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-slate-200"></textarea>
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modalAssetForm')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">Batal</button>
+          <button id="btnSubmitFormAset" type="submit" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold shadow-lg shadow-sky-600/30 flex items-center gap-2">
+            <span>Simpan ke Cloud</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 9. MODAL DETAIL RIWAYAT (ACCORDION) ================= -->
+  <div id="modalHistoryDetail" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 max-h-[90vh] overflow-y-auto custom-scroll space-y-4 shadow-2xl">
+      <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+        <div class="flex gap-3 items-center">
+          <img id="histDetailFoto" src="" class="hidden h-14 w-14 object-cover rounded-xl border border-slate-700 shadow-md">
+          <div>
+            <span id="histDetailStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Operasional</span>
+            <h3 id="histDetailNamaAset" class="text-base font-bold text-white mt-1">Nama Aset</h3>
+            <p id="histDetailKodeAset" class="text-xs font-mono font-bold text-sky-400">AST-000</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modalHistoryDetail')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-center">
+        <div>
+          <span class="text-slate-400 text-[10px] block">Harga Perolehan</span>
+          <strong id="histSummaryHargaAwal" class="text-slate-200">Rp 0</strong>
+        </div>
+        <div>
+          <span class="text-slate-400 text-[10px] block">Masa Manfaat</span>
+          <strong id="histSummaryKelompok" class="text-amber-400">4 Thn (25%)</strong>
+        </div>
+        <div>
+          <span class="text-slate-400 text-[10px] block">Nilai Buku Saat Ini</span>
+          <strong id="histSummaryNilaiBuku" class="text-emerald-400">Rp 0</strong>
+        </div>
+        <div>
+          <span class="text-slate-400 text-[10px] block">Audit Terakhir</span>
+          <strong id="histSummaryAuditDate" class="text-sky-400">-</strong>
+        </div>
+      </div>
+
+      <!-- KOTAK LOG 1: SERVIS (ACCORDION) -->
+      <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
+        <button type="button" onclick="toggleAccordion('boxHistoryServiceContent', 'iconChevronService')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-wrench text-sky-400"></i>
+            <span>Log Pemeliharaan, Kalibrasi & Servis</span>
+            <span id="badgeServiceCount" class="text-[10px] bg-sky-950 text-sky-400 border border-sky-800/80 px-2 py-0.5 rounded-full font-mono">0</span>
+          </span>
+          <i id="iconChevronService" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"></i>
+        </button>
+        <div id="boxHistoryServiceContent" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60 max-h-60 overflow-y-auto custom-scroll">
+          <div id="boxHistoryServiceList" class="space-y-2">
+            <p class="text-slate-500 italic">Belum ada riwayat perbaikan/servis.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- KOTAK LOG 2: MUTASI (ACCORDION) -->
+      <div class="border border-slate-800 rounded-2xl overflow-hidden shadow-md">
+        <button type="button" onclick="toggleAccordion('boxHistoryMutasiContent', 'iconChevronMutasi')" class="w-full bg-slate-950 hover:bg-slate-900/90 p-3.5 flex justify-between items-center text-xs font-bold text-slate-200 transition">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i>
+            <span>Log Mutasi Ruangan & PIC</span>
+            <span id="badgeMutasiCount" class="text-[10px] bg-teal-950 text-teal-400 border border-teal-800/80 px-2 py-0.5 rounded-full font-mono">0</span>
+          </span>
+          <i id="iconChevronMutasi" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-200"></i>
+        </button>
+        <div id="boxHistoryMutasiContent" class="hidden p-3.5 space-y-2 border-t border-slate-800 text-xs bg-slate-900/60 max-h-60 overflow-y-auto custom-scroll">
+          <div id="boxHistoryMutasiList" class="space-y-2">
+            <p class="text-slate-500 italic">Belum ada riwayat mutasi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 10. MODAL SERVIS ================= -->
+  <div id="modalActionService" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-wrench text-sky-400"></i> Catat Servis / Kalibrasi</h3>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Tindakan Perbaikan / Kalibrasi *</label>
+        <input type="text" id="inputSvcTindakan" placeholder="Contoh: Kalibrasi Tahunan, Ganti Sensor" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Biaya Perbaikan (Rp)</label>
+        <input type="text" id="inputSvcBiaya" oninput="formatInputRupiahRealtime(this)" placeholder="Rp 0" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-semibold text-emerald-400">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Nama Teknisi / Rekanan</label>
+        <input type="text" id="inputSvcTeknisi" placeholder="Teknisi RS / PT Vendor" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2">
+        <button type="button" onclick="closeModal('modalActionService')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitServiceLog()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold">Simpan ke Cloud</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 11. MODAL MUTASI ================= -->
+  <div id="modalActionMutasi" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 space-y-3 text-xs shadow-2xl">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Mutasi Ruangan & Lokasi</h3>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Pindah ke Ruangan Baru *</label>
+        <select id="inputMutasiTargetRoom" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200"></select>
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Penanggung Jawab Penerima (PIC Baru) *</label>
+        <input type="text" id="inputMutasiNewPIC" placeholder="Nama Staf / Kepala Ruangan Baru" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2">
+        <button type="button" onclick="closeModal('modalActionMutasi')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitMutasiLog()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold">Sahkan Mutasi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 12. MODAL DISPOSAL ================= -->
+  <div id="modalActionDisposal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-rose-900/50 space-y-3.5 text-xs shadow-2xl">
+      <div class="flex items-center gap-2 text-rose-400">
+        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+        <h3 class="text-sm font-bold text-white">Penghapusan Aset (Disposal)</h3>
+      </div>
+      <div>
+        <label class="block text-slate-300 font-bold mb-1">Metode Penghapusan *</label>
+        <select id="inputDisposalMethod" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+          <option value="Afkir / Rusak Total">Afkir / Rusak Total (Scrap)</option>
+          <option value="Dijual / Lelang">Dijual / Lelang Aset Bekas</option>
+          <option value="Dihibahkan">Dihibahkan</option>
+          <option value="Hilang">Hilang</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-slate-300 font-bold mb-1">Nomor Berita Acara (BAST Penghapusan) *</label>
+        <input type="text" id="inputDisposalDocNo" placeholder="Contoh: BA-DISP/PHS/2026/045" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-mono text-slate-200">
+      </div>
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalActionDisposal')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" onclick="submitDisposalLog()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold">Sahkan Penghapusan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 13. MODAL LAPORAN ================= -->
+  <div id="modalReportCenter" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Laporan Rekapitulasi & Depresiasi Aset</h3>
+          <p class="text-xs text-slate-400">Ekspor rekapitulasi nilai buku sesuai 4 Kelompok Masa Manfaat</p>
+        </div>
+        <button type="button" onclick="closeModal('modalReportCenter')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button type="button" onclick="exportDataToCSV()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30">
+          <i class="fa-solid fa-file-excel"></i> Unduh Laporan Excel (.CSV)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 14. MODAL SCANNER HP ================= -->
+  <div id="modalCameraScanner" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-5 border border-slate-800 text-center relative shadow-2xl">
+      <button type="button" onclick="closeScannerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div class="w-12 h-12 rounded-2xl bg-sky-950 text-sky-400 flex items-center justify-center mx-auto mb-2 text-xl border border-sky-800/60"><i class="fa-solid fa-camera"></i></div>
+      <h3 class="text-base font-bold text-white">Scan QR / Barcode Aset</h3>
+      <p class="text-xs text-slate-400 mb-4">Arahkan kamera ponsel tepat ke stiker QR Code</p>
+      <div id="cameraPreviewBox" class="overflow-hidden rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950 min-h-[220px]"></div>
+      <div id="cameraStatusMsg" class="text-xs font-bold text-sky-400 mt-3">Mempersiapkan kamera...</div>
+    </div>
+  </div>
+
+  <div id="printableReportArea" class="hidden"></div>
+  <!-- ================= JAVASCRIPT LOGIC LENGKAP & NULL-SAFE ================= -->
   <script>
     const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwFZ1vwCz215Gi75ts9A0ymWXdgffrgvxGDJPmU-0VWvA_jKz1UXy_QUkwrFcGnNXc3lg/exec";
 
@@ -793,15 +1066,22 @@
     });
 
     // ================= FUNGSI DROPDOWN PROFIL & ACCORDION =================
-    function toggleUserDropdown() {
+    function toggleUserDropdown(e) {
+      if (e) e.stopPropagation();
       const menu = document.getElementById('userDropdownMenu');
       if (menu) menu.classList.toggle('hidden');
     }
 
     window.addEventListener('click', (e) => {
       const menu = document.getElementById('userDropdownMenu');
-      if (menu && !e.target.closest('#headerUserNameDisplay') && !e.target.closest('#userDropdownMenu') && !e.target.closest('.fa-chevron-down') && !e.target.closest('.fa-user')) {
+      const container = document.getElementById('userDropdownContainer');
+      if (menu && container && !container.contains(e.target)) {
         menu.classList.add('hidden');
+      }
+      const dropLok = document.getElementById('autocompleteDropdownLokasi');
+      const inLok = document.getElementById('inputFormLokasi');
+      if (dropLok && inLok && !inLok.contains(e.target) && !dropLok.contains(e.target)) {
+        dropLok.classList.add('hidden');
       }
     });
 
@@ -838,10 +1118,15 @@
       const p = pEl.value.trim();
 
       if (!u || !p) {
-        err.innerText = "Username dan password wajib diisi!";
-        err.classList.remove('hidden');
+        if (err) {
+          err.innerText = "Username dan password wajib diisi!";
+          err.classList.remove('hidden');
+        }
         return;
       }
+
+      const currentAdminPass = localStorage.getItem("SUPER_ADMIN_PASS") || "admin123";
+      SUPER_ADMIN.password = currentAdminPass;
 
       if (u === SUPER_ADMIN.username && p === SUPER_ADMIN.password) {
         CURRENT_LOGGED_USER = SUPER_ADMIN;
@@ -852,7 +1137,7 @@
         return;
       }
 
-      const found = STORED_USERS.find(usr => usr.username === u && usr.password === p);
+      const found = STORED_USERS.find(usr => usr.username.toLowerCase() === u.toLowerCase() && usr.password === p);
       if (found) {
         CURRENT_LOGGED_USER = found;
         sessionStorage.setItem("ACTIVE_USER_SESSION", JSON.stringify(CURRENT_LOGGED_USER));
@@ -862,8 +1147,10 @@
         return;
       }
 
-      err.innerText = "Username atau password salah!";
-      err.classList.remove('hidden');
+      if (err) {
+        err.innerText = "Username atau password salah!";
+        err.classList.remove('hidden');
+      }
     }
 
     function handleLogout() {
@@ -894,6 +1181,7 @@
         if (idx !== -1) {
           STORED_USERS[idx].password = p1;
           localStorage.setItem("APP_STAFF_USERS", JSON.stringify(STORED_USERS));
+          renderStaffUsersList();
         }
       }
 
@@ -909,16 +1197,20 @@
       const p = CURRENT_LOGGED_USER.permissions || {};
 
       const tabNavUsers = document.getElementById('tabNavUsers');
-      if (isSuperAdmin) {
-        tabNavUsers.classList.remove('hidden');
-      } else {
-        tabNavUsers.classList.add('hidden');
+      if (tabNavUsers) {
+        if (isSuperAdmin) tabNavUsers.classList.remove('hidden');
+        else tabNavUsers.classList.add('hidden');
       }
 
-      document.getElementById('btnHeaderAdd').style.display = (isSuperAdmin || p.add) ? '' : 'none';
-      document.getElementById('btnHeaderImport').style.display = (isSuperAdmin || p.add) ? '' : 'none';
-      document.getElementById('btnHeaderScan').style.display = (isSuperAdmin || p.audit) ? '' : 'none';
-      document.getElementById('btnHeaderReport').style.display = (isSuperAdmin || p.report) ? '' : 'none';
+      const btnAdd = document.getElementById('btnHeaderAdd');
+      const btnImp = document.getElementById('btnHeaderImport');
+      const btnScn = document.getElementById('btnHeaderScan');
+      const btnRep = document.getElementById('btnHeaderReport');
+
+      if (btnAdd) btnAdd.style.display = (isSuperAdmin || p.add) ? '' : 'none';
+      if (btnImp) btnImp.style.display = (isSuperAdmin || p.add) ? '' : 'none';
+      if (btnScn) btnScn.style.display = (isSuperAdmin || p.audit) ? '' : 'none';
+      if (btnRep) btnRep.style.display = (isSuperAdmin || p.report) ? '' : 'none';
     }
 
     // ================= PENGELOLAAN PENGGUNA (TAB OTORITAS) =================
@@ -926,10 +1218,12 @@
       const selects = [document.getElementById('newUnitKerja'), document.getElementById('editUnitKerja')];
       selects.forEach(sel => {
         if (!sel) return;
+        const currentVal = sel.value;
         sel.innerHTML = '<option value="">Pilih Unit / Ruangan</option>';
         MASTER_LOKASI.forEach(l => {
           sel.innerHTML += `<option value="${l}">${l}</option>`;
         });
+        if (currentVal) sel.value = currentVal;
       });
     }
 
@@ -955,17 +1249,21 @@
         if (permsObj.report) perms.push("Laporan");
 
         tbody.innerHTML += `
-          <tr class="hover:bg-slate-800/40">
+          <tr class="hover:bg-slate-800/40 transition">
             <td class="p-3 font-mono font-bold text-sky-400">${u.username}</td>
             <td class="p-3 font-semibold text-white">${u.nama || '-'}</td>
             <td class="p-3 text-slate-300">${u.unit || '-'}</td>
             <td class="p-3 font-mono text-amber-400">
-              <span class="bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${u.password}</span>
+              <span class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">${u.password}</span>
             </td>
             <td class="p-3 text-[11px] text-slate-400">${perms.join(", ") || "Hanya Lihat"}</td>
             <td class="p-3 text-center space-x-1 whitespace-nowrap">
-              <button type="button" onclick="openEditUserModal(${idx})" title="Edit User & Password" class="text-amber-400 hover:text-amber-300 font-bold px-2 py-1"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button type="button" onclick="deleteStaffUser(${idx})" title="Hapus User" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+              <button type="button" onclick="openEditUserModal(${idx})" title="Edit User & Password" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg px-2.5 py-1.5 transition">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button type="button" onclick="deleteStaffUser(${idx})" title="Hapus User" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg px-2.5 py-1.5 transition">
+                <i class="fa-solid fa-trash"></i>
+              </button>
             </td>
           </tr>
         `;
@@ -994,7 +1292,7 @@
       const unit = document.getElementById('newUnitKerja').value;
 
       if (!u || !p) return alert("Username dan Password wajib diisi!");
-      if (u === SUPER_ADMIN.username) return alert("Tidak boleh menggunakan username admin!");
+      if (u.toLowerCase() === SUPER_ADMIN.username.toLowerCase()) return alert("Tidak boleh menggunakan username admin!");
       if (STORED_USERS.some(x => x.username.toLowerCase() === u.toLowerCase())) return alert(`Username "${u}" sudah digunakan!`);
 
       const newUser = {
@@ -1024,10 +1322,12 @@
       populateUnitKerjaDropdowns();
 
       document.getElementById('editUserIndex').value = idx;
-      document.getElementById('editUsername').value = user.username;
-      document.getElementById('editPassword').value = user.password;
+      document.getElementById('editUsername').value = user.username || '';
+      document.getElementById('editPassword').value = user.password || '';
       document.getElementById('editNamaLengkap').value = user.nama || '';
-      document.getElementById('editUnitKerja').value = user.unit || '';
+      
+      const unitSel = document.getElementById('editUnitKerja');
+      if (unitSel) unitSel.value = user.unit || '';
 
       const p = user.permissions || {};
       document.getElementById('editPermAdd').checked = Boolean(p.add);
@@ -1067,7 +1367,7 @@
       localStorage.setItem("APP_STAFF_USERS", JSON.stringify(STORED_USERS));
       renderStaffUsersList();
       closeModal('modalEditUserForm');
-      alert("Data pengguna berhasil diperbarui!");
+      alert(`Data pengguna "${STORED_USERS[idx].username}" berhasil diperbarui!`);
     }
 
     function deleteStaffUser(idx) {
@@ -1261,6 +1561,7 @@
           MASTER_LOKASI.push(it.lokasi);
         }
       });
+      localStorage.setItem("APP_MASTER_LOKASI", JSON.stringify(MASTER_LOKASI));
       populateLokasiDropdowns();
       populateUnitKerjaDropdowns();
       renderGridLokasiCards();
@@ -1352,8 +1653,10 @@
           }).filter(a => a.kode !== "");
           
           localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
-          badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
-          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Google Sheets Sync`;
+          if (badge) {
+            badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Google Sheets Sync`;
+          }
         }
       } catch (err) {
         console.warn("Koneksi cloud offline, menggunakan cache lokal:", err);
@@ -1362,6 +1665,8 @@
         executeDataFilters();
         updateExecutiveKPIs();
         updateKelompokCardsSummary();
+        renderGridKategoriCards();
+        renderGridLokasiCards();
       }
     }
 
@@ -1391,12 +1696,18 @@
         btn.classList.add('text-slate-400');
       });
 
-      document.getElementById(targetTabId).classList.remove('hidden');
-      btnEl.classList.add('active', 'border-b-2', 'border-sky-400', 'text-sky-400');
-      btnEl.classList.remove('text-slate-400');
+      const targetSec = document.getElementById(targetTabId);
+      if (targetSec) targetSec.classList.remove('hidden');
+      if (btnEl) {
+        btnEl.classList.add('active', 'border-b-2', 'border-sky-400', 'text-sky-400');
+        btnEl.classList.remove('text-slate-400');
+      }
 
       if (targetTabId === 'tab-dashboard') updateExecutiveKPIs();
       if (targetTabId === 'tab-depreciation') updateKelompokCardsSummary();
+      if (targetTabId === 'tab-categories') renderGridKategoriCards();
+      if (targetTabId === 'tab-rooms') renderGridLokasiCards();
+      if (targetTabId === 'tab-users') renderStaffUsersList();
     }
 
     function getAssetKelompokConfig(asset) {
@@ -1477,11 +1788,17 @@
     }
 
     function executeDataFilters() {
-      const q = document.getElementById('filterKeyword').value.toLowerCase().trim();
-      const fKelompok = document.getElementById('filterKelompokDepresiasi').value;
-      const fLok = document.getElementById('filterLokasi').value;
-      const fStatus = document.getElementById('filterStatus').value;
-      const fAudit = document.getElementById('filterAuditFlag').value;
+      const qEl = document.getElementById('filterKeyword');
+      const fKelEl = document.getElementById('filterKelompokDepresiasi');
+      const fLokEl = document.getElementById('filterLokasi');
+      const fStaEl = document.getElementById('filterStatus');
+      const fAudEl = document.getElementById('filterAuditFlag');
+
+      const q = qEl ? qEl.value.toLowerCase().trim() : '';
+      const fKelompok = fKelEl ? fKelEl.value : '';
+      const fLok = fLokEl ? fLokEl.value : '';
+      const fStatus = fStaEl ? fStaEl.value : '';
+      const fAudit = fAudEl ? fAudEl.value : '';
 
       const results = DATA_INVENTARIS.filter(item => {
         const { namaKelompok } = getAssetKelompokConfig(item);
@@ -1505,6 +1822,7 @@
 
     function renderInventoryTable(items) {
       const tbody = document.getElementById('inventoryTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       if (items.length === 0) {
@@ -1521,11 +1839,12 @@
 
         let statusClass = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
         if (item.status === 'Dalam Perbaikan') statusClass = 'bg-amber-500/10 text-amber-400 border border-amber-500/30';
+        if (item.status === 'Perlu Kalibrasi') statusClass = 'bg-sky-500/10 text-sky-400 border border-sky-500/30';
         if (item.status === 'Disposed') statusClass = 'bg-rose-500/10 text-rose-400 border border-rose-500/30 line-through';
 
         let auditTag = isOverdue
-          ? `<span class="text-rose-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation animate-pulse"></i>${item.terakhirAudit} (${daysAgo} hr lalu)</span>`
-          : `<span class="text-slate-300 font-medium">${item.terakhirAudit}</span>`;
+          ? `<span class="text-rose-400 font-bold flex items-center gap-1.5 whitespace-nowrap"><i class="fa-solid fa-triangle-exclamation animate-pulse"></i>${item.terakhirAudit} (${daysAgo} hr lalu)</span>`
+          : `<span class="text-slate-300 font-medium whitespace-nowrap">${item.terakhirAudit}</span>`;
 
         let fotoImg = item.fotoUrl 
           ? `<img src="${item.fotoUrl}" class="h-8 w-8 object-cover rounded-lg border border-slate-700 mx-auto">` 
@@ -1540,26 +1859,26 @@
             <input type="radio" name="rowSelector" value="${item.kode}" ${isSelected ? 'checked' : ''} onchange="selectTableRow('${item.kode}')">
           </td>
           <td class="py-3 px-2 text-center">${fotoImg}</td>
-          <td class="py-3 px-3 font-mono font-bold text-sky-400">${item.kode}</td>
+          <td class="py-3 px-3 font-mono font-bold text-sky-400 whitespace-nowrap">${item.kode}</td>
           <td class="py-3 px-3">
             <span class="font-bold text-white block">${item.nama}</span>
             <span class="text-[10px] text-slate-400 font-mono">PIC: ${item.pic || '-'}</span>
           </td>
-          <td class="py-3 px-3 font-medium text-amber-400">${depInfo.kelompokStr}</td>
+          <td class="py-3 px-3 font-medium text-amber-400 whitespace-nowrap">${depInfo.kelompokStr}</td>
           <td class="py-3 px-3 text-slate-200">${item.lokasi}</td>
-          <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusClass}">${item.status}</span></td>
-          <td class="py-3 px-3 text-slate-300 font-mono">${item.tglBeli || '-'}</td>
-          <td class="py-3 px-3 font-mono font-semibold text-slate-200">Rp ${Number(item.hargaBeli || 0).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-3 font-mono font-bold text-emerald-400">Rp ${Number(depInfo.nilaiBuku).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-3">
+          <td class="py-3 px-3 whitespace-nowrap"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusClass}">${item.status}</span></td>
+          <td class="py-3 px-3 text-slate-300 font-mono whitespace-nowrap">${item.tglBeli || '-'}</td>
+          <td class="py-3 px-3 font-mono font-semibold text-slate-200 whitespace-nowrap">Rp ${Number(item.hargaBeli || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-3 font-mono font-bold text-emerald-400 whitespace-nowrap">Rp ${Number(depInfo.nilaiBuku).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-3 whitespace-nowrap">
             <span class="font-semibold block ${depInfo.sisaBulan === 0 ? 'text-rose-400' : 'text-slate-200'}">${depInfo.sisaTahunStr}</span>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-1">
+            <div class="w-24 bg-slate-800 rounded-full h-1.5 mt-1">
               <div class="bg-sky-500 h-1.5 rounded-full" style="width: ${depInfo.persenDepresiasi}%"></div>
             </div>
           </td>
           <td class="py-3 px-3">${auditTag}</td>
-          <td class="py-3 px-3 text-center" onclick="event.stopPropagation()">
-            <button type="button" onclick="openHistoryDetailModal('${item.kode}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-bold border border-slate-700 transition">
+          <td class="py-3 px-3 text-center sticky right-0 bg-slate-900/95 backdrop-blur-sm shadow-lg" onclick="event.stopPropagation()">
+            <button type="button" onclick="openHistoryDetailModal('${item.kode}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-sky-400 rounded-lg text-[11px] font-bold border border-slate-700 transition whitespace-nowrap">
               <i class="fa-solid fa-clock-rotate-left mr-1"></i>Detail
             </button>
           </td>
@@ -1595,10 +1914,14 @@
         if (namaKelompok === 'Kelompok 3') c3++;
         if (namaKelompok === 'Kelompok 4') c4++;
       });
-      document.getElementById('countKelompok1').innerText = `${c1} Unit`;
-      document.getElementById('countKelompok2').innerText = `${c2} Unit`;
-      document.getElementById('countKelompok3').innerText = `${c3} Unit`;
-      document.getElementById('countKelompok4').innerText = `${c4} Unit`;
+      const el1 = document.getElementById('countKelompok1');
+      const el2 = document.getElementById('countKelompok2');
+      const el3 = document.getElementById('countKelompok3');
+      const el4 = document.getElementById('countKelompok4');
+      if (el1) el1.innerText = `${c1} Unit`;
+      if (el2) el2.innerText = `${c2} Unit`;
+      if (el3) el3.innerText = `${c3} Unit`;
+      if (el4) el4.innerText = `${c4} Unit`;
     }
 
     function previewSelectedImage(e) {
@@ -1621,8 +1944,10 @@
           selectedBase64Image = canvas.toDataURL('image/jpeg', 0.6);
 
           const thumb = document.getElementById('imgPreviewThumb');
-          thumb.src = selectedBase64Image;
-          thumb.classList.remove('hidden');
+          if (thumb) {
+            thumb.src = selectedBase64Image;
+            thumb.classList.remove('hidden');
+          }
         };
         img.src = evt.target.result;
       };
@@ -1630,10 +1955,13 @@
     }
 
     function onFormKategoriChanged() {
-      const katName = document.getElementById('inputFormKategori').value;
-      const katObj = MASTER_KATEGORI.find(k => k.nama === katName);
+      const katEl = document.getElementById('inputFormKategori');
+      if (!katEl) return;
+      const katName = katEl.value;
+      const katObj = MASTER_KATEGORI.find(k => k.nama === katName) || MASTER_KATEGORI[0];
       if (katObj) {
-        document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tahun} Tahun - ${KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok].tarifTahunan * 100}%/Thn)`;
+        const kelConf = KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok] || KELOMPOK_PENYUSUTAN_CONFIG['Kelompok 1'];
+        document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${kelConf.tahun} Tahun - ${kelConf.tarifTahunan * 100}%/Thn)`;
         
         const prefix = katObj.prefix;
         let maxIndex = 0;
@@ -1648,6 +1976,9 @@
     }
 
     function openModalAddAsset(prefillBarcode = '') {
+      const modal = document.getElementById('modalAssetForm');
+      if (!modal) return;
+      populateKategoriDropdowns();
       document.getElementById('modalAssetHeading').innerText = 'Registrasi Pengadaan Aset Baru';
       document.getElementById('inputFormKode').value = prefillBarcode;
       document.getElementById('inputFormNama').value = '';
@@ -1665,7 +1996,7 @@
       document.getElementById('inputFormFotoFile').value = '';
       document.getElementById('imgPreviewThumb').classList.add('hidden');
       selectedBase64Image = null;
-      document.getElementById('modalAssetForm').classList.remove('hidden');
+      modal.classList.remove('hidden');
 
       if (!prefillBarcode) onFormKategoriChanged();
     }
@@ -1675,9 +2006,15 @@
       const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
       if (!asset) return;
 
+      populateKategoriDropdowns();
       document.getElementById('modalAssetHeading').innerText = 'Edit Spesifikasi & Riwayat Audit Aset';
       document.getElementById('inputFormKode').value = asset.kode;
       document.getElementById('inputFormKategori').value = asset.kategori;
+      
+      const katObj = MASTER_KATEGORI.find(k => k.nama === asset.kategori) || MASTER_KATEGORI[0];
+      const kelConf = KELOMPOK_PENYUSUTAN_CONFIG[katObj.kelompok] || KELOMPOK_PENYUSUTAN_CONFIG['Kelompok 1'];
+      document.getElementById('inputFormKelompokPenyusutan').value = `${katObj.kelompok} (${kelConf.tahun} Tahun - ${kelConf.tarifTahunan * 100}%/Thn)`;
+
       document.getElementById('inputFormNama').value = asset.nama;
       document.getElementById('inputFormStatus').value = asset.status;
       document.getElementById('inputFormLokasi').value = asset.lokasi;
@@ -1874,9 +2211,9 @@
       const contentMut = document.getElementById('boxHistoryMutasiContent');
       const iconMut = document.getElementById('iconChevronMutasi');
       
-      contentSvc.classList.add('hidden');
+      if (contentSvc) contentSvc.classList.add('hidden');
       if (iconSvc) iconSvc.classList.remove('rotate-180');
-      contentMut.classList.add('hidden');
+      if (contentMut) contentMut.classList.add('hidden');
       if (iconMut) iconMut.classList.remove('rotate-180');
 
       const svcBox = document.getElementById('boxHistoryServiceList');
@@ -1940,11 +2277,17 @@
         if (kelompokCounter[namaKelompok] !== undefined) kelompokCounter[namaKelompok]++;
       });
 
-      document.getElementById('dashTotalAset').innerText = DATA_INVENTARIS.length;
-      document.getElementById('dashTotalHarga').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
-      document.getElementById('dashTotalNilaiBuku').innerText = 'Rp ' + totalBuku.toLocaleString('id-ID');
-      document.getElementById('dashTotalDepresiasi').innerText = 'Rp ' + Math.max(0, totalHarga - totalBuku).toLocaleString('id-ID');
-      document.getElementById('dashTotalOverdue').innerText = overdueCount;
+      const elTot = document.getElementById('dashTotalAset');
+      const elHrg = document.getElementById('dashTotalHarga');
+      const elBku = document.getElementById('dashTotalNilaiBuku');
+      const elDep = document.getElementById('dashTotalDepresiasi');
+      const elOvr = document.getElementById('dashTotalOverdue');
+
+      if (elTot) elTot.innerText = DATA_INVENTARIS.length;
+      if (elHrg) elHrg.innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
+      if (elBku) elBku.innerText = 'Rp ' + totalBuku.toLocaleString('id-ID');
+      if (elDep) elDep.innerText = 'Rp ' + Math.max(0, totalHarga - totalBuku).toLocaleString('id-ID');
+      if (elOvr) elOvr.innerText = overdueCount;
 
       try {
         if (chartStatusInstance) {
@@ -1988,7 +2331,9 @@
     }
 
     function openScannerModal() {
-      document.getElementById('modalCameraScanner').classList.remove('hidden');
+      const modal = document.getElementById('modalCameraScanner');
+      if (!modal) return;
+      modal.classList.remove('hidden');
       document.getElementById('cameraStatusMsg').innerText = 'Mengakses kamera ponsel...';
 
       cameraHtml5Scanner = new Html5Qrcode("cameraPreviewBox");
@@ -2014,25 +2359,29 @@
     }
 
     function closeScannerModal() {
+      const modal = document.getElementById('modalCameraScanner');
       if (cameraHtml5Scanner) {
         cameraHtml5Scanner.stop().then(() => {
           cameraHtml5Scanner.clear();
-          document.getElementById('modalCameraScanner').classList.add('hidden');
-        }).catch(() => document.getElementById('modalCameraScanner').classList.add('hidden'));
+          if (modal) modal.classList.add('hidden');
+        }).catch(() => {
+          if (modal) modal.classList.add('hidden');
+        });
       } else {
-        document.getElementById('modalCameraScanner').classList.add('hidden');
+        if (modal) modal.classList.add('hidden');
       }
     }
 
     function openReportModal() {
-      document.getElementById('modalReportCenter').classList.remove('hidden');
+      const modal = document.getElementById('modalReportCenter');
+      if (modal) modal.classList.remove('hidden');
     }
 
     function exportDataToCSV() {
-      let csv = "Kode Aset,Nama Aset,Kategori,Kelompok,Lokasi,Tgl Beli,Harga Perolehan,Nilai Buku,Foto Drive\n";
+      let csv = "Kode Aset,Nama Aset,Kategori,Kelompok,Lokasi,Status,Tgl Beli,Harga Perolehan,Nilai Buku,Audit Terakhir,Foto Drive\n";
       DATA_INVENTARIS.forEach(a => {
         const dep = calculateDepreciationValues(a);
-        csv += `"${a.kode}","${a.nama}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${a.fotoUrl}"\n`;
+        csv += `"${a.kode}","${a.nama}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.status}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${a.terakhirAudit}","${a.fotoUrl}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -2055,10 +2404,12 @@
     function populateLokasiDropdowns() {
       const fLok = document.getElementById('filterLokasi');
       if (!fLok) return;
+      const cur = fLok.value;
       fLok.innerHTML = '<option value="">Semua Ruangan</option>';
       MASTER_LOKASI.forEach(l => {
         fLok.innerHTML += `<option value="${l}">${l}</option>`;
       });
+      if (cur) fLok.value = cur;
     }
 
     function renderGridKategoriCards() {
@@ -2119,6 +2470,8 @@
         localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
         localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
 
+        executeDataFilters();
+
         await sendPostToCloud({
           action: "logAction",
           log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi Nyata", picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
@@ -2129,7 +2482,6 @@
           asset: asset
         });
         
-        executeDataFilters();
         alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal ${stamp}.`);
       }
     }
@@ -2162,11 +2514,12 @@
         });
         localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
 
+        closeModal('modalActionService');
+
         await sendPostToCloud({
           action: "logAction",
           log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "SERVIS", keterangan: act, picOrBiaya: costStr }
         });
-        closeModal('modalActionService');
         alert('Log pemeliharaan berhasil dicatat!');
       }
     }
@@ -2200,6 +2553,9 @@
         localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
         localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
 
+        closeModal('modalActionMutasi');
+        executeDataFilters();
+
         await sendPostToCloud({
           action: "logAction",
           log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "MUTASI", keterangan: `Pindah dari [${oldRoom}] ke [${r}]`, picOrBiaya: p || a.pic }
@@ -2210,8 +2566,6 @@
           asset: a
         });
         
-        closeModal('modalActionMutasi');
-        executeDataFilters();
         alert(`Aset berhasil dimutasikan ke ${r}!`);
       }
     }
@@ -2241,6 +2595,9 @@
         localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
         localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
 
+        closeModal('modalActionDisposal');
+        executeDataFilters();
+
         await sendPostToCloud({
           action: "logAction",
           log: { timestamp: stamp, kodeAset: a.kode, tipeLog: "DISPOSAL", keterangan: `Metode: ${method} (BAST: ${doc})`, picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
@@ -2251,8 +2608,6 @@
           asset: a
         });
 
-        closeModal('modalActionDisposal');
-        executeDataFilters();
         alert(`Aset ${a.kode} resmi didekomisi/dihapuskan.`);
       }
     }
