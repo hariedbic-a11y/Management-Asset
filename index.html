@@ -455,16 +455,21 @@
       <div id="gridContainerKategori" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- TAB 5: MASTER LOKASI -->
+    <!-- TAB 5: MASTER LOKASI (DENGAN IMPORT EXCEL & TOMBOL HAPUS) -->
     <section id="tab-rooms" class="hidden space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
           <h3 class="text-sm font-bold text-white">Master Lokasi, Ruangan & Unit Kerja</h3>
           <p class="text-xs text-slate-400">Daftar penempatan aset resmi sebagai acuan mutasi dan stock opname fisik</p>
         </div>
-        <button type="button" onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-plus"></i> Tambah Unit Ruangan
-        </button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" onclick="openModalImportLokasi()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-400 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-file-excel"></i> Import Ruangan
+          </button>
+          <button type="button" onclick="openModalAddLokasi()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-plus"></i> Tambah Unit Ruangan
+          </button>
+        </div>
       </div>
       <div id="gridContainerLokasi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
@@ -499,6 +504,43 @@
     </section>
 
   </main>
+
+  <!-- ================= MODAL IMPORT LOKASI/RUANGAN ================= -->
+  <div id="modalImportLokasi" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-file-excel text-emerald-400"></i> Import Data Ruangan / Lokasi
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Unggah daftar ruangan secara massal via file Excel/CSV</p>
+        </div>
+        <button type="button" onclick="closeModal('modalImportLokasi')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+        <div class="flex flex-wrap justify-between items-center gap-2">
+          <span class="font-bold text-slate-200">1. Unduh Template Format Excel:</span>
+          <button type="button" onclick="downloadLokasiExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-download"></i> Unduh Template Ruangan
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">Kolom pada excel wajib bernama <b>NamaRuangan</b>.</p>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-300 mb-1.5">2. Pilih File Excel / CSV:</label>
+        <input type="file" id="inputLokasiExcelFile" accept=".xlsx, .xls, .csv" onchange="handleLokasiExcelFileSelected(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-950 border border-slate-700 rounded-xl p-1.5">
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalImportLokasi')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" id="btnSubmitLokasiImport" disabled onclick="submitBatchImportLokasi()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold shadow-lg shadow-emerald-600/30">
+          Import Ruangan Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ================= 2. MODAL TAMBAH USER ================= -->
   <div id="modalUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
@@ -572,10 +614,9 @@
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermAdd" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Pengadaan Aset Baru (+)</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermEdit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Edit Spesifikasi Aset</label>
           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermService" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Catat Servis / Kalibrasi</label>
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Mutasi Ruangan</label>
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan Opname Fisik</label>
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal</label>
-          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermReport" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermMutasi" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Scan Opname Fisik</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermAudit" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Hapus / Disposal</label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPermDisposal" class="rounded bg-slate-950 border-slate-700 text-sky-500"> Cetak Laporan & BAST</label>
         </div>
       </div>
       <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
@@ -1041,7 +1082,7 @@
   </div>
 
   <div id="printableReportArea" class="hidden"></div>
-  <!-- ================= JAVASCRIPT LOGIC (ZERO-DELAY & FULL BAST) ================= -->
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwFZ1vwCz215Gi75ts9A0ymWXdgffrgvxGDJPmU-0VWvA_jKz1UXy_QUkwrFcGnNXc3lg/exec";
 
@@ -1091,6 +1132,7 @@
     let chartStatusInstance = null, chartKategoriInstance = null;
     let selectedBase64Image = null;
     let BATCH_IMPORTED_ITEMS = [];
+    let BATCH_IMPORTED_LOKASI = [];
 
     window.addEventListener('DOMContentLoaded', () => {
       try {
@@ -1430,7 +1472,7 @@
       }
     }
 
-    // ================= PENGELOLAAN KATEGORI & LOKASI =================
+    // ================= PENGELOLAAN KATEGORI & LOKASI (DENGAN HAPUS & IMPORT LOKASI) =================
     function openModalAddKategori() {
       document.getElementById('newKatPrefix').value = '';
       document.getElementById('newKatNama').value = '';
@@ -1474,7 +1516,96 @@
       alert(`Unit ruangan "${nama}" berhasil didaftarkan!`);
     }
 
-    // ================= FITUR IMPORT EXCEL / CSV =================
+    function deleteLokasiItem(roomName) {
+      const usedCount = DATA_INVENTARIS.filter(a => a.lokasi === roomName).length;
+      if (usedCount > 0) {
+        return alert(`Tidak dapat menghapus ruangan "${roomName}" karena masih terdapat ${usedCount} aset yang tertaut di ruangan ini.`);
+      }
+
+      if (confirm(`Yakin ingin menghapus ruangan "${roomName}" dari master lokasi?`)) {
+        MASTER_LOKASI = MASTER_LOKASI.filter(l => l !== roomName);
+        localStorage.setItem("APP_MASTER_LOKASI", JSON.stringify(MASTER_LOKASI));
+        populateLokasiDropdowns();
+        populateUnitKerjaDropdowns();
+        renderGridLokasiCards();
+        alert(`Ruangan "${roomName}" berhasil dihapus.`);
+      }
+    }
+
+    function openModalImportLokasi() {
+      document.getElementById('inputLokasiExcelFile').value = '';
+      document.getElementById('btnSubmitLokasiImport').disabled = true;
+      BATCH_IMPORTED_LOKASI = [];
+      document.getElementById('modalImportLokasi').classList.remove('hidden');
+    }
+
+    function downloadLokasiExcelTemplate() {
+      const rows = [
+        ["NamaRuangan"],
+        ["Ruang Poli Anak"],
+        ["Laboratorium Mikrobiologi"],
+        ["Instalasi Bedah Sentral Lt. 3"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template_Ruangan");
+      XLSX.writeFile(wb, "Template_Import_Ruangan.xlsx");
+    }
+
+    function handleLokasiExcelFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+          BATCH_IMPORTED_LOKASI = [];
+          jsonData.forEach(row => {
+            const roomName = String(row.NamaRuangan || row.namaRuangan || row.nama || '').trim();
+            if (roomName && !BATCH_IMPORTED_LOKASI.includes(roomName)) {
+              BATCH_IMPORTED_LOKASI.push(roomName);
+            }
+          });
+
+          if (BATCH_IMPORTED_LOKASI.length > 0) {
+            document.getElementById('btnSubmitLokasiImport').disabled = false;
+            alert(`Berhasil membaca ${BATCH_IMPORTED_LOKASI.length} ruangan dari file Excel.`);
+          } else {
+            alert("Tidak ditemukan nama ruangan yang valid pada file Excel (pastikan header kolom bernama 'NamaRuangan')!");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Gagal membaca file Excel ruangan.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function submitBatchImportLokasi() {
+      if (BATCH_IMPORTED_LOKASI.length === 0) return;
+      let addedCount = 0;
+
+      BATCH_IMPORTED_LOKASI.forEach(room => {
+        if (!MASTER_LOKASI.includes(room)) {
+          MASTER_LOKASI.push(room);
+          addedCount++;
+        }
+      });
+
+      localStorage.setItem("APP_MASTER_LOKASI", JSON.stringify(MASTER_LOKASI));
+      populateLokasiDropdowns();
+      populateUnitKerjaDropdowns();
+      renderGridLokasiCards();
+      closeModal('modalImportLokasi');
+      alert(`Berhasil mengimpor ${addedCount} ruangan baru!`);
+    }
+
+    // ================= FITUR IMPORT EXCEL / CSV ASET =================
     function openModalImportExcel() {
       document.getElementById('inputExcelFile').value = '';
       document.getElementById('boxImportPreview').classList.add('hidden');
@@ -1624,7 +1755,6 @@
       closeModal('modalImportExcel');
       alert(`Berhasil mengimpor ${countImported} aset! Sinkronisasi ke Google Sheets berjalan di latar belakang.`);
 
-      // Kirim di latar belakang tanpa menahan layar (Zero-Delay)
       sendPostToCloud({
         action: "importBatchAssets",
         assetList: itemsToSend,
@@ -1667,7 +1797,7 @@
       return '';
     }
 
-    // ================= SYNC CLOUD GOOGLE SHEETS (BACKGROUND NON-BLOCKING) =================
+    // ================= SYNC CLOUD GOOGLE SHEETS =================
     async function fetchCloudData() {
       const badge = document.getElementById('cloudStatusBadge');
       const icon = document.getElementById('btnRefreshIcon');
@@ -1955,7 +2085,6 @@
       document.getElementById('labelInventoryCount').innerText = `Menampilkan ${items.length} dari ${DATA_INVENTARIS.length} total aset`;
     }
 
-    // SELEKSI BARIS INSTAN TANPA RE-RENDER TABEL (0ms)
     function selectTableRow(kode) {
       SELECTED_ROW_KODE = kode;
 
@@ -2171,14 +2300,11 @@
       closeModal('modalAssetForm');
       alert(`Aset "${nama}" (${kode}) berhasil disimpan!`);
 
-      // Sinkronisasi ke Cloud di latar belakang (Zero-Delay)
-      const payload = {
+      sendPostToCloud({
         action: "saveAsset",
         asset: assetObj,
         imageFile: selectedBase64Image ? { base64: selectedBase64Image, mimeType: "image/jpeg" } : null
-      };
-
-      sendPostToCloud(payload).then(res => {
+      }).then(res => {
         if (res && res.photoUrl) {
           assetObj.fotoUrl = res.photoUrl;
           localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
@@ -2440,7 +2566,7 @@
       }
     }
 
-    // ================= MODUL LAPORAN (.XLSX, .CSV) & GENERATOR BAST RESMI =================
+    // ================= MODUL LAPORAN & GENERATOR BAST =================
     function openReportModal() {
       const modal = document.getElementById('modalReportCenter');
       if (!modal) return;
@@ -2650,7 +2776,12 @@
         c.innerHTML += `
           <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between border-l-4 border-l-emerald-500 shadow-md text-xs">
             <div>
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">UNIT RUANGAN</span>
+              <div class="flex justify-between items-start">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">UNIT RUANGAN</span>
+                <button type="button" onclick="deleteLokasiItem('${l}')" title="Hapus Ruangan Ini" class="text-rose-400 hover:text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 p-1.5 rounded-lg transition">
+                  <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+              </div>
               <h4 class="font-bold text-white text-xs mt-2">${l}</h4>
             </div>
             <p class="text-[11px] font-bold text-emerald-400 mt-3 pt-2 border-t border-slate-800/80">Terisi: ${count} Unit Aset</p>
@@ -2659,7 +2790,7 @@
       });
     }
 
-    // ================= AKSI OPERASIONAL INSTAN (ZERO-DELAY) =================
+    // ================= AKSI OPERASIONAL INSTAN =================
     function actionVerifyAuditToday() {
       if (!SELECTED_ROW_KODE) return;
       const asset = DATA_INVENTARIS.find(a => a.kode === SELECTED_ROW_KODE);
@@ -2680,7 +2811,6 @@
         executeDataFilters();
         alert(`Verifikasi Opname Fisik aset ${asset.kode} (${asset.nama}) disahkan per tanggal ${stamp}!`);
 
-        // Kirim di latar belakang tanpa menahan layar
         sendPostToCloud({
           action: "logAction",
           log: { timestamp: stamp, kodeAset: asset.kode, tipeLog: "AUDIT OPNAME", keterangan: "Fisik Terverifikasi Nyata", picOrBiaya: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin" }
@@ -2805,7 +2935,6 @@
       }
     }
 
-    // ================= CETAK STIKER QR CODE =================
     function actionPrintBarcode() {
       if (!SELECTED_ROW_KODE) {
         alert("Pilih salah satu baris aset terlebih dahulu!");
