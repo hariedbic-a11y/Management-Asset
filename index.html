@@ -1111,7 +1111,7 @@
 
     const SUPER_ADMIN = {
       username: "admin",
-      password: localStorage.getItem("SUPER_ADMIN_PASS") || "admin123",
+      password: localStorage.getItem("SUPER_ADMIN_PASS") || "*Hs69d002",
       nama: "Administrator Utama",
       role: "SUPER_ADMIN"
     };
@@ -1248,7 +1248,7 @@
         return;
       }
 
-      const currentAdminPass = localStorage.getItem("SUPER_ADMIN_PASS") || "admin123";
+      const currentAdminPass = localStorage.getItem("SUPER_ADMIN_PASS") || "*Hs69d002";
       SUPER_ADMIN.password = currentAdminPass;
 
       if (u === SUPER_ADMIN.username && p === SUPER_ADMIN.password) {
