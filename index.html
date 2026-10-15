@@ -455,7 +455,7 @@
       <div id="gridContainerKategori" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- TAB 5: MASTER LOKASI (DILENGKAPI IMPORT EXCEL, TEMPLATE & HAPUS LOKASI) -->
+    <!-- TAB 5: MASTER LOKASI (DENGAN IMPORT EXCEL, TEMPLATE & HAPUS LOKASI) -->
     <section id="tab-rooms" class="hidden space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <div>
@@ -525,7 +525,11 @@
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
-        <input type="text" id="newNamaLengkap" placeholder="contoh: Budi Santoso" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+        <input type="text" id="newNamaLengkap" placeholder="contoh: Sudrajat" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Jabatan / Status Pegawai</label>
+        <input type="text" id="newJabatan" placeholder="contoh: Teknisi Elektromedis / Staf Logistik" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Unit Kerja / Ruangan</label>
@@ -554,7 +558,7 @@
   <div id="modalEditUserForm" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 space-y-3.5 text-xs shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <h3 class="text-sm font-bold text-white">Edit Pengguna & Password</h3>
+        <h3 class="text-sm font-bold text-white">Edit Pengguna & Jabatan</h3>
         <button type="button" onclick="closeModal('modalEditUserForm')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
       </div>
       <input type="hidden" id="editUserIndex">
@@ -569,6 +573,10 @@
       <div>
         <label class="block text-slate-400 font-bold mb-1">Nama Lengkap Pegawai</label>
         <input type="text" id="editNamaLengkap" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
+      </div>
+      <div>
+        <label class="block text-slate-400 font-bold mb-1">Jabatan / Status Pegawai</label>
+        <input type="text" id="editJabatan" placeholder="contoh: Kepala Unit Logistik" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl font-medium text-slate-200">
       </div>
       <div>
         <label class="block text-slate-400 font-bold mb-1">Unit Kerja / Ruangan</label>
@@ -1097,7 +1105,7 @@
 
   <div id="printableReportArea" class="hidden"></div>
 
-  <!-- ================= JAVASCRIPT LOGIC (ZERO-DELAY, FULL BAST & IMPORT LOKASI) ================= -->
+  <!-- ================= JAVASCRIPT LOGIC LENGKAP ================= -->
   <script>
     const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwFZ1vwCz215Gi75ts9A0ymWXdgffrgvxGDJPmU-0VWvA_jKz1UXy_QUkwrFcGnNXc3lg/exec";
 
@@ -1199,7 +1207,13 @@
       const nameEl = document.getElementById('headerUserNameDisplay');
       const roleEl = document.getElementById('dropdownUserRoleDisplay');
       if (nameEl) nameEl.innerText = CURRENT_LOGGED_USER.nama || CURRENT_LOGGED_USER.username;
-      if (roleEl) roleEl.innerText = CURRENT_LOGGED_USER.role === 'SUPER_ADMIN' ? 'Administrator Utama' : (CURRENT_LOGGED_USER.unit || 'Staf Operasional');
+      if (roleEl) {
+        if (CURRENT_LOGGED_USER.role === 'SUPER_ADMIN') {
+          roleEl.innerText = 'Administrator Utama';
+        } else {
+          roleEl.innerText = CURRENT_LOGGED_USER.jabatan || CURRENT_LOGGED_USER.unit || 'Staf Operasional';
+        }
+      }
     }
 
     function toggleAccordion(contentId, iconId) {
@@ -1360,7 +1374,10 @@
         tbody.innerHTML += `
           <tr class="hover:bg-slate-800/40 transition">
             <td class="p-3 font-mono font-bold text-sky-400">${u.username}</td>
-            <td class="p-3 font-semibold text-white">${u.nama || '-'}</td>
+            <td class="p-3 font-semibold text-white">
+              ${u.nama || '-'}<br>
+              <span class="text-[10px] text-sky-300/80 font-normal">${u.jabatan || 'Staf Operasional'}</span>
+            </td>
             <td class="p-3 text-slate-300">${u.unit || '-'}</td>
             <td class="p-3 font-mono text-amber-400">
               <span class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">${u.password}</span>
@@ -1385,6 +1402,7 @@
       document.getElementById('newUsername').value = '';
       document.getElementById('newPassword').value = '';
       document.getElementById('newNamaLengkap').value = '';
+      document.getElementById('newJabatan').value = '';
       populateUnitKerjaDropdowns();
       document.getElementById('newUnitKerja').value = '';
       ['permAdd', 'permEdit', 'permService', 'permMutasi', 'permAudit', 'permDisposal', 'permReport'].forEach(id => {
@@ -1398,6 +1416,7 @@
       const u = document.getElementById('newUsername').value.trim();
       const p = document.getElementById('newPassword').value.trim();
       const n = document.getElementById('newNamaLengkap').value.trim();
+      const j = document.getElementById('newJabatan').value.trim();
       const unit = document.getElementById('newUnitKerja').value;
 
       if (!u || !p) return alert("Username dan Password wajib diisi!");
@@ -1405,7 +1424,7 @@
       if (STORED_USERS.some(x => x.username.toLowerCase() === u.toLowerCase())) return alert(`Username "${u}" sudah digunakan!`);
 
       const newUser = {
-        username: u, password: p, nama: n, unit: unit, role: "STAFF",
+        username: u, password: p, nama: n, jabatan: j || 'Staf Operasional', unit: unit, role: "STAFF",
         permissions: {
           add: document.getElementById('permAdd').checked,
           edit: document.getElementById('permEdit').checked,
@@ -1434,6 +1453,7 @@
       document.getElementById('editUsername').value = user.username || '';
       document.getElementById('editPassword').value = user.password || '';
       document.getElementById('editNamaLengkap').value = user.nama || '';
+      document.getElementById('editJabatan').value = user.jabatan || '';
       
       const unitSel = document.getElementById('editUnitKerja');
       if (unitSel) unitSel.value = user.unit || '';
@@ -1456,12 +1476,14 @@
 
       const newPass = document.getElementById('editPassword').value.trim();
       const newNama = document.getElementById('editNamaLengkap').value.trim();
+      const newJab = document.getElementById('editJabatan').value.trim();
       const newUnit = document.getElementById('editUnitKerja').value;
 
       if (!newPass) return alert("Password tidak boleh kosong!");
 
       STORED_USERS[idx].password = newPass;
       STORED_USERS[idx].nama = newNama;
+      STORED_USERS[idx].jabatan = newJab || 'Staf Operasional';
       STORED_USERS[idx].unit = newUnit;
       STORED_USERS[idx].permissions = {
         add: document.getElementById('editPermAdd').checked,
@@ -1487,7 +1509,7 @@
       }
     }
 
-    // ================= PENGELOLAAN KATEGORI, LOKASI & HAPUS LOKASI EXISTING =================
+    // ================= PENGELOLAAN KATEGORI & LOKASI =================
     function openModalAddKategori() {
       document.getElementById('newKatPrefix').value = '';
       document.getElementById('newKatNama').value = '';
@@ -1542,7 +1564,6 @@
       alert(`Unit ruangan "${nama}" berhasil didaftarkan!`);
     }
 
-    // HAPUS 1 LOKASI EXISTING
     function deleteLokasiItem(idx) {
       const namaLok = MASTER_LOKASI[idx];
       if (!namaLok) return;
@@ -1555,7 +1576,6 @@
       }
     }
 
-    // KOSONGKAN SEMUA LOKASI EXISTING
     function clearAllMasterLokasi() {
       if (MASTER_LOKASI.length === 0) return alert("Daftar lokasi sudah kosong.");
       if (confirm("Yakin ingin MENGHAPUS SEMUA daftar lokasi/unit existing? (Anda dapat mengimpor daftar baru dari Excel setelah ini)")) {
@@ -1670,12 +1690,12 @@
 
     function downloadExcelTemplate() {
       const headers = [
-        ["Nama", "Kategori", "Lokasi", "Status", "TglBeli", "HargaBeli", "PIC", "Ket"]
+        ["Nama", "Kategori", "Lokasi", "Status", "TglBeli", "HargaBeli", "PIC", "SN", "Ket"]
       ];
       const sampleRows = [
-        ["Monitor 24 Inci", "Perangkat IT & Jaringan", "Poliklinik Umum", "Operasional", "14/10/2026", 2500000, "Budi", "Pengadaan Unit Baru"],
-        ["AC Split 2 PK", "Elektronik & Utility", "Rawat Inap Dahlia Lantai 2", "Operasional", "14/10/2026", 6000000, "Siti", "Pengadaan Unit Baru"],
-        ["Kursi Roda Standar", "Furniture & Mebeler", "Instalasi Gawat Darurat (IGD)", "Operasional", "14/10/2026", 1800000, "Joko", "Unit UGD"]
+        ["Monitor 24 Inci", "Perangkat IT & Jaringan", "Poliklinik Umum", "Operasional", "14/10/2026", 2500000, "Budi", "SN-99823-MON", "Pengadaan Unit Baru"],
+        ["AC Split 2 PK", "Elektronik & Utility", "Rawat Inap Dahlia Lantai 2", "Operasional", "14/10/2026", 6000000, "Siti", "SN-AC-1029", "Pengadaan Unit Baru"],
+        ["Kursi Roda Standar", "Furniture & Mebeler", "Instalasi Gawat Darurat (IGD)", "Operasional", "14/10/2026", 1800000, "Joko", "-", "Unit UGD"]
       ];
 
       const ws = XLSX.utils.aoa_to_sheet([...headers, ...sampleRows]);
@@ -1734,8 +1754,8 @@
             const tglBeli = cleanDateFormat(rawTgl) !== '-' ? cleanDateFormat(rawTgl) : cleanDateFormat(new Date());
             const harga = Number(String(row.HargaBeli || row.hargaBeli || 0).replace(/[^0-9]/g, '')) || 0;
             const pic = String(row.PIC || row.pic || '-').trim();
-            const ket = String(row.Ket || row.ket || '-').trim();
             const sn = String(row.SN || row.sn || row.SerialNumber || '-').trim();
+            const ket = String(row.Ket || row.ket || '-').trim();
 
             const assetItem = {
               kode: newBarcode,
@@ -2142,7 +2162,6 @@
       document.getElementById('labelInventoryCount').innerText = `Menampilkan ${items.length} dari ${DATA_INVENTARIS.length} total aset`;
     }
 
-    // SELEKSI BARIS INSTAN TANPA RE-RENDER TABEL (0ms)
     function selectTableRow(kode) {
       SELECTED_ROW_KODE = kode;
 
