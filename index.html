@@ -140,10 +140,25 @@
           <i class="fa-solid fa-qrcode text-sm"></i>
           <span class="hidden md:inline">Scan Audit (HP)</span>
         </button>
-        <button type="button" id="btnHeaderImport" onclick="openModalImportExcel()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-400 border border-slate-700 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-file-excel"></i>
-          <span class="hidden md:inline">Import Aset</span>
-        </button>
+        <!-- DROPDOWN PUSAT IMPORT EXCEL -->
+<div class="relative" id="importDropdownContainer">
+  <button type="button" onclick="toggleImportDropdown(event)" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-400 border border-slate-700 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+    <i class="fa-solid fa-file-excel"></i>
+    <span>Import Excel</span>
+    <i class="fa-solid fa-chevron-down text-[10px] ml-0.5 text-slate-400"></i>
+  </button>
+  <div id="importDropdownMenu" class="hidden absolute left-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl py-1.5 z-50 text-xs">
+    <button type="button" onclick="openModalImportExcel()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 text-slate-200 flex items-center gap-2.5 transition">
+      <i class="fa-solid fa-boxes-stacked text-emerald-400 w-4"></i> Import Master Aset
+    </button>
+    <button type="button" onclick="openModalImportMaintenanceExcel()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 text-slate-200 flex items-center gap-2.5 transition">
+      <i class="fa-solid fa-wrench text-sky-400 w-4"></i> Import Riwayat Servis
+    </button>
+    <button type="button" onclick="openModalImportMutasiExcel()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 text-slate-200 flex items-center gap-2.5 transition">
+      <i class="fa-solid fa-arrows-turn-to-dots text-teal-400 w-4"></i> Import Riwayat Mutasi
+    </button>
+  </div>
+</div>
         <button type="button" id="btnHeaderAdd" onclick="openModalAddAsset()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-plus text-sm"></i>
           <span class="hidden sm:inline">Pengadaan Baru</span>
@@ -779,6 +794,121 @@
         <button type="button" onclick="closeModal('modalImportExcel')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
         <button type="button" id="btnSubmitImportBatch" disabled onclick="submitBatchImportToCloud()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30">
           <span>Simpan Seluruh Aset ke Cloud</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- ================= 7B. MODAL IMPORT MAINTENANCE / SERVIS ================= -->
+  <div id="modalImportMaintenanceExcel" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-wrench text-sky-400"></i> Import Riwayat Maintenance & Kalibrasi
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Tersinkronisasi otomatis dengan Sheet Logs & Riwayat Detail Aset</p>
+        </div>
+        <button type="button" onclick="closeModal('modalImportMaintenanceExcel')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+        <div class="flex flex-wrap justify-between items-center gap-2">
+          <span class="font-bold text-slate-200">1. Unduh Template Import Maintenance:</span>
+          <button type="button" onclick="downloadMaintenanceExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-download"></i> Unduh Template Maintenance
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">Pastikan kolom <b>KodeAset</b> sesuai dengan kode aset yang terdaftar di sistem.</p>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-300 mb-1.5">2. Pilih File Excel / CSV Maintenance:</label>
+        <input type="file" id="inputMaintenanceExcelFile" accept=".xlsx, .xls, .csv" onchange="handleMaintenanceExcelFileSelected(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer bg-slate-950 border border-slate-700 rounded-xl p-1.5">
+      </div>
+
+      <div id="boxImportMaintenancePreview" class="hidden space-y-2">
+        <div class="flex justify-between items-center text-slate-300 font-bold">
+          <span>Pratinjau Data Servis (<span id="countImportMaintenancePreview">0</span> Baris Valid):</span>
+          <span class="text-[10px] text-sky-400 font-mono">*Siap Disinkronkan</span>
+        </div>
+        <div class="max-h-52 overflow-y-auto custom-scroll border border-slate-800 rounded-xl bg-slate-950">
+          <table class="w-full text-left text-[11px] border-collapse">
+            <thead class="bg-slate-900 text-slate-400 sticky top-0 border-b border-slate-800">
+              <tr>
+                <th class="p-2">Kode Aset</th>
+                <th class="p-2">Tanggal</th>
+                <th class="p-2">Tindakan Perbaikan</th>
+                <th class="p-2">Biaya</th>
+                <th class="p-2">Teknisi / Vendor</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyImportMaintenancePreview" class="divide-y divide-slate-800/80 text-slate-300"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalImportMaintenanceExcel')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" id="btnSubmitImportMaintenanceBatch" disabled onclick="submitBatchImportMaintenance()" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold flex items-center gap-1.5 shadow-lg shadow-sky-600/30">
+          <span>Simpan Riwayat Servis ke Cloud</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 7C. MODAL IMPORT MUTASI RUANGAN ================= -->
+  <div id="modalImportMutasiExcel" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 border border-slate-800 space-y-4 text-xs shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-arrows-turn-to-dots text-teal-400"></i> Import Riwayat Mutasi Ruangan
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Mencatat perpindahan & otomatis mengupdate lokasi terkini aset</p>
+        </div>
+        <button type="button" onclick="closeModal('modalImportMutasiExcel')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+        <div class="flex flex-wrap justify-between items-center gap-2">
+          <span class="font-bold text-slate-200">1. Unduh Template Import Mutasi:</span>
+          <button type="button" onclick="downloadMutasiExcelTemplate()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-teal-400 border border-teal-500/30 rounded-xl font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-download"></i> Unduh Template Mutasi
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">Lokasi penempatan barang di master inventaris akan otomatis disesuaikan dengan <b>RuanganTujuan</b>.</p>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-300 mb-1.5">2. Pilih File Excel / CSV Mutasi:</label>
+        <input type="file" id="inputMutasiExcelFile" accept=".xlsx, .xls, .csv" onchange="handleMutasiExcelFileSelected(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-teal-600 file:text-white hover:file:bg-teal-500 cursor-pointer bg-slate-950 border border-slate-700 rounded-xl p-1.5">
+      </div>
+
+      <div id="boxImportMutasiPreview" class="hidden space-y-2">
+        <div class="flex justify-between items-center text-slate-300 font-bold">
+          <span>Pratinjau Data Mutasi (<span id="countImportMutasiPreview">0</span> Baris Valid):</span>
+          <span class="text-[10px] text-teal-400 font-mono">*Otomatis Update Master</span>
+        </div>
+        <div class="max-h-52 overflow-y-auto custom-scroll border border-slate-800 rounded-xl bg-slate-950">
+          <table class="w-full text-left text-[11px] border-collapse">
+            <thead class="bg-slate-900 text-slate-400 sticky top-0 border-b border-slate-800">
+              <tr>
+                <th class="p-2">Kode Aset</th>
+                <th class="p-2">Tanggal</th>
+                <th class="p-2">Dari Ruangan</th>
+                <th class="p-2">Ke Ruangan Baru</th>
+                <th class="p-2">PIC Baru</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyImportMutasiPreview" class="divide-y divide-slate-800/80 text-slate-300"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+        <button type="button" onclick="closeModal('modalImportMutasiExcel')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Batal</button>
+        <button type="button" id="btnSubmitImportMutasiBatch" disabled onclick="submitBatchImportMutasi()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold flex items-center gap-1.5 shadow-lg shadow-teal-600/30">
+          <span>Simpan Riwayat Mutasi ke Cloud</span>
         </button>
       </div>
     </div>
