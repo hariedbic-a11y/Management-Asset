@@ -1416,7 +1416,7 @@
       const u = document.getElementById('newUsername').value.trim();
       const p = document.getElementById('newPassword').value.trim();
       const n = document.getElementById('newNamaLengkap').value.trim();
-      const j = document.getElementById('newJabatan').value.trim();
+      const j = document.getElementById('newJabatan') ? document.getElementById('newJabatan').value.trim() : '';
       const unit = document.getElementById('newUnitKerja').value;
 
       if (!u || !p) return alert("Username dan Password wajib diisi!");
@@ -1441,33 +1441,9 @@
       renderStaffUsersList();
       closeModal('modalUserForm');
       alert(`User "${u}" berhasil dibuat!`);
-    }
 
-    function openEditUserModal(idx) {
-      const user = STORED_USERS[idx];
-      if (!user) return;
-
-      populateUnitKerjaDropdowns();
-
-      document.getElementById('editUserIndex').value = idx;
-      document.getElementById('editUsername').value = user.username || '';
-      document.getElementById('editPassword').value = user.password || '';
-      document.getElementById('editNamaLengkap').value = user.nama || '';
-      document.getElementById('editJabatan').value = user.jabatan || '';
-      
-      const unitSel = document.getElementById('editUnitKerja');
-      if (unitSel) unitSel.value = user.unit || '';
-
-      const p = user.permissions || {};
-      document.getElementById('editPermAdd').checked = Boolean(p.add);
-      document.getElementById('editPermEdit').checked = Boolean(p.edit);
-      document.getElementById('editPermService').checked = Boolean(p.service);
-      document.getElementById('editPermMutasi').checked = Boolean(p.mutasi);
-      document.getElementById('editPermAudit').checked = Boolean(p.audit);
-      document.getElementById('editPermDisposal').checked = Boolean(p.disposal);
-      document.getElementById('editPermReport').checked = Boolean(p.report);
-
-      document.getElementById('modalEditUserForm').classList.remove('hidden');
+      // Kirim otomatis ke Sheet Users
+      sendPostToCloud({ action: "saveUser", user: newUser });
     }
 
     function submitUpdateUser() {
@@ -1476,14 +1452,14 @@
 
       const newPass = document.getElementById('editPassword').value.trim();
       const newNama = document.getElementById('editNamaLengkap').value.trim();
-      const newJab = document.getElementById('editJabatan').value.trim();
+      const newJab = document.getElementById('editJabatan') ? document.getElementById('editJabatan').value.trim() : '';
       const newUnit = document.getElementById('editUnitKerja').value;
 
       if (!newPass) return alert("Password tidak boleh kosong!");
 
       STORED_USERS[idx].password = newPass;
       STORED_USERS[idx].nama = newNama;
-      STORED_USERS[idx].jabatan = newJab || 'Staf Operasional';
+      STORED_USERS[idx].jabatan = newJab || STORED_USERS[idx].jabatan || 'Staf Operasional';
       STORED_USERS[idx].unit = newUnit;
       STORED_USERS[idx].permissions = {
         add: document.getElementById('editPermAdd').checked,
@@ -1499,13 +1475,20 @@
       renderStaffUsersList();
       closeModal('modalEditUserForm');
       alert(`Data pengguna "${STORED_USERS[idx].username}" berhasil diperbarui!`);
+
+      // Update otomatis ke Sheet Users
+      sendPostToCloud({ action: "saveUser", user: STORED_USERS[idx] });
     }
 
     function deleteStaffUser(idx) {
-      if (confirm("Hapus pengguna ini?")) {
+      const usr = STORED_USERS[idx];
+      if (confirm(`Yakin ingin menghapus pengguna "${usr.username}"?`)) {
         STORED_USERS.splice(idx, 1);
         localStorage.setItem("APP_STAFF_USERS", JSON.stringify(STORED_USERS));
         renderStaffUsersList();
+
+        // Hapus baris di Sheet Users
+        sendPostToCloud({ action: "deleteUser", username: usr.username });
       }
     }
 
@@ -1883,31 +1866,42 @@
         const response = await fetch(GOOGLE_API_URL);
         const result = await response.json();
         
-        if (result.success && Array.isArray(result.data)) {
-          DATA_INVENTARIS = result.data.map(item => {
-            const rawTglBeli = cleanDateFormat(String(getProp(item, 'TglBeli') || ''));
-            const rawAudit = String(getProp(item, 'TerakhirAudit') || '').trim();
-            const cleanAudit = (rawAudit && rawAudit !== '-') ? cleanDateFormat(rawAudit) : rawTglBeli;
+        if (result.success) {
+          // 1. Sinkronisasi Data Aset
+          if (Array.isArray(result.data)) {
+            DATA_INVENTARIS = result.data.map(item => {
+              const rawTglBeli = cleanDateFormat(String(getProp(item, 'TglBeli') || ''));
+              const rawAudit = String(getProp(item, 'TerakhirAudit') || '').trim();
+              const cleanAudit = (rawAudit && rawAudit !== '-') ? cleanDateFormat(rawAudit) : rawTglBeli;
 
-            return {
-              kode: String(getProp(item, 'Kode') || '').trim(),
-              nama: String(getProp(item, 'Nama') || '').trim(),
-              kategori: String(getProp(item, 'Kategori') || '').trim(),
-              kelompok: String(getProp(item, 'Kelompok') || '').trim(),
-              lokasi: String(getProp(item, 'Lokasi') || '').trim(),
-              status: String(getProp(item, 'Status') || 'Operasional').trim(),
-              tglBeli: rawTglBeli,
-              hargaBeli: Number(getProp(item, 'HargaBeli')) || 0,
-              pic: String(getProp(item, 'PIC') || '-').trim(),
-              serialNumber: String(getProp(item, 'SerialNumber') || getProp(item, 'SN') || '-').trim(),
-              tglKalibrasi: String(getProp(item, 'Kalibrasi') || '-').trim(),
-              keterangan: String(getProp(item, 'Ket') || '-').trim(),
-              fotoUrl: String(getProp(item, 'FotoUrl') || '').trim(),
-              terakhirAudit: cleanAudit
-            };
-          }).filter(a => a.kode !== "");
-          
-          localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+              return {
+                kode: String(getProp(item, 'Kode') || '').trim(),
+                nama: String(getProp(item, 'Nama') || '').trim(),
+                kategori: String(getProp(item, 'Kategori') || '').trim(),
+                kelompok: String(getProp(item, 'Kelompok') || '').trim(),
+                lokasi: String(getProp(item, 'Lokasi') || '').trim(),
+                status: String(getProp(item, 'Status') || 'Operasional').trim(),
+                tglBeli: rawTglBeli,
+                hargaBeli: Number(getProp(item, 'HargaBeli')) || 0,
+                pic: String(getProp(item, 'PIC') || '-').trim(),
+                serialNumber: String(getProp(item, 'SerialNumber') || getProp(item, 'SN') || '-').trim(),
+                tglKalibrasi: String(getProp(item, 'Kalibrasi') || '-').trim(),
+                keterangan: String(getProp(item, 'Ket') || '-').trim(),
+                fotoUrl: String(getProp(item, 'FotoUrl') || '').trim(),
+                terakhirAudit: cleanAudit
+              };
+            }).filter(a => a.kode !== "");
+            
+            localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+          }
+
+          // 2. Sinkronisasi Data Pengguna (Users) dari Sheet
+          if (Array.isArray(result.users) && result.users.length > 0) {
+            STORED_USERS = result.users.filter(u => u.username && u.username.toLowerCase() !== 'admin');
+            localStorage.setItem('APP_STAFF_USERS', JSON.stringify(STORED_USERS));
+            renderStaffUsersList();
+          }
+
           if (badge) {
             badge.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase flex items-center gap-1";
             badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Google Sheets Sync`;
@@ -1922,6 +1916,7 @@
         updateKelompokCardsSummary();
         renderGridKategoriCards();
         renderGridLokasiCards();
+        renderStaffUsersList();
       }
     }
 
