@@ -1286,6 +1286,8 @@
     let selectedBase64Image = null;
     let BATCH_IMPORTED_ITEMS = [];
     let BATCH_IMPORTED_LOKASI = [];
+    let BATCH_IMPORTED_MAINTENANCE = [];
+    let BATCH_IMPORTED_MUTASI = [];
 
     window.addEventListener('DOMContentLoaded', () => {
       try {
@@ -1318,19 +1320,31 @@
       const menu = document.getElementById('userDropdownMenu');
       if (menu) menu.classList.toggle('hidden');
     }
+    function toggleImportDropdown(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('importDropdownMenu');
+  if (menu) menu.classList.toggle('hidden');
+}
 
     window.addEventListener('click', (e) => {
-      const menu = document.getElementById('userDropdownMenu');
-      const container = document.getElementById('userDropdownContainer');
-      if (menu && container && !container.contains(e.target)) {
-        menu.classList.add('hidden');
-      }
-      const dropLok = document.getElementById('autocompleteDropdownLokasi');
-      const inLok = document.getElementById('inputFormLokasi');
-      if (dropLok && inLok && !inLok.contains(e.target) && !dropLok.contains(e.target)) {
-        dropLok.classList.add('hidden');
-      }
-    });
+  const userMenu = document.getElementById('userDropdownMenu');
+  const userContainer = document.getElementById('userDropdownContainer');
+  if (userMenu && userContainer && !userContainer.contains(e.target)) {
+    userMenu.classList.add('hidden');
+  }
+
+  const impMenu = document.getElementById('importDropdownMenu');
+  const impContainer = document.getElementById('importDropdownContainer');
+  if (impMenu && impContainer && !impContainer.contains(e.target)) {
+    impMenu.classList.add('hidden');
+  }
+
+  const dropLok = document.getElementById('autocompleteDropdownLokasi');
+  const inLok = document.getElementById('inputFormLokasi');
+  if (dropLok && inLok && !inLok.contains(e.target) && !dropLok.contains(e.target)) {
+    dropLok.classList.add('hidden');
+  }
+});
 
     function updateHeaderUserDisplay() {
       if (!CURRENT_LOGGED_USER) return;
@@ -1948,6 +1962,243 @@
         action: "importBatchAssets",
         assetList: itemsToSend,
         user: CURRENT_LOGGED_USER ? CURRENT_LOGGED_USER.nama : "Admin"
+      });
+    }
+    // ================= FITUR IMPORT MAINTENANCE / SERVIS =================
+    function openModalImportMaintenanceExcel() {
+      const impMenu = document.getElementById('importDropdownMenu');
+      if (impMenu) impMenu.classList.add('hidden');
+
+      document.getElementById('inputMaintenanceExcelFile').value = '';
+      document.getElementById('boxImportMaintenancePreview').classList.add('hidden');
+      document.getElementById('btnSubmitImportMaintenanceBatch').disabled = true;
+      BATCH_IMPORTED_MAINTENANCE = [];
+      document.getElementById('modalImportMaintenanceExcel').classList.remove('hidden');
+    }
+
+    function downloadMaintenanceExcelTemplate() {
+      const headers = [
+        ["KodeAset", "Tanggal", "Tindakan", "Biaya", "Teknisi_Vendor"]
+      ];
+      const sampleRows = [
+        ["IT002", "14/10/2026", "Ganti Sensor Power Supply", 350000, "Teknisi IT Internal"],
+        ["ML001", "15/10/2026", "Kalibrasi Tahunan Akreditasi", 1200000, "PT Sarana Medika"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet([...headers, ...sampleRows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template_Maintenance");
+      XLSX.writeFile(wb, "Template_Import_Maintenance.xlsx");
+    }
+
+    function handleMaintenanceExcelFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+          if (jsonData.length === 0) return alert("File Excel kosong atau format tidak sesuai!");
+
+          BATCH_IMPORTED_MAINTENANCE = [];
+          const previewBody = document.getElementById('tableBodyImportMaintenancePreview');
+          previewBody.innerHTML = '';
+
+          jsonData.forEach(row => {
+            const kode = String(row.KodeAset || row.kodeaset || row.Kode || row.kode || '').trim();
+            const tindakan = String(row.Tindakan || row.tindakan || '').trim();
+            if (!kode || !tindakan) return;
+
+            const rawTgl = String(row.Tanggal || row.tanggal || '').trim();
+            const cleanTgl = cleanDateFormat(rawTgl) !== '-' ? cleanDateFormat(rawTgl) : cleanDateFormat(new Date());
+            const biaya = Number(String(row.Biaya || row.biaya || 0).replace(/[^0-9]/g, '')) || 0;
+            const teknisi = String(row.Teknisi_Vendor || row.teknisi_vendor || row.Teknisi || row.teknisi || 'Teknisi RS').trim();
+
+            const costStr = `Rp ${biaya.toLocaleString('id-ID')} (${teknisi})`;
+
+            const logItem = {
+              timestamp: `${cleanTgl} 09:00`,
+              kodeAset: kode,
+              tipeLog: "SERVIS",
+              keterangan: tindakan,
+              picOrBiaya: costStr
+            };
+
+            BATCH_IMPORTED_MAINTENANCE.push(logItem);
+
+            previewBody.innerHTML += `
+              <tr class="hover:bg-slate-900">
+                <td class="p-2 font-mono font-bold text-sky-400">${kode}</td>
+                <td class="p-2 text-slate-300">${cleanTgl}</td>
+                <td class="p-2 font-semibold text-white">${tindakan}</td>
+                <td class="p-2 font-mono text-emerald-400">Rp ${biaya.toLocaleString('id-ID')}</td>
+                <td class="p-2 text-slate-300">${teknisi}</td>
+              </tr>
+            `;
+          });
+
+          if (BATCH_IMPORTED_MAINTENANCE.length > 0) {
+            document.getElementById('countImportMaintenancePreview').innerText = BATCH_IMPORTED_MAINTENANCE.length;
+            document.getElementById('boxImportMaintenancePreview').classList.remove('hidden');
+            document.getElementById('btnSubmitImportMaintenanceBatch').disabled = false;
+          } else {
+            alert("Tidak ada baris data servis yang valid! Pastikan kolom KodeAset dan Tindakan terisi.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Gagal membaca file Excel maintenance.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function submitBatchImportMaintenance() {
+      if (BATCH_IMPORTED_MAINTENANCE.length === 0) return;
+
+      const count = BATCH_IMPORTED_MAINTENANCE.length;
+      GLOBAL_LOGS.unshift(...BATCH_IMPORTED_MAINTENANCE);
+      localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
+
+      closeModal('modalImportMaintenanceExcel');
+      alert(`Berhasil mengimpor ${count} riwayat pemeliharaan/servis!`);
+
+      sendPostToCloud({
+        action: "importBatchLogs",
+        logList: BATCH_IMPORTED_MAINTENANCE
+      });
+    }
+
+    // ================= FITUR IMPORT MUTASI RUANGAN =================
+    function openModalImportMutasiExcel() {
+      const impMenu = document.getElementById('importDropdownMenu');
+      if (impMenu) impMenu.classList.add('hidden');
+
+      document.getElementById('inputMutasiExcelFile').value = '';
+      document.getElementById('boxImportMutasiPreview').classList.add('hidden');
+      document.getElementById('btnSubmitImportMutasiBatch').disabled = true;
+      BATCH_IMPORTED_MUTASI = [];
+      document.getElementById('modalImportMutasiExcel').classList.remove('hidden');
+    }
+
+    function downloadMutasiExcelTemplate() {
+      const headers = [
+        ["KodeAset", "Tanggal", "RuanganAsal", "RuanganTujuan", "PIC_Baru"]
+      ];
+      const sampleRows = [
+        ["IT002", "14/10/2026", "Logistik PHS", "Poliklinik Umum", "Aan"],
+        ["FM001", "15/10/2026", "Instalasi Gawat Darurat (IGD)", "Rawat Inap Dahlia Lantai 2", "Siti"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet([...headers, ...sampleRows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template_Mutasi");
+      XLSX.writeFile(wb, "Template_Import_Mutasi.xlsx");
+    }
+
+    function handleMutasiExcelFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+          if (jsonData.length === 0) return alert("File Excel kosong atau format tidak sesuai!");
+
+          BATCH_IMPORTED_MUTASI = [];
+          const previewBody = document.getElementById('tableBodyImportMutasiPreview');
+          previewBody.innerHTML = '';
+
+          jsonData.forEach(row => {
+            const kode = String(row.KodeAset || row.kodeaset || row.Kode || row.kode || '').trim();
+            const asal = String(row.RuanganAsal || row.ruanganasal || row.Asal || row.asal || '-').trim();
+            const tujuan = String(row.RuanganTujuan || row.ruangantujuan || row.Tujuan || row.tujuan || '').trim();
+            if (!kode || !tujuan) return;
+
+            const rawTgl = String(row.Tanggal || row.tanggal || '').trim();
+            const cleanTgl = cleanDateFormat(rawTgl) !== '-' ? cleanDateFormat(rawTgl) : cleanDateFormat(new Date());
+            const picBaru = String(row.PIC_Baru || row.pic_baru || row.PIC || row.pic || '-').trim();
+
+            const logItem = {
+              timestamp: `${cleanTgl} 10:00`,
+              kodeAset: kode,
+              tipeLog: "MUTASI",
+              keterangan: `Pindah dari [${asal}] ke [${tujuan}]`,
+              picOrBiaya: picBaru,
+              lokasiBaru: tujuan
+            };
+
+            BATCH_IMPORTED_MUTASI.push(logItem);
+
+            previewBody.innerHTML += `
+              <tr class="hover:bg-slate-900">
+                <td class="p-2 font-mono font-bold text-teal-400">${kode}</td>
+                <td class="p-2 text-slate-300">${cleanTgl}</td>
+                <td class="p-2 text-slate-400">${asal}</td>
+                <td class="p-2 font-semibold text-white">${tujuan}</td>
+                <td class="p-2 text-sky-400">${picBaru}</td>
+              </tr>
+            `;
+          });
+
+          if (BATCH_IMPORTED_MUTASI.length > 0) {
+            document.getElementById('countImportMutasiPreview').innerText = BATCH_IMPORTED_MUTASI.length;
+            document.getElementById('boxImportMutasiPreview').classList.remove('hidden');
+            document.getElementById('btnSubmitImportMutasiBatch').disabled = false;
+          } else {
+            alert("Tidak ada baris mutasi yang valid! Pastikan kolom KodeAset dan RuanganTujuan terisi.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Gagal membaca file Excel mutasi.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function submitBatchImportMutasi() {
+      if (BATCH_IMPORTED_MUTASI.length === 0) return;
+
+      const count = BATCH_IMPORTED_MUTASI.length;
+      GLOBAL_LOGS.unshift(...BATCH_IMPORTED_MUTASI);
+      localStorage.setItem('GLOBAL_LOGS', JSON.stringify(GLOBAL_LOGS));
+
+      // Otomatis update lokasi dan PIC terakhir di master inventaris lokal
+      const updateLocList = [];
+      BATCH_IMPORTED_MUTASI.forEach(m => {
+        const a = DATA_INVENTARIS.find(x => x.kode === m.kodeAset);
+        if (a) {
+          a.lokasi = m.lokasiBaru;
+          if (m.picOrBiaya && m.picOrBiaya !== '-') a.pic = m.picOrBiaya;
+          updateLocList.push({ kode: m.kodeAset, lokasiBaru: m.lokasiBaru, picBaru: m.picOrBiaya });
+        }
+        if (!MASTER_LOKASI.includes(m.lokasiBaru)) {
+          MASTER_LOKASI.push(m.lokasiBaru);
+        }
+      });
+
+      localStorage.setItem('DATA_INVENTARIS', JSON.stringify(DATA_INVENTARIS));
+      localStorage.setItem('APP_MASTER_LOKASI', JSON.stringify(MASTER_LOKASI));
+
+      populateLokasiDropdowns();
+      populateUnitKerjaDropdowns();
+      renderGridLokasiCards();
+      executeDataFilters();
+
+      closeModal('modalImportMutasiExcel');
+      alert(`Berhasil mengimpor ${count} riwayat mutasi! Lokasi master aset otomatis disesuaikan.`);
+
+      sendPostToCloud({
+        action: "importBatchLogs",
+        logList: BATCH_IMPORTED_MUTASI,
+        updateAssetLocations: updateLocList
       });
     }
 
