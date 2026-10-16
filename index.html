@@ -2671,39 +2671,132 @@
     function exportDataToXLSX() {
       if (DATA_INVENTARIS.length === 0) return alert("Belum ada data aset untuk diekspor!");
 
-      const rows = [
-        ["Kode Aset", "Nama Aset", "Nomor Seri (SN)", "Kategori", "Kelompok Masa Manfaat", "Lokasi Ruangan", "Status", "Tgl Perolehan", "Harga Perolehan (Rp)", "Nilai Buku Berjalan (Rp)", "Sisa Usia Ekonomis", "PIC Unit", "Audit Terakhir"]
+      const wb = XLSX.utils.book_new();
+
+      // ================= SHEET 1: REKAPITULASI ASET & NILAI BUKU =================
+      const masterRows = [
+        [
+          "Kode Aset", "Nama Aset", "Nomor Seri (SN)", "Kategori", "Kelompok Masa Manfaat",
+          "Lokasi Ruangan", "Status Operasional", "Tanggal Perolehan", "Harga Perolehan (Rp)",
+          "Akumulasi Depresiasi (Rp)", "Nilai Buku Saat Ini (Rp)", "Sisa Usia Ekonomis",
+          "PIC Penanggung Jawab", "Audit Opname Terakhir", "Total Kali Servis", "Total Biaya Pemeliharaan (Rp)", "Total Mutasi"
+        ]
       ];
 
       DATA_INVENTARIS.forEach(a => {
         const dep = calculateDepreciationValues(a);
-        rows.push([
-          a.kode, a.nama, a.serialNumber || '-', a.kategori, dep.kelompokStr, a.lokasi, a.status,
-          a.tglBeli, Number(a.hargaBeli || 0), Number(dep.nilaiBuku || 0),
-          dep.sisaTahunStr, a.pic || '-', a.terakhirAudit
+        const harga = Number(a.hargaBeli || 0);
+        const nilaiBuku = Number(dep.nilaiBuku || 0);
+        const akumulasiDep = Math.max(0, harga - nilaiBuku);
+
+        // Hitung riwayat log aset terkait
+        const assetLogs = GLOBAL_LOGS.filter(l => l.kodeAset === a.kode);
+        const svcLogs = assetLogs.filter(l => l.tipeLog === 'SERVIS');
+        const mutLogs = assetLogs.filter(l => l.tipeLog === 'MUTASI');
+
+        let totalBiayaSvc = 0;
+        svcLogs.forEach(s => {
+          const num = Number(String(s.picOrBiaya || '').replace(/[^0-9]/g, '')) || 0;
+          totalBiayaSvc += num;
+        });
+
+        masterRows.push([
+          a.kode,
+          a.nama,
+          a.serialNumber || '-',
+          a.kategori,
+          dep.kelompokStr,
+          a.lokasi,
+          a.status,
+          a.tglBeli,
+          harga,
+          akumulasiDep,
+          nilaiBuku,
+          dep.sisaTahunStr,
+          a.pic || '-',
+          a.terakhirAudit,
+          svcLogs.length,
+          totalBiayaSvc,
+          mutLogs.length
         ]);
       });
 
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Rekap_Inventaris_Aset");
-      XLSX.writeFile(wb, `Laporan_Rekap_Aset_${new Date().toISOString().split('T')[0]}.xlsx`);
+      const wsMaster = XLSX.utils.aoa_to_sheet(masterRows);
+      XLSX.utils.book_append_sheet(wb, wsMaster, "Rekap_Master_Aset");
+
+      // ================= SHEET 2: RIWAYAT LOG PEMELIHARAAN & KALIBRASI =================
+      const svcRows = [
+        ["No", "Waktu Pelaksanaan (Lokal)", "Kode Aset", "Nama Aset", "Unit / Lokasi", "Tindakan Pemeliharaan / Kalibrasi", "Rincian Biaya & Teknisi"]
+      ];
+
+      let svcCount = 1;
+      GLOBAL_LOGS.filter(l => l.tipeLog === 'SERVIS').forEach(log => {
+        const a = DATA_INVENTARIS.find(x => x.kode === log.kodeAset) || {};
+        svcRows.push([
+          svcCount++,
+          log.timestamp,
+          log.kodeAset,
+          a.nama || '-',
+          a.lokasi || '-',
+          log.keterangan,
+          log.picOrBiaya || '-'
+        ]);
+      });
+
+      if (svcRows.length === 1) {
+        svcRows.push(["-", "-", "-", "Belum ada riwayat pemeliharaan/kalibrasi yang tercatat", "-", "-", "-"]);
+      }
+      const wsSvc = XLSX.utils.aoa_to_sheet(svcRows);
+      XLSX.utils.book_append_sheet(wb, wsSvc, "Log_Pemeliharaan_Kalibrasi");
+
+      // ================= SHEET 3: RIWAYAT LOG MUTASI RUANGAN =================
+      const mutRows = [
+        ["No", "Waktu Mutasi (Lokal)", "Kode Aset", "Nama Aset", "Keterangan Mutasi Ruangan", "PIC Baru Penerima"]
+      ];
+
+      let mutCount = 1;
+      GLOBAL_LOGS.filter(l => l.tipeLog === 'MUTASI').forEach(log => {
+        const a = DATA_INVENTARIS.find(x => x.kode === log.kodeAset) || {};
+        mutRows.push([
+          mutCount++,
+          log.timestamp,
+          log.kodeAset,
+          a.nama || '-',
+          log.keterangan,
+          log.picOrBiaya || '-'
+        ]);
+      });
+
+      if (mutRows.length === 1) {
+        mutRows.push(["-", "-", "-", "Belum ada riwayat mutasi ruangan yang tercatat", "-", "-"]);
+      }
+      const wsMut = XLSX.utils.aoa_to_sheet(mutRows);
+      XLSX.utils.book_append_sheet(wb, wsMut, "Log_Mutasi_Ruangan");
+
+      // Unduh berkas Excel
+      const todayISO = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `Laporan_Aset_Lengkap_Beserta_Log_${todayISO}.xlsx`);
       closeModal('modalReportCenter');
+      alert("Laporan Excel Lengkap (Master Aset + Log Pemeliharaan + Log Mutasi) berhasil diunduh!");
     }
 
     function exportDataToCSV() {
       if (DATA_INVENTARIS.length === 0) return alert("Belum ada data aset untuk diekspor!");
 
-      let csv = "Kode Aset,Nama Aset,Nomor Seri (SN),Kategori,Kelompok,Lokasi,Status,Tgl Beli,Harga Perolehan,Nilai Buku,PIC,Audit Terakhir\n";
+      let csv = "Kode Aset,Nama Aset,Nomor Seri (SN),Kategori,Kelompok,Lokasi,Status,Tgl Beli,Harga Perolehan,Nilai Buku,Sisa Usia,PIC,Audit Terakhir,Total Servis,Total Mutasi\n";
       DATA_INVENTARIS.forEach(a => {
         const dep = calculateDepreciationValues(a);
-        csv += `"${a.kode}","${a.nama}","${a.serialNumber || '-'}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.status}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${a.pic || '-'}","${a.terakhirAudit}"\n`;
+        const assetLogs = GLOBAL_LOGS.filter(l => l.kodeAset === a.kode);
+        const svcCount = assetLogs.filter(l => l.tipeLog === 'SERVIS').length;
+        const mutCount = assetLogs.filter(l => l.tipeLog === 'MUTASI').length;
+
+        csv += `"${a.kode}","${a.nama}","${a.serialNumber || '-'}","${a.kategori}","${dep.kelompokStr}","${a.lokasi}","${a.status}","${a.tglBeli}",${a.hargaBeli},${dep.nilaiBuku},"${dep.sisaTahunStr}","${a.pic || '-'}","${a.terakhirAudit}",${svcCount},${mutCount}\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `Laporan_Aset_${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `Laporan_Ringkas_Aset_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
